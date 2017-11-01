@@ -63,8 +63,9 @@ TRUE: 'true';
 FALSE: 'false';
 
 //char literal
-CHAR_LIT: '\'' . '\'';
+CHAR_LIT: '\'' (. | ESCAPE) '\'';
 CHARACTER_LIT: '"' (.)*? '"' ;
+ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' ;
 
 //ident
 IDENT: ('_' | LOWERCASE | UPPERCASE ) ('_' | LOWERCASE | UPPERCASE | DIGIT)*;
@@ -91,6 +92,6 @@ INTEGER: DIGIT+ ;
 //null
 NULL: 'null' ;
 
-WHITESPACE : ( '\t' | ' ' | '\r' | '\n')+ -> skip ;
+WHITESPACE: ( '\t' | ' ' | '\r' | '\n')+ -> channel(HIDDEN) ;
 COMMENT: ('#' (.)*? '\n' )+ -> skip ;
 
