@@ -5,7 +5,7 @@
 
 path = ARGV[0]
 lib = "bin:lib/antlr-4.4-complete.jar"
-system "java -cp #{lib} Main < ../#{path}"
+system "java -cp #{lib} Main < #{path}"
 ret = $?.exitstatus
 if ret==100
   puts "#syntax_error#"
