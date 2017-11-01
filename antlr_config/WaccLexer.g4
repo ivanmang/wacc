@@ -65,7 +65,7 @@ FALSE: 'false';
 
 //char literal
 CHAR_LIT: '\'' . '\'';
-CHARACTER_LIT: '"' . '"' ;
+CHARACTER_LIT: '"' (.)*? '"' ;
 
 //ident
 IDENT: ('_' | LOWERCASE | UPPERCASE ) ('_' | LOWERCASE | UPPERCASE | DIGIT)*;
