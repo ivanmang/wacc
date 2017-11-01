@@ -23,6 +23,7 @@ DO: 'do';
 DONE: 'done';
 BEGIN: 'begin';
 END: 'end';
+IS: 'is' ;
 
 //pair type
 PAIR: 'pair' ;
@@ -33,7 +34,7 @@ CALL: 'call';
 
 //pair elem
 FST: 'fst';
-SECOND: 'snd';
+SND: 'snd';
 
 //un operators
 NOT: '!';
@@ -80,6 +81,8 @@ OPEN_BRACKET: '[';
 CLOSE_BRACKET: ']';
 COMMA: ',' ;
 EQUAL: '=';
+HASH: '#';
+COL: ';';
 
 //numbers
 fragment DIGIT : '0'..'9' ;
