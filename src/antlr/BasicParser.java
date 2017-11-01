@@ -17,7 +17,7 @@ public class BasicParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		INTEGER=5, OPEN_PARENTHESES=3, PLUS=1, CLOSE_PARENTHESES=4, MINUS=2;
+		OPEN_PARENTHESES=3, PLUS=1, MINUS=2, CLOSE_PARENTHESES=4, INTEGER=5;
 	public static final String[] tokenNames = {
 		"<INVALID>", "'+'", "'-'", "'('", "')'", "INTEGER"
 	};
@@ -47,8 +47,8 @@ public class BasicParser extends Parser {
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 	public static class BinaryOperContext extends ParserRuleContext {
-		public TerminalNode MINUS() { return getToken(BasicParser.MINUS, 0); }
 		public TerminalNode PLUS() { return getToken(BasicParser.PLUS, 0); }
+		public TerminalNode MINUS() { return getToken(BasicParser.MINUS, 0); }
 		public BinaryOperContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -87,15 +87,15 @@ public class BasicParser extends Parser {
 	}
 
 	public static class ExprContext extends ParserRuleContext {
+		public TerminalNode CLOSE_PARENTHESES() { return getToken(BasicParser.CLOSE_PARENTHESES, 0); }
+		public TerminalNode INTEGER() { return getToken(BasicParser.INTEGER, 0); }
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-		public TerminalNode CLOSE_PARENTHESES() { return getToken(BasicParser.CLOSE_PARENTHESES, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
 		public TerminalNode OPEN_PARENTHESES() { return getToken(BasicParser.OPEN_PARENTHESES, 0); }
-		public TerminalNode INTEGER() { return getToken(BasicParser.INTEGER, 0); }
 		public BinaryOperContext binaryOper() {
 			return getRuleContext(BinaryOperContext.class,0);
 		}
@@ -179,10 +179,10 @@ public class BasicParser extends Parser {
 	}
 
 	public static class ProgContext extends ParserRuleContext {
-		public TerminalNode EOF() { return getToken(BasicParser.EOF, 0); }
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
+		public TerminalNode EOF() { return getToken(BasicParser.EOF, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}

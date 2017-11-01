@@ -12,11 +12,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface BasicParserVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link BasicParser#prog}.
+	 * Visit a parse tree produced by {@link BasicParser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProg(@NotNull BasicParser.ProgContext ctx);
+	T visitExpr(@NotNull BasicParser.ExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link BasicParser#binaryOper}.
 	 * @param ctx the parse tree
@@ -24,9 +24,9 @@ public interface BasicParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitBinaryOper(@NotNull BasicParser.BinaryOperContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link BasicParser#expr}.
+	 * Visit a parse tree produced by {@link BasicParser#prog}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitExpr(@NotNull BasicParser.ExprContext ctx);
+	T visitProg(@NotNull BasicParser.ProgContext ctx);
 }
