@@ -1,7 +1,7 @@
 lexer grammar WaccLexer;
 
 //base type
-INT: 'ínt';
+INT: 'int';
 BOOL: 'bool';
 CHAR: 'char';
 STRING: 'string';
@@ -68,7 +68,7 @@ CHAR_LIT: '\'' . '\'';
 CHARACTER_LIT: '"' . '"' ;
 
 //ident
-IDENT: ('_' | LOWERCASE | UPPERCASE ) ('_' | LOWERCASE | UPPERCASE | DIGIT);
+IDENT: ('_' | LOWERCASE | UPPERCASE ) ('_' | LOWERCASE | UPPERCASE | DIGIT)*;
 
 //character
 LOWERCASE: 'a'..'z';
@@ -93,5 +93,5 @@ INTEGER: DIGIT+ ;
 NULL: 'null' ;
 
 WHITESPACE : ( '\t' | ' ' | '\r' | '\n')+ -> skip ;
-COMMENT: ('#' . '\n' )+ ->skip ;
+COMMENT: ('#' (.)*? '\n' )+ -> skip ;
 
