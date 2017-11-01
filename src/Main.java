@@ -1,5 +1,4 @@
-import antlr.BasicLexer;
-import antlr.BasicParser;
+import antlr.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -21,11 +20,11 @@ public class Main {
 
     ANTLRInputStream input = new ANTLRInputStream(fileStream);
 
-    BasicLexer lexer = new BasicLexer(input);
+    WaccLexer lexer = new WaccLexer(input);
 
     CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-    BasicParser parser = new BasicParser(tokens);
+    WaccParser parser = new WaccParser(tokens);
 
     ParseTree tree = parser.prog();
     System.out.println(tree.toStringTree(parser));

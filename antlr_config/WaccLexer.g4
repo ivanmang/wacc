@@ -91,3 +91,7 @@ INTEGER: DIGIT+ ;
 
 //null
 NULL: 'null' ;
+
+WHITESPACE : ( '\t' | ' ' | '\r' | '\n')+ -> skip ;
+COMMENT: ('#' . '\n' )+ ->skip ;
+
