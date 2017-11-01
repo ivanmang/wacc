@@ -26,7 +26,7 @@ public class Main {
     CommonTokenStream tokens = new CommonTokenStream(lexer);
 
     WaccParser parser = new WaccParser(tokens);
-//    parser.setErrorHandler(new ParserErrorHandler());
+    parser.setErrorHandler(new ParserErrorHandler());
 
     ParseTree tree = parser.prog();
     System.out.println(tree.toStringTree(parser));
