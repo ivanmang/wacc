@@ -9,6 +9,8 @@ system "java -cp #{lib} Main #{path}"
 ret = $?.exitstatus
 if ret==100
   puts "#syntax_error#"
+  exit(100)
 elsif ret==200
   puts "#semantic_error#"
+  exit(200)
 end
