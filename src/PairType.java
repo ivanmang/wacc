@@ -11,6 +11,7 @@ public class PairType implements Type{
     return ID.Pair;
   }
 
+  //returns true if both are pairs and the first and second type matches
   @Override
   public boolean equals(Type other) {
     if(other.getID() == ID.Pair) {
