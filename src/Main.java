@@ -29,7 +29,7 @@ public class Main {
     parser.setErrorHandler(new ParserErrorHandler());
 
     ParseTree tree = parser.prog();
-//    System.out.println(tree.toStringTree(parser));
+    System.out.println(tree.toStringTree(parser));
 
     //show AST in GUI
 //    JFrame frame = new JFrame("Antlr AST");
