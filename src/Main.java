@@ -31,16 +31,16 @@ public class Main {
     ParseTree tree = parser.prog();
     System.out.println(tree.toStringTree(parser));
 
-    //show AST in GUI
-//    JFrame frame = new JFrame("Antlr AST");
-//    JPanel panel = new JPanel();
-//    TreeViewer viewr = new TreeViewer(Arrays.asList(
-//        parser.getRuleNames()),tree);
-//    viewr.setScale(1);//scale a little
-//    panel.add(viewr);
-//    frame.add(panel);
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    frame.setSize(1000,1000);
-//    frame.setVisible(true);
+//    show AST in GUI
+    JFrame frame = new JFrame("Antlr AST");
+    JPanel panel = new JPanel();
+    TreeViewer viewr = new TreeViewer(Arrays.asList(
+        parser.getRuleNames()),tree);
+    viewr.setScale(1);//scale a little
+    panel.add(viewr);
+    frame.add(panel);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(1000,1000);
+    frame.setVisible(true);
   }
 }
