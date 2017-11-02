@@ -9,72 +9,70 @@ func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS 
 param_list     : param (COMMA param)* ;
 param          : type ident ;
 
-stat           : SKIP_
-               | type ident EQUAL assign_rhs
-               | assign_lhs EQUAL assign_rhs
-               | READ assign_lhs
-               | FREE expr
-               | RETURN expr
-               | EXIT expr
-               | PRINT expr
-               | PRINTLN expr
-               | IF expr THEN stat ELSE stat FI
-               | WHILE expr DO stat DONE
-               | BEGIN stat END
-               | stat_helper COL stat ;
+stat           : SKIP_                              #skipStat
+               | type ident EQUAL assign_rhs        #declareAndAssignStat
+               | assign_lhs EQUAL assign_rhs        #assignStat
+               | READ assign_lhs                    #readStat
+               | FREE expr                          #freeStat
+               | EXIT expr                          #exitStat
+               | PRINT expr                         #printStat
+               | PRINTLN expr                       #printlnStat
+               | IF expr THEN stat ELSE stat FI     #ifStat
+               | WHILE expr DO stat DONE            #whileStat
+               | BEGIN stat END                     #beginStat
+               | <assoc=right> stat COL (stat | returnStat)        #nextStat
+               ;
 
-stat_helper    : SKIP_
-               | type ident EQUAL assign_rhs
-               | assign_lhs EQUAL assign_rhs
-               | READ assign_lhs
-               | FREE expr
-               | EXIT expr
-               | PRINT expr
-               | PRINTLN expr
-               | IF expr THEN stat ELSE stat FI
-               | WHILE expr DO stat DONE
-               | BEGIN stat END
-               | stat_helper COL stat;
+returnStat     : RETURN expr;
+
 
 assign_lhs     : ident
                | array_elem
-               | pair_elem;
-
-assign_rhs     : expr
-               | array_liter
-               | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES
                | pair_elem
-               | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES ;
+               ;
 
-arg_list       : expr (COMMA expr)* ;
+assign_rhs     : expr                                                       #expression
+               | array_liter                                                #arrayLiter
+               | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES #newPair
+               | pair_elem                                                  #pairElem
+               | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES  #funcCall
+               ;
+
+arg_list       : expr (COMMA expr)*;
 
 pair_elem      : FST expr
-               | SND expr;
+               | SND expr
+               ;
 
 type           : base_type
                | array_type
-               | pair_type ;
+               | pair_type
+               ;
 
 base_type      : INT
                | BOOL
                | CHAR
-               | STRING ;
+               | STRING
+               ;
 
 array_type     : (base_type | pair_type ) OPEN_BRACKET CLOSE_BRACKET
-               | array_type OPEN_BRACKET CLOSE_BRACKET;
+               | array_type OPEN_BRACKET CLOSE_BRACKET
+               ;
 
-pair_type      : PAIR OPEN_PARENTHESES pair_elem_type COMMA pair_elem_type CLOSE_PARENTHESES ;
+pair_type      : PAIR OPEN_PARENTHESES pair_elem_type COMMA pair_elem_type CLOSE_PARENTHESES;
 
 pair_elem_type : base_type
                | array_type
-               | PAIR ;
+               | PAIR
+               ;
 
 expr           : int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT | pair_liter
                | expr binary_oper expr
                | ident
                | array_elem
                | unary_oper expr
-               | OPEN_PARENTHESES expr CLOSE_PARENTHESES ;
+               | OPEN_PARENTHESES expr CLOSE_PARENTHESES
+               ;
 
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 

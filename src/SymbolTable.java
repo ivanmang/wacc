@@ -13,6 +13,10 @@ public class SymbolTable {
     dictionary = new Hashtable<>();
   }
 
+  public SymbolTable() {
+
+  }
+
   //the previous name of the specified type in this hash table, or null if it did not have one
   public Type insert(String name, Type type){
     return dictionary.put(name, type);
