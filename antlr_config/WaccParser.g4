@@ -10,7 +10,12 @@ param_list     : param (COMMA param)* ;
 param          : type ident ;
 stat           : SKIP_ | type ident EQUAL assign_rhs | assign_lhs EQUAL assign_rhs |
                  READ assign_lhs | FREE expr | RETURN expr | EXIT expr | PRINT expr | PRINTLN expr |
-                 IF expr THEN stat ELSE stat FI | WHILE expr DO stat DONE | BEGIN stat END | stat COL stat ;
+                 IF expr THEN stat ELSE stat FI | WHILE expr DO stat DONE | BEGIN stat END | stat_helper COL stat ;
+
+stat_helper     : SKIP_ | type ident EQUAL assign_rhs | assign_lhs EQUAL assign_rhs |
+                 READ assign_lhs | FREE expr | PRINT expr | PRINTLN expr |
+                 IF expr THEN stat ELSE stat FI | WHILE expr DO stat DONE | BEGIN stat END | stat_helper COL stat;
+
 assign_lhs     : ident | array_elem | pair_elem ;
 assign_rhs     : expr | array_liter | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES | pair_elem | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES ;
 arg_list       : expr (COMMA expr)* ;
