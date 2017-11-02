@@ -64,7 +64,7 @@ FALSE: 'false';
 
 //char literal
 CHAR_LIT: '\'' ((.) | ESCAPE) '\''  ;
-CHARACTER_LIT: '\"' ('\t' | ' ' | LOWERCASE | UPPERCASE | DIGIT | ESCAPE | FULLSTOP)* '\"' ;
+CHARACTER_LIT: '"' (.)*? ('\t' | ' ' | ESCAPE | FULLSTOP)* '"' ;
 ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' | '\\\'' | '\\\"' | '\\\\';
 
 //ident
