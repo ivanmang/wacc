@@ -23,6 +23,7 @@ public class SymbolTable {
     return dictionary.get(name);
   }
 
+  //lookup name in current and enclosed symbol table, if found return type, else return null
   public Type lookupAll(String name){
     SymbolTable symbolTable = this;
     while(symbolTable != null){
