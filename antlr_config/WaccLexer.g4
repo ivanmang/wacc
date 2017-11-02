@@ -64,7 +64,7 @@ FALSE: 'false';
 
 //char literal
 CHAR_LIT: '\'' ((.) | ESCAPE) '\''  ;
-CHARACTER_LIT: '"' (.)*? ('\t' | ' ' | ESCAPE | FULLSTOP)* '"' ;
+CHARACTER_LIT: '"' ( ~'\\' | ESCAPE )*? '"' ;
 ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' | '\\\'' | '\\\"' | '\\\\';
 
 //ident
@@ -83,7 +83,7 @@ COMMA: ',' ;
 EQUAL: '=';
 HASH: '#';
 COL: ';';
-FULLSTOP: '.';
+
 
 //numbers
 fragment DIGIT : '0'..'9' ;
