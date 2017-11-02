@@ -4,7 +4,7 @@ options {
   tokenVocab=WaccLexer;
 }
 
-prog           : BEGIN (func)* stat END ;
+prog           : BEGIN (func)* stat END EOF;
 func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS stat END ;
 param_list     : param (COMMA param)* ;
 param          : type ident ;
@@ -13,7 +13,7 @@ stat           : SKIP_ | type ident EQUAL assign_rhs | assign_lhs EQUAL assign_r
                  IF expr THEN stat ELSE stat FI | WHILE expr DO stat DONE | BEGIN stat END | stat_helper COL stat ;
 
 stat_helper     : SKIP_ | type ident EQUAL assign_rhs | assign_lhs EQUAL assign_rhs |
-                 READ assign_lhs | FREE expr | PRINT expr | PRINTLN expr |
+                 READ assign_lhs | FREE expr | EXIT expr | PRINT expr | PRINTLN expr |
                  IF expr THEN stat ELSE stat FI | WHILE expr DO stat DONE | BEGIN stat END | stat_helper COL stat;
 
 assign_lhs     : ident | array_elem | pair_elem ;
