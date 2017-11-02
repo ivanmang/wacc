@@ -63,8 +63,8 @@ TRUE: 'true';
 FALSE: 'false';
 
 //char literal
-CHAR_LIT: '\'' ((.) | ESCAPE) '\''  ;
-CHARACTER_LIT: '"' ( ~'\\' | ESCAPE )*? '"' ;
+CHAR_LIT: '\'' (~('\\' | '\"' | '\'' ) | ESCAPE) '\''  ;
+CHARACTER_LIT: '"' ( ~('\\' | '\"' | '\'' )  | ESCAPE )*? '"' ;
 ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' | '\\\'' | '\\\"' | '\\\\';
 
 //ident
