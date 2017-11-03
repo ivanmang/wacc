@@ -9,19 +9,22 @@ func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS 
 param_list     : param (COMMA param)* ;
 param          : type ident ;
 
-stat           : SKIP_                              #skipStat
+stat           : stat_helper
+               | RETURN expr
+               | <assoc=right> stat_helper COL stat
+               ;
+
+stat_helper    : SKIP_                              #skipStat
                | type ident EQUAL assign_rhs        #declareAndAssignStat
                | assign_lhs EQUAL assign_rhs        #assignStat
                | READ assign_lhs                    #readStat
                | FREE expr                          #freeStat
                | EXIT expr                          #exitStat
-               | RETURN expr                        #returnStat
                | PRINT expr                         #printStat
                | PRINTLN expr                       #printlnStat
                | IF expr THEN stat ELSE stat FI     #ifStat
                | WHILE expr DO stat DONE            #whileStat
                | BEGIN stat END                     #beginStat
-               | <assoc=right> stat COL stat        #nextStat
                ;
 
 
