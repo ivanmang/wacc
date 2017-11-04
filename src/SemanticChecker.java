@@ -66,10 +66,62 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type>{
   public Type visitPrintStat(PrintStatContext ctx) {
     Type actual = visit(ctx.expr());
     if(!actual.isValidType()){
-      //invalid type can't print
+      //invalid type can't be print
     }
     return null;
   }
 
-  pu
+  @Override
+  public Type visitPrintlnStat(PrintlnStatContext ctx) {
+    Type actual = visit(ctx.expr());
+    if(!actual.isValidType()){
+      //invalid type can't be print
+    }
+    return null;
+  }
+
+
+  @Override
+  public Type visitIfStat(IfStatContext ctx) {
+    Type condition = visit(ctx.expr());
+    if (!typeChecker(WaccParser.BOOL, condition)) {
+      //type mismatch
+    }
+    //new scope
+    Type fstat = visit(ctx.stat(0));
+    //end scope
+
+    //new scope
+    Type sstat = visit(ctx.stat(1));
+    //end scope
+
+    if(sstat == null){//only have if then , no else
+      //new scope
+      Type stat = visit(ctx.stat(0));
+      //end scope
+      return stat;
+
+    }
+    return null; //return stat conditional branch
+  }
+
+  @Override
+  public Type visitWhileStat(WhileStatContext ctx) {
+    Type conditon = visit(ctx.expr());
+    if(!typeChecker(WaccParser.BOOL,conditon)){
+      //type mismatch
+    }
+    //new scope
+    Type stat = visit(ctx.stat());
+    //end scope
+    return stat;
+  }
+
+  @Override
+  public Type visitBeginStat(BeginStatContext ctx) {
+    //new scope
+    Type stat = visit(ctx.stat());
+    //end scope
+    return stat;
+  }
 }
