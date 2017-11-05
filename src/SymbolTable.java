@@ -1,20 +1,35 @@
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
 
-  private SymbolTable innerSymbolTable;
   private Map<String, Type> dictionary;
+  private SymbolTable innerSymbolTable;
+  private SymbolTable outerSymbolTable;
 
 
-  public SymbolTable(SymbolTable symbolTable) {
-    innerSymbolTable = symbolTable;
+  public SymbolTable(SymbolTable innerSymbolTable, SymbolTable outerSymbolTable) {
+    this.innerSymbolTable = innerSymbolTable;
+    this.outerSymbolTable = outerSymbolTable;
     dictionary = new Hashtable<>();
   }
 
-  public SymbolTable() {
+  public void setInnerSymbolTable(SymbolTable innerSymbolTable) {
+    this.innerSymbolTable = innerSymbolTable;
+  }
 
+  public void setOuterSymbolTable(SymbolTable outerSymbolTable) {
+    this.outerSymbolTable = outerSymbolTable;
+  }
+
+  public SymbolTable enterScope(SymbolTable cur) {
+    return new SymbolTable(null, cur);
+  }
+
+  public SymbolTable exitScope(SymbolTable cur) {
+    return cur.outerSymbolTable;
   }
 
   //the previous name of the specified type in this hash table, or null if it did not have one
@@ -35,10 +50,15 @@ public class SymbolTable {
       if(type != null){
         return type;
       }else{
-        symbolTable = symbolTable.innerSymbolTable;
+        symbolTable = symbolTable.getInnerSymbolTable();
       }
     }
     return null;
+  }
+
+  public boolean contain(String name){
+    //It can't find any name in it previously
+      return !(this.lookupAll(name) == null);
   }
 
   public SymbolTable getInnerSymbolTable() {

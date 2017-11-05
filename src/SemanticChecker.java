@@ -5,10 +5,11 @@ import antlr.WaccParserBaseVisitor;
 public class SemanticChecker extends WaccParserBaseVisitor<Type>{
 
 
-  SymbolTable symbolTable = new SymbolTable();
+  SymbolTable symbolTable;
 
-  public boolean typeChecker(Type type, Type type1){
-    return type.equals(type1);
+  public boolean typeChecker(Object type, Type type1){
+      Type checkType = (Type) type;
+      return checkType.isValidType() && checkType.equals(type1);
   }
 
   @Override
@@ -123,5 +124,36 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type>{
     Type stat = visit(ctx.stat());
     //end scope
     return stat;
+  }
+
+  @Override
+  public Type visitAssign_lhs(Assign_lhsContext ctx) {
+    if(ctx.array_elem() != null){
+      return visit(ctx.array_elem());
+    }else if(ctx.ident() != null){
+      return visit(ctx.ident());
+    }else if(ctx.pair_elem() != null){
+      return visit(ctx.pair_elem());
+    }
+    return null;
+  }
+
+
+  @Override
+  public Type visitArg_list(Arg_listContext ctx) {
+    for(int i =0 ; i<ctx.expr().size();i++){
+
+    }
+    return null;
+  }
+
+  @Override
+  public Type visitPair_elem(Pair_elemContext ctx) {
+    Type expr = visit(ctx.expr());
+    Type newType;
+    if(ctx.FST()!=null){
+
+    }
+    return null;
   }
 }

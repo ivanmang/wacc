@@ -21,6 +21,11 @@ public class PairType implements Type{
     return false;
   }
 
+  @Override
+  public boolean isValidType() {
+    return this.getID() == ID.Pair;
+  }
+
   public Type getFst() {
     return fst;
   }

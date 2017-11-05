@@ -33,11 +33,11 @@ assign_lhs     : ident
                | pair_elem
                ;
 
-assign_rhs     : expr                                                       #expression
-               | array_liter                                                #arrayLiter
-               | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES #newPair
-               | pair_elem                                                  #pairElem
-               | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES  #funcCall
+assign_rhs     : expr
+               | array_liter
+               | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES
+               | pair_elem
+               | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES
                ;
 
 arg_list       : expr (COMMA expr)*;

@@ -41,6 +41,11 @@ public class BaseType implements Type{
   }
 
   @Override
+  public boolean isValidType() {
+    return contentId != INVALID_ID;
+  }
+
+  @Override
   public ID getID() {
     return ID.Base;
   }

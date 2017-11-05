@@ -28,6 +28,11 @@ public class ArrayType implements Type {
     return false;
   }
 
+  @Override
+  public boolean isValidType() {
+    return this.getID() == ID.Array;
+  }
+
   public Type getElementType() {
     return elementType;
   }
