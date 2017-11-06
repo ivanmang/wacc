@@ -3,18 +3,22 @@ import antlr.WaccParser.Arg_listContext;
 import antlr.WaccParser.Array_typeContext;
 import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.Assign_lhsContext;
+import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.Base_typeContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.FreeStatContext;
+import antlr.WaccParser.FuncContext;
+import antlr.WaccParser.Function_callContext;
 import antlr.WaccParser.IfStatContext;
 import antlr.WaccParser.Pair_elem_typeContext;
 import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.StatContext;
 import antlr.WaccParser.TypeContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
@@ -255,5 +259,24 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     return null;
   }
 
+  @Override
+  public Type visitAssign_rhs(Assign_rhsContext ctx) {
+    return visitChildren(ctx);
+  }
 
+  @Override
+  public Type visitFunction_call(Function_callContext ctx) {
+    return symbolTable.lookupAll(ctx.ident().toString());
+  }
+
+  @Override
+  public Type visitFunc(FuncContext ctx) {
+    Type expected = visit(ctx.type());
+    symbolTable = symbolTable.enterScope(symbolTable);
+    if(symbolTable.lookupAll(ctx.ident().toString()) != null){
+
+    }
+    symbolTable.insert(ctx.ident().toString(),expected);
+    return expected;
+  }
 }
