@@ -2,6 +2,8 @@ public class PairType implements Type{
   private Type fst;
   private Type snd;
 
+  PairType() {}
+
   PairType(Type fst, Type snd) {
     this.fst = fst;
     this.snd = snd;

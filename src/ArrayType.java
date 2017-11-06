@@ -4,7 +4,13 @@ public class ArrayType implements Type {
 
   private Type elementType;
 
+  ArrayType() {}
+
   ArrayType(Type elementType) {
+    this.elementType = elementType;
+  }
+
+  public void setElementType(Type elementType) {
     this.elementType = elementType;
   }
 
