@@ -38,7 +38,7 @@ public class SymbolTable {
   }
 
   //the Type to which the specified name is mapped, or null if this map contains no mapping for the Type
-  private Type lookup(String name){
+  public Type lookup(String name){
     return dictionary.get(name);
   }
 
