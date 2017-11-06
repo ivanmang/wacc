@@ -33,4 +33,9 @@ public class PairType implements Type{
   public Type getSnd() {
     return snd;
   }
+
+  @Override
+  public String toString() {
+    return "(" + fst.toString() + ", " + snd.toString() + ")";
+  }
 }

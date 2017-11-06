@@ -49,4 +49,20 @@ public class BaseType implements Type{
   public ID getID() {
     return ID.Base;
   }
+
+  @Override
+  public String toString() {
+    switch(contentId) {
+      case WaccParser.INT:
+        return "INT";
+      case WaccParser.BOOL:
+        return "BOOL";
+      case WaccParser.CHAR:
+        return "CHAR";
+      case WaccParser.STRING:
+        return "CHAR[]";
+      default:
+        return "Unknown Type";
+    }
+  }
 }

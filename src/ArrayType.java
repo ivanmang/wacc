@@ -36,4 +36,9 @@ public class ArrayType implements Type {
   public Type getElementType() {
     return elementType;
   }
+
+  @Override
+  public String toString() {
+    return elementType.toString() + "[]";
+  }
 }
