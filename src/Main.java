@@ -3,13 +3,9 @@ import antlr.WaccParser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.gui.TreeViewer;
 
 public class Main {
 
@@ -36,6 +32,8 @@ public class Main {
 
     //begin parsing at prog rule
     ParseTree tree = parser.prog();
+    SemanticChecker checker = new SemanticChecker();
+    checker.visit(tree);
 
     //print LISP-style tree
     System.out.println(tree.toStringTree(parser));
