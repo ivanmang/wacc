@@ -35,10 +35,15 @@ assign_lhs     : ident
 
 assign_rhs     : expr
                | array_liter
-               | NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES
+               | new_pair
                | pair_elem
-               | CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES
+               | function_call
                ;
+
+new_pair       : NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES;
+
+function_call  : CALL ident OPEN_PARENTHESES (arg_list)? CLOSE_PARENTHESES;
+
 
 arg_list       : expr (COMMA expr)*;
 
