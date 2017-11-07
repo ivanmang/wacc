@@ -1,5 +1,7 @@
 import antlr.WaccParser;
 import antlr.WaccParser.Arg_listContext;
+import antlr.WaccParser.Array_elemContext;
+import antlr.WaccParser.Array_literContext;
 import antlr.WaccParser.Array_typeContext;
 import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.Assign_lhsContext;
@@ -12,33 +14,34 @@ import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.FuncContext;
 import antlr.WaccParser.Function_callContext;
+import antlr.WaccParser.IdentContext;
 import antlr.WaccParser.IfStatContext;
+import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elem_typeContext;
 import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.StatContext;
 import antlr.WaccParser.TypeContext;
+import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
-  private SymbolTable symbolTable = new SymbolTable(null, null);
-
   public VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
-
-  public SymbolTable getSymbolTable() {
-    return symbolTable;
-  }
-
+  private SymbolTable symbolTable = new SymbolTable(null, null);
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
   private Type boolType = new BaseType(WaccParser.BOOL);
   private Type stringType = new BaseType(WaccParser.STRING);
 
+  public SymbolTable getSymbolTable() {
+    return symbolTable;
+  }
+
   public boolean typeChecker(Type type1, Type type2) {
+    System.out.println("type checking");
     return type1.isValidType() && type2.isValidType() && type1.equals(type2);
   }
 
@@ -51,7 +54,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     String identName = ctx.ident().IDENT().getText();
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
-          .incompatibleTypeError(ctx, ctx.ident().IDENT().getText(), expected, actual);
+          .incompatibleTypeError(ctx, ctx.ident().IDENT().getText(), expected,
+              actual);
     } else if (symbolTable.contain(identName)) {
       visitorErrorHandler.variableRedefineError(ctx, identName);
     } else {
@@ -66,7 +70,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     Type actual = visit(ctx.assign_rhs());
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
-          .incompatibleTypeError(ctx, ctx.assign_rhs().getTokens(0).toString(), expected, actual);
+          .incompatibleTypeError(ctx, ctx.assign_rhs().getTokens(0).toString(),
+              expected, actual);
     }
     return null;
   }
@@ -185,13 +190,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitBase_type(Base_typeContext ctx) {
-    if(ctx.BOOL() != null) {
+    if (ctx.BOOL() != null) {
       return new BaseType(WaccParser.BOOL);
-    } else if(ctx.CHAR() != null) {
+    } else if (ctx.CHAR() != null) {
       return new BaseType(WaccParser.CHAR);
-    } else if(ctx.INT() != null) {
+    } else if (ctx.INT() != null) {
       return new BaseType(WaccParser.INT);
-    } else if(ctx.STRING() != null) {
+    } else if (ctx.STRING() != null) {
       return new BaseType(WaccParser.STRING);
     }
     System.out.println("VISIT BASE TYPE ERROR");
@@ -200,11 +205,11 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitArray_type(Array_typeContext ctx) {
-    if(ctx.array_type().array_type() != null){
+    if (ctx.array_type().array_type() != null) {
       return new ArrayType(visit(ctx.array_type()));
-    } else if(ctx.base_type() != null){
+    } else if (ctx.base_type() != null) {
       return new ArrayType(visit(ctx.base_type()));
-    } else if(ctx.pair_type() != null) {
+    } else if (ctx.pair_type() != null) {
       return new ArrayType(visit(ctx.pair_type()));
     }
     System.out.println("VISIT ARRAY TYPE ERROR");
@@ -220,11 +225,11 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPair_elem_type(Pair_elem_typeContext ctx) {
-    if(ctx.PAIR() != null) {
+    if (ctx.PAIR() != null) {
       return new PairType();
-    } else if(ctx.array_type() != null) {
+    } else if (ctx.array_type() != null) {
       return visit(ctx.array_type());
-    } else if(ctx.base_type() != null){
+    } else if (ctx.base_type() != null) {
       return visit(ctx.base_type());
     }
     System.out.println("VISIT PAIR ELEM TYPE ERROR");
@@ -233,27 +238,27 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitExpr(ExprContext ctx) {
-    if(ctx.int_liter()!= null){
+    if (ctx.int_liter() != null) {
       return visit(ctx.int_liter());
-    }else if(ctx.bool_liter() != null){
+    } else if (ctx.bool_liter() != null) {
       return visit(ctx.bool_liter());
-    }else if(ctx.array_elem() != null){
+    } else if (ctx.array_elem() != null) {
       return visit(ctx.array_elem());
-    }else if(ctx.binary_oper() != null){
+    } else if (ctx.binary_oper() != null) {
       return visit(ctx.binary_oper());
-    }else if(ctx.pair_liter() != null){
-      return  visit(ctx.pair_liter());
-    }else if(ctx.unary_oper()!= null){
+    } else if (ctx.pair_liter() != null) {
+      return visit(ctx.pair_liter());
+    } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
-    }else if(ctx.ident()!= null){
+    } else if (ctx.ident() != null) {
       return visit(ctx.ident());
-    }else if(ctx.CHAR_LIT()!= null){
+    } else if (ctx.CHAR_LIT() != null) {
       return new BaseType(WaccParser.CHAR);
-    }else if(ctx.CHARACTER_LIT()!= null){
+    } else if (ctx.CHARACTER_LIT() != null) {
       return new BaseType(WaccParser.CHAR);
-    }else if(ctx.binary_oper()!= null){
+    } else if (ctx.binary_oper() != null) {
       return visit(ctx.binary_oper());
-    }else if(ctx.OPEN_PARENTHESES()!= null){
+    } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
     }
     return null;
@@ -273,10 +278,54 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitFunc(FuncContext ctx) {
     Type expected = visit(ctx.type());
     symbolTable = symbolTable.enterScope(symbolTable);
-    if(symbolTable.lookupAll(ctx.ident().toString()) != null){
-
+    if (symbolTable.lookupAll(ctx.ident().toString()) != null) {
+      //TODO:IF
     }
-    symbolTable.insert(ctx.ident().toString(),expected);
+    symbolTable.insert(ctx.ident().toString(), expected);
     return expected;
   }
+
+  @Override
+  public Type visitArray_elem(Array_elemContext ctx) {
+    for (ExprContext exprContext : ctx.expr()) {
+      Type typeInArray = visit(exprContext);
+      if (!typeChecker(intType, typeInArray)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, typeInArray.toString(), intType,
+                typeInArray);
+      }
+    }
+    return visit(ctx.ident());
+  }
+
+  @Override
+  public Type visitArray_liter(Array_literContext ctx) {
+    Type first_elem_type = visit(ctx.expr(0));
+    for (ExprContext exprContext : ctx.expr()) {
+      Type typeInArray = visit(exprContext);
+      if (!typeChecker(first_elem_type, typeInArray)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, typeInArray.toString(), first_elem_type,
+                typeInArray);
+      }
+    }
+    return first_elem_type;
+  }
+
+  @Override
+  public Type visitNew_pair(New_pairContext ctx) {
+    Type fst_type = visit(ctx.expr(0));
+    Type snd_type = visit(ctx.expr(1));
+    return new PairType(fst_type,snd_type);
+  }
+
+  @Override
+  public Type visitIdent(IdentContext ctx) {
+    String ident = ctx.IDENT().getText();
+    if(!symbolTable.contain(ident)){
+      visitorErrorHandler.variableNotDefinedInScopeError(ctx,ident);
+    }
+    return symbolTable.lookupAll(ident);
+  }
+
 }
