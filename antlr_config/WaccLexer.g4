@@ -63,11 +63,9 @@ TRUE: 'true';
 FALSE: 'false';
 
 //char literal
-CHAR_LIT: '\'' (~('\\' | '"' | '\'' ) | ESCAPE) '\''  ;
-CHARACTER_LIT: '"' ( ~('\\' | '"' | '\'' )  | ESCAPE )*? '"' ;
-ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' | '\\\'' | '\\"' | '\\\\';
-
-NULL: 'null' ;
+CHAR_LIT: '\'' (~('\\' | '\"' | '\'' ) | ESCAPE) '\''  ;
+CHARACTER_LIT: '"' ( ~('\\' | '\"' | '\'' )  | ESCAPE )*? '"' ;
+ESCAPE: '\\0' | '\\b' | '\\t' | '\\n' | '\\f' | '\\r' | '\\\'' | '\\\"' | '\\\\';
 
 //ident
 IDENT: ('_' | LOWERCASE | UPPERCASE ) ('_' | LOWERCASE | UPPERCASE | DIGIT)*;
@@ -92,6 +90,8 @@ fragment DIGIT : '0'..'9' ;
 
 INTEGER: DIGIT+ ;
 
+//null
+NULL: 'null' ;
 
 WHITESPACE: ( '\t' | ' ' | '\r' | '\n')+ -> channel(HIDDEN) ;
 COMMENT: ('#' (.)*? '\n' )+ -> skip ;
