@@ -73,7 +73,7 @@ pair_elem_type : base_type
                | PAIR
                ;
 
-expr           : int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT | pair_liter
+expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
                | expr binary_oper expr
                | ident
                | array_elem

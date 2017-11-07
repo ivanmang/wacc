@@ -16,7 +16,8 @@ public class VisitorErrorHandler {
   public void incompatibleTypeError(ParseTree ctx, String token, Type expectedType,
       Type actualType) {
     throwError(ctx,
-        "Incompatible type at " + token + " (expeted: " + expectedType + ", actual: " + actualType,
+        "Incompatible type at " + token + " (expected: " + expectedType
+            + ", actual: " + actualType,
         SEMANTIC_ERROR_CODE);
   }
 
