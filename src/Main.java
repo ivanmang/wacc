@@ -13,51 +13,34 @@ import org.antlr.v4.runtime.tree.gui.TreeViewer;
 
 public class Main {
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws Exception{
 
     String filename = args[0];
     File file = new File(filename);
     InputStream fileStream = new FileInputStream(file);
 
-    //create a CharStream that reads from file stream
     ANTLRInputStream input = new ANTLRInputStream(fileStream);
 
-    //create a lexer that feeds off of input CharStream
     WaccLexer lexer = new WaccLexer(input);
 
-    //create a buffer of tokens pulled from the lexer
     CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-    //create a parser that feeds off the tokens buffer
     WaccParser parser = new WaccParser(tokens);
+    //parser.setErrorHandler(new ParserErrorHandler());
 
-    //set a error handler for parser
-    parser.setErrorHandler(new ParserErrorHandler());
-
-    //begin parsing at prog rule
     ParseTree tree = parser.prog();
+    System.out.println(tree.toStringTree(parser));
 
     //show AST in GUI
-//    JFrame frame = new JFrame("Antlr AST");
-//    JPanel panel = new JPanel();
-//    TreeViewer viewr = new TreeViewer(Arrays.asList(
-//        parser.getRuleNames()),tree);
-//    viewr.setScale(1);//scale a little
-//    panel.add(viewr);
-//    frame.add(panel);
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    frame.setSize(1000,1000);
-//    frame.setVisible(true);
-
-    SemanticChecker checker = new SemanticChecker();
-    checker.visit(tree);
-
-    //print LISP-style tree
-//    System.out.println(tree.toStringTree(parser));
-
-    //System.out.println("====");
-    //MyVisitor visitor = new MyVisitor();
-    //visitor.visit(tree);
-    //System.out.println("====");
+    JFrame frame = new JFrame("Antlr AST");
+    JPanel panel = new JPanel();
+    TreeViewer viewr = new TreeViewer(Arrays.asList(
+        parser.getRuleNames()),tree);
+    viewr.setScale(0.8);//scale a little
+    panel.add(viewr);
+    frame.add(panel);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(1000,1000);
+    frame.setVisible(true);
   }
 }
