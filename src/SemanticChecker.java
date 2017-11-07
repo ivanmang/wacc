@@ -23,19 +23,27 @@ import antlr.WaccParser.Pair_elem_typeContext;
 import antlr.WaccParser.Pair_literContext;
 import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.ParamContext;
+import antlr.WaccParser.Param_listContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.StatContext;
 import antlr.WaccParser.TypeContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   public VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
   private SymbolTable symbolTable = new SymbolTable(null, null);
+  private Map<String, Function> functionList = new HashMap<>();
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
   private Type boolType = new BaseType(WaccParser.BOOL);
@@ -66,11 +74,11 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     String identName = ctx.ident().IDENT().getText();
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
-          .incompatibleTypeError(ctx, ctx.ident().IDENT().getText(), expected,
+          .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
               actual);
     } else if (symbolTable.contain(identName) && !symbolTable
         .getOuterSymbolTable().contain(identName)) {
-      visitorErrorHandler.variableRedefineError(ctx, identName);
+      visitorErrorHandler.redefineError(ctx, identName);
     } else {
       symbolTable.insert(ctx.ident().getText(), expected);
     }
@@ -198,10 +206,16 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitArg_list(Arg_listContext ctx) {
     System.out.println("visiting arg list");
+    Function_callContext parent = (Function_callContext) ctx.getParent();
+    Function curFunc = functionList.get(parent.ident().getText());
     for (int i = 0; i < ctx.expr().size(); i++) {
-      Type argType = visit(ctx.expr(i));
-      //check type match with function para
-      //TODO
+      Type actualType = visit(ctx.expr(i));
+      Type expectedType = curFunc.getType(i);
+      if (!typeChecker(expectedType, actualType)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, ctx.expr(i).getText(), expectedType,
+                actualType);
+      }
     }
     return null;
   }
@@ -282,7 +296,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
     }
-    System.out.println("FAILED");
+    System.out.println("FAILED EXPR");
     return null;
   }
 
@@ -295,19 +309,66 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitFunction_call(Function_callContext ctx) {
     System.out.println("visiting function call");
-    return symbolTable.lookupAll(ctx.ident().toString());
+    String ident = ctx.ident().getText();
+    Function curFunc = functionList.get(ident);
+    int expectedSize = curFunc.getParamSize();
+    int actualSize = 0;
+    if (ctx.arg_list() != null) {
+      actualSize = ctx.arg_list().expr().size();
+    }
+    if (expectedSize != actualSize) {
+      visitorErrorHandler
+          .incorrectNumberOfParametersError(ctx, ident, expectedSize,
+              actualSize);
+    }
+    if (ctx.arg_list() != null) {
+      visit(ctx.arg_list());
+    }
+    return symbolTable.lookupAll(ctx.ident().getText());
   }
 
   @Override
   public Type visitFunc(FuncContext ctx) {
     System.out.println("visiting func");
-    Type expected = visit(ctx.type());
+    List<String> identList = new ArrayList<>();
+    List<Type> typeList = new ArrayList<>();
     symbolTable = symbolTable.enterScope(symbolTable);
-    if (symbolTable.lookupAll(ctx.ident().toString()) != null) {
-      //TODO:IF
+    if (ctx.param_list() != null) {
+      for (ParamContext paramContext : ctx.param_list().param()) {
+        String ident = paramContext.ident().getText();
+        Type type = visit(paramContext.type());
+        symbolTable.insert(ident, type);
+        identList.add(ident);
+        typeList.add(type);
+      }
     }
-    symbolTable.insert(ctx.ident().toString(), expected);
+    Type expected = visit(ctx.type());
+    Type returnType = visit(ctx.stat());
+    functionList.put(ctx.ident().getText(),
+        new Function(returnType, identList, typeList));
+    if (!typeChecker(expected, returnType)) {
+      visitorErrorHandler
+          .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
+              returnType);
+    }
+    if (symbolTable.lookupAll(ctx.ident().getText()) != null) {
+      visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
+    }
+
+    symbolTable.exitScope(symbolTable);
+    symbolTable.insert(ctx.ident().getText(), expected);
     return expected;
+  }
+
+  @Override
+  public Type visitStat(StatContext ctx) {
+    if (ctx.RETURN() != null) {
+      return visit(ctx.expr());
+    } else {
+      visitChildren(ctx);
+    }
+    System.out.println("FAILED STAT");
+    return null;
   }
 
   @Override
@@ -328,7 +389,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     } else if (array instanceof BaseType) {
       return charType;
     }
-    System.out.println("FAILED");
+    System.out.println("FAILED ARRAY ELEM");
     return null;
   }
 
@@ -371,19 +432,6 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     return new PairType();
   }
 
-  /*
-    @Override
-    public Type visitProg(ProgContext ctx) {
-      for(FuncContext funcContext : ctx.func()){
-        if(symbolTable.contain(funcContext.getText())){
-          //function redeclare
-        }
-        symbolTable.insert(funcContext.getText(),visit(funcContext.type()));
-        visit(funcContext.param_list());
-      }
-      return visitChildren(ctx);
-    }
-   */
   @Override
   public Type visitParam(ParamContext ctx) {
     System.out.println("visiting param");

@@ -25,15 +25,16 @@ public class VisitorErrorHandler {
     throwError(ctx, "Variable " + token + " is not defined in this scope", SEMANTIC_ERROR_CODE);
   }
 
-  public void variableRedefineError(ParseTree ctx, String token) {
-    throwError(ctx, "\"" + token + "\"" + "is already defined in this scope", SEMANTIC_ERROR_CODE);
+  public void redefineError(ParseTree ctx, String token) {
+    throwError(ctx, "\"" + token + "\"" + " is already defined in this scope",
+        SEMANTIC_ERROR_CODE);
   }
 
   public void incorrectNumberOfParametersError(ParseTree ctx, String funcToken, int expected,
       int actual) {
     throwError(ctx,
         "Incorrect number of parameters for " + funcToken + " (expected: " + expected + ", actual: "
-            + actual, SEMANTIC_ERROR_CODE);
+            + actual + ")", SEMANTIC_ERROR_CODE);
   }
 
   public void functionNoReturnError(ParseTree ctx, String funcToken) {
