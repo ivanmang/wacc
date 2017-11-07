@@ -7,10 +7,10 @@ public class SyntaxChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitFunc(FuncContext ctx) {
-    if(ctx.stat() == null) {
+    if(ctx.func_stat() == null) {
       visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
     } else {
-      if(ctx.stat().RETURN() == null) {
+      if(ctx.func_stat().RETURN() == null) {
         visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
       }
     }

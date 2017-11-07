@@ -42,6 +42,10 @@ public class VisitorErrorHandler {
         SYNTAX_ERROR_CODE);
   }
 
+  public void cantReturnFromGlobalScope(ParseTree ctx) {
+    throwError(ctx, "Cannot return from the global scope.", SEMANTIC_ERROR_CODE);
+  }
+
   public void intValueOutofBoundsError(ParseTree ctx) {
     throwError(ctx,
         "Integer out of bounds error, expected between " + INT_MIN_VALUE + " and " + INT_MAX_VALUE

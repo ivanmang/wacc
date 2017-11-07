@@ -17,6 +17,7 @@ import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.FuncContext;
+import antlr.WaccParser.Func_statContext;
 import antlr.WaccParser.Function_callContext;
 import antlr.WaccParser.IdentContext;
 import antlr.WaccParser.IfStatContext;
@@ -28,6 +29,7 @@ import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.ParamContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
+import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
 import antlr.WaccParser.StatContext;
 import antlr.WaccParser.TypeContext;
@@ -63,6 +65,15 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       System.out.println("Type 2 null");
     }
     return type1.isValidType() && type2.isValidType() && type1.equals(type2);
+  }
+
+  @Override
+  public Type visitProg(ProgContext ctx) {
+    if(ctx.stat().RETURN() == null) {
+      visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+    }
+    visitChildren(ctx);
+    return null;
   }
 
   @Override
@@ -363,7 +374,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         typeList.add(type);
       }
     }
-    Type returnType = visit(ctx.stat());
+    Type returnType = visit(ctx.func_stat());
     functionList.put(ctx.ident().getText(),
         new Function(returnType, identList, typeList));
     if (!typeChecker(expected, returnType)) {
@@ -381,6 +392,12 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitStat(StatContext ctx) {
+    visitChildren(ctx);
+    return null;
+  }
+
+  @Override
+  public Type visitFunc_stat(Func_statContext ctx) {
     if (ctx.RETURN() != null) {
       return visit(ctx.expr());
     } else {
