@@ -32,22 +32,22 @@ public class Main {
     WaccParser parser = new WaccParser(tokens);
 
     //set a error handler for parser
-    parser.setErrorHandler(new ParserErrorHandler());
+    //parser.setErrorHandler(new ParserErrorHandler());
 
     //begin parsing at prog rule
     ParseTree tree = parser.prog();
 
     //show AST in GUI
-//    JFrame frame = new JFrame("Antlr AST");
-//    JPanel panel = new JPanel();
-//    TreeViewer viewr = new TreeViewer(Arrays.asList(
-//        parser.getRuleNames()),tree);
-//    viewr.setScale(1);//scale a little
-//    panel.add(viewr);
-//    frame.add(panel);
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    frame.setSize(1000,1000);
-//    frame.setVisible(true);
+    JFrame frame = new JFrame("Antlr AST");
+    JPanel panel = new JPanel();
+    TreeViewer viewr = new TreeViewer(Arrays.asList(
+        parser.getRuleNames()),tree);
+    viewr.setScale(1);//scale a little
+    panel.add(viewr);
+    frame.add(panel);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(1000,1000);
+    frame.setVisible(true);
 
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);

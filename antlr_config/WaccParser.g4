@@ -74,16 +74,23 @@ pair_elem_type : base_type
                ;
 
 expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
-               | expr binary_oper expr
+               | expr binary_oper_mul expr
+               | expr binary_oper_plus expr
+               | expr binary_oper_eql expr
+               | expr binary_oper_and_or expr
                | ident
                | array_elem
                | unary_oper expr
                | OPEN_PARENTHESES expr CLOSE_PARENTHESES
                ;
 
+
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 
-binary_oper    : MUL | DIV | MOD | PLUS | MINUS | GT | GET | LT | LET | EQL | NEQL | AND | OR ;
+binary_oper_mul   : MUL | DIV | MOD ;
+binary_oper_plus  : PLUS | MINUS ;
+binary_oper_eql  : GT | GET | LT | LET | EQL | NEQL;
+binary_oper_and_or  : AND | OR ;
 
 ident          : IDENT ;
 
