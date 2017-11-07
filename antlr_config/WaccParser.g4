@@ -73,17 +73,28 @@ pair_elem_type : base_type
                | PAIR
                ;
 
+
 expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
-               | expr binary_oper expr
+               | plus_minus_oper ( GT plus_minus_oper| GET plus_minus_oper| LT plus_minus_oper| LET plus_minus_oper| EQL plus_minus_oper| NEQL plus_minus_oper| AND plus_minus_oper| OR plus_minus_oper)*
                | ident
                | array_elem
                | unary_oper expr
                | OPEN_PARENTHESES expr CLOSE_PARENTHESES
                ;
 
+expr_helper    : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
+               | ident
+               | array_elem
+               | unary_oper expr
+               | OPEN_PARENTHESES expr CLOSE_PARENTHESES
+               ;
+
+
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 
-binary_oper    : MUL | DIV | MOD | PLUS | MINUS | GT | GET | LT | LET | EQL | NEQL | AND | OR ;
+mul_div_oper   : expr_helper MUL expr_helper|expr_helper DIV expr_helper;
+
+plus_minus_oper: mul_div_oper ( MOD mul_div_oper)* |mul_div_oper (PLUS mul_div_oper)* |mul_div_oper ( MINUS mul_div_oper)*;
 
 ident          : IDENT ;
 
