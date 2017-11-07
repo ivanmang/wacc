@@ -102,6 +102,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     Type expected = visit(ctx.assign_lhs());
     Type actual = visit(ctx.assign_rhs());
     System.out.println("EXPECTED TYPE = " + expected);
+    if(functionList.containsKey(ctx.assign_lhs().getText())) {
+      visitorErrorHandler.variableNotDefinedInScopeError(ctx, ctx.assign_lhs().getText());
+    }
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.assign_rhs().getTokens(0).toString(),
