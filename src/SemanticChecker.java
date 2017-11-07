@@ -78,11 +78,20 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
               actual);
-    } else if (symbolTable.contain(identName) && !symbolTable
-        .getOuterSymbolTable().contain(identName)) {
-      visitorErrorHandler.redefineError(ctx, identName);
-    } else {
-      symbolTable.insert(ctx.ident().getText(), expected);
+    } else if(symbolTable.getOuterSymbolTable() != null) {
+      if (symbolTable.contain(identName) && !symbolTable.getOuterSymbolTable().contain(identName)) {
+        visitorErrorHandler.redefineError(ctx, identName);
+      } else {
+        symbolTable.insert(ctx.ident().getText(), expected);
+      }
+    } else if(symbolTable.getOuterSymbolTable() == null) {
+//      System.out.println(identName);
+//      System.out.println(symbolTable.contain(identName));
+      if (symbolTable.contain(identName)) {
+        visitorErrorHandler.redefineError(ctx, identName);
+      } else {
+        symbolTable.insert(ctx.ident().getText(), expected);
+      }
     }
     return null;
   }
