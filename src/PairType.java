@@ -1,8 +1,11 @@
 public class PairType implements Type{
   private Type fst;
   private Type snd;
+  private boolean isNull = false;
 
-  PairType() {}
+  PairType() {
+    isNull =  true;
+  }
 
   PairType(Type fst, Type snd) {
     this.fst = fst;
@@ -16,6 +19,9 @@ public class PairType implements Type{
   //returns true if both are pairs and the first and second type matches
   @Override
   public boolean equals(Type other) {
+    if(isNull) {
+      return true;
+    }
     if(other.getID() == ID.Pair) {
       PairType pair = (PairType) other;
       return fst.equals(pair.fst) && snd.equals(pair.snd);
@@ -38,6 +44,9 @@ public class PairType implements Type{
 
   @Override
   public String toString() {
-    return "(" + fst.toString() + ", " + snd.toString() + ")";
+    if(fst != null && snd != null) {
+      return "(" + fst.toString() + ", " + snd.toString() + ")";
+    }
+    return "";
   }
 }

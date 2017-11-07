@@ -45,6 +45,9 @@ public class ArrayType implements Type {
 
   @Override
   public String toString() {
-    return elementType.toString() + "[]";
+    if(elementType != null) {
+      return elementType.toString() + "[]";
+    }
+    return "";
   }
 }
