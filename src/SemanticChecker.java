@@ -352,6 +352,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     System.out.println("visiting func");
     List<String> identList = new ArrayList<>();
     List<Type> typeList = new ArrayList<>();
+    Type expected = visit(ctx.type());
     symbolTable = symbolTable.enterScope(symbolTable);
     if (ctx.param_list() != null) {
       for (ParamContext paramContext : ctx.param_list().param()) {
@@ -362,7 +363,6 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         typeList.add(type);
       }
     }
-    Type expected = visit(ctx.type());
     Type returnType = visit(ctx.stat());
     functionList.put(ctx.ident().getText(),
         new Function(returnType, identList, typeList));
@@ -374,7 +374,6 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     if (symbolTable.lookupAll(ctx.ident().getText()) != null) {
       visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
     }
-
     symbolTable = symbolTable.exitScope(symbolTable);
     symbolTable.insert(ctx.ident().getText(), expected);
     return expected;
