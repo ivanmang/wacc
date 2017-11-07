@@ -67,7 +67,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
-    System.out.println("CHEKING EXPECTED");
+    System.out.println("Declare and assign");
+    System.out.println("CHECKING EXPECTED");
     Type expected = visitType(ctx.type());
     System.out.println("CHECKING ACTUAL");
     Type actual = visit(ctx.assign_rhs());
@@ -240,7 +241,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitArray_type(Array_typeContext ctx) {
     System.out.println("visiting array type");
-    if (ctx.array_type().array_type() != null) {
+    if (ctx.array_type() != null) {
       return new ArrayType(visit(ctx.array_type()));
     } else if (ctx.base_type() != null) {
       return new ArrayType(visit(ctx.base_type()));
@@ -411,7 +412,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
                 typeInArray);
       }
     }
-    return first_elem_type;
+    return new ArrayType(first_elem_type);
   }
 
   @Override
@@ -507,6 +508,12 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         || op == WaccParser.LET) {
       if (!typeChecker(t1, t2)) {
         visitorErrorHandler.incompatibleTypeError(ctx, firstString, t1, t2);
+      }
+      if (t1 instanceof ArrayType || t1 instanceof PairType) {
+        visitorErrorHandler.incompatibleTypeError(ctx, t1);
+      }
+      if (t2 instanceof ArrayType || t2 instanceof PairType) {
+        visitorErrorHandler.incompatibleTypeError(ctx, t2);
       }
       return boolType;
     }

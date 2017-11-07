@@ -24,7 +24,7 @@ public class ArrayType implements Type {
   public boolean equals(Type other) {
     if (other.getID() == ID.Array) {
       ArrayType array = (ArrayType) other;
-      return elementType == array.getElementType();
+      return elementType.equals(array.getElementType());
     } else if (elementType.getID() == ID.Base && other.getID() == ID.Base) {
       BaseType base = (BaseType) elementType;
       BaseType otherBase = (BaseType) other;
