@@ -25,6 +25,7 @@ import antlr.WaccParser.ParamContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.TypeContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
@@ -45,6 +46,12 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   public boolean typeChecker(Type type1, Type type2) {
     System.out.println("type checking");
+    if (type1 == null) {
+      System.out.println("Type 1 null");
+    }
+    if (type2 == null) {
+      System.out.println("Type 2 null");
+    }
     return type1.isValidType() && type2.isValidType() && type1.equals(type2);
   }
 
@@ -54,6 +61,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     Type expected = visitType(ctx.type());
     System.out.println("CHECKING ACTUAL");
     Type actual = visit(ctx.assign_rhs());
+    System.out.println(actual);
     String identName = ctx.ident().IDENT().getText();
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
@@ -69,6 +77,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitAssignStat(AssignStatContext ctx) {
+    System.out.println("Visiting Assign Stat");
     Type expected = visit(ctx.assign_lhs());
     Type actual = visit(ctx.assign_rhs());
     if (!typeChecker(expected, actual)) {
@@ -81,6 +90,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitReadStat(ReadStatContext ctx) {
+    System.out.println("Visiting Read Stat");
     Type actual = visit(ctx.assign_lhs());
     if (!typeChecker(charType, actual) && !typeChecker(intType, actual)) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
@@ -90,6 +100,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitFreeStat(FreeStatContext ctx) {
+    System.out.println("Visiting Free stat");
     Type actual = visit(ctx.expr());
     if (actual.getID() != ID.Pair) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
@@ -99,6 +110,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitExitStat(ExitStatContext ctx) {
+    System.out.println("Visiting exit stat");
     Type actual = visit(ctx.expr());
     if (!typeChecker(intType, actual)) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
@@ -108,6 +120,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPrintStat(PrintStatContext ctx) {
+    System.out.println("Visiting print stat");
     Type actual = visit(ctx.expr());
     if (!actual.isValidType()) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
@@ -117,6 +130,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPrintlnStat(PrintlnStatContext ctx) {
+    System.out.println("visiting println stat");
     Type actual = visit(ctx.expr());
     if (!actual.isValidType()) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
@@ -127,30 +141,35 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitIfStat(IfStatContext ctx) {
+    System.out.println("Visiting if stat");
     Type condition = visit(ctx.expr());
     if (!typeChecker(boolType, condition)) {
       visitorErrorHandler.incompatibleTypeError(ctx, condition);
     }
-    symbolTable = symbolTable.enterScope(symbolTable);
-    Type fstat = visit(ctx.stat(0));
-    symbolTable = symbolTable.exitScope(symbolTable);
 
-    symbolTable = symbolTable.enterScope(symbolTable);
-    Type sstat = visit(ctx.stat(1));
-    symbolTable = symbolTable.exitScope(symbolTable);
+    if (ctx.stat(1) != null) { //have if, then, else
+      symbolTable = symbolTable.enterScope(symbolTable);
+      Type fstat = visit(ctx.stat(0));
+      symbolTable = symbolTable.exitScope(symbolTable);
 
-    if (sstat == null) {//only have if then , no else
+      symbolTable = symbolTable.enterScope(symbolTable);
+      Type sstat = visit(ctx.stat(1));
+      symbolTable = symbolTable.exitScope(symbolTable);
+      return typeChecker(fstat, sstat) ? fstat : null;
+
+    } else { //only have if then , no else
       symbolTable = symbolTable.enterScope(symbolTable);
       Type stat = visit(ctx.stat(0));
       symbolTable = symbolTable.exitScope(symbolTable);
       return stat;
-
     }
-    return typeChecker(fstat, sstat) ? fstat : null;
+
+
   }
 
   @Override
   public Type visitWhileStat(WhileStatContext ctx) {
+    System.out.println("visiting while stat");
     Type conditon = visit(ctx.expr());
     if (!typeChecker(boolType, conditon)) {
       visitorErrorHandler.incompatibleTypeError(ctx, conditon);
@@ -163,6 +182,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitBeginStat(BeginStatContext ctx) {
+    System.out.println("visiting begin stat");
     symbolTable = symbolTable.enterScope(symbolTable);
     Type stat = visit(ctx.stat());
     symbolTable = symbolTable.exitScope(symbolTable);
@@ -171,6 +191,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitAssign_lhs(Assign_lhsContext ctx) {
+    System.out.println("visiting assign lhs");
     if (ctx.array_elem() != null) {
       return visit(ctx.array_elem());
     } else if (ctx.ident() != null) {
@@ -184,15 +205,18 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitArg_list(Arg_listContext ctx) {
+    System.out.println("visiting arg list");
     for (int i = 0; i < ctx.expr().size(); i++) {
       Type argType = visit(ctx.expr(i));
       //check type match with function para
+      //TODO
     }
     return null;
   }
 
   @Override
   public Type visitBase_type(Base_typeContext ctx) {
+    System.out.println("visiting base type");
     if (ctx.BOOL() != null) {
       return new BaseType(WaccParser.BOOL);
     } else if (ctx.CHAR() != null) {
@@ -208,6 +232,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitArray_type(Array_typeContext ctx) {
+    System.out.println("visiting array type");
     if (ctx.array_type().array_type() != null) {
       return new ArrayType(visit(ctx.array_type()));
     } else if (ctx.base_type() != null) {
@@ -221,6 +246,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPair_type(Pair_typeContext ctx) {
+    System.out.println("visiting pair type");
     Type fst = visit(ctx.pair_elem_type(0));
     Type snd = visit(ctx.pair_elem_type(1));
     return new PairType(fst, snd);
@@ -228,6 +254,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPair_elem_type(Pair_elem_typeContext ctx) {
+    System.out.println("visiting pair elem type");
     if (ctx.PAIR() != null) {
       return new PairType();
     } else if (ctx.array_type() != null) {
@@ -241,44 +268,49 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitExpr(ExprContext ctx) {
+    System.out.println("visiting expr");
     if (ctx.int_liter() != null) {
-      return visit(ctx.int_liter());
+      return intType;
     } else if (ctx.bool_liter() != null) {
-      return visit(ctx.bool_liter());
+      return boolType;
     } else if (ctx.array_elem() != null) {
       return visit(ctx.array_elem());
     } else if (ctx.binary_oper() != null) {
       return visit(ctx.binary_oper());
     } else if (ctx.pair_liter() != null) {
-      return visit(ctx.pair_liter());
+      return new PairType();
     } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
       return visit(ctx.ident());
     } else if (ctx.CHAR_LIT() != null) {
-      return new BaseType(WaccParser.CHAR);
+      return charType;
     } else if (ctx.CHARACTER_LIT() != null) {
-      return new BaseType(WaccParser.CHAR);
+      return charType;
     } else if (ctx.binary_oper() != null) {
       return visit(ctx.binary_oper());
     } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
     }
+    System.out.println("FAILED");
     return null;
   }
 
   @Override
   public Type visitAssign_rhs(Assign_rhsContext ctx) {
+    System.out.println("visiting assign rhs");
     return visitChildren(ctx);
   }
 
   @Override
   public Type visitFunction_call(Function_callContext ctx) {
+    System.out.println("visiting function call");
     return symbolTable.lookupAll(ctx.ident().toString());
   }
 
   @Override
   public Type visitFunc(FuncContext ctx) {
+    System.out.println("visiting func");
     Type expected = visit(ctx.type());
     symbolTable = symbolTable.enterScope(symbolTable);
     if (symbolTable.lookupAll(ctx.ident().toString()) != null) {
@@ -290,6 +322,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitArray_elem(Array_elemContext ctx) {
+    System.out.println("visiting array elem");
     for (ExprContext exprContext : ctx.expr()) {
       Type typeInArray = visit(exprContext);
       if (!typeChecker(intType, typeInArray)) {
@@ -303,6 +336,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitArray_liter(Array_literContext ctx) {
+    System.out.println("visiting array liter");
     Type first_elem_type = visit(ctx.expr(0));
     for (ExprContext exprContext : ctx.expr()) {
       Type typeInArray = visit(exprContext);
@@ -317,6 +351,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitNew_pair(New_pairContext ctx) {
+    System.out.println("visiting new pair");
     Type fst_type = visit(ctx.expr(0));
     Type snd_type = visit(ctx.expr(1));
     return new PairType(fst_type, snd_type);
@@ -324,6 +359,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitIdent(IdentContext ctx) {
+    System.out.println("visiting ident");
     String ident = ctx.IDENT().getText();
     if (!symbolTable.contain(ident)) {
       visitorErrorHandler.variableNotDefinedInScopeError(ctx, ident);
@@ -333,6 +369,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitPair_liter(Pair_literContext ctx) {
+    System.out.println("visiting pair liter");
     return new PairType();
   }
 
@@ -351,11 +388,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
    */
   @Override
   public Type visitParam(ParamContext ctx) {
+    System.out.println("visiting param");
     return visitType(ctx.type());
   }
 
   @Override
   public Type visitBinary_oper(Binary_operContext ctx) {
+    System.out.println("visiting binary op");
     ExprContext parent = (ExprContext) ctx.getParent();
     Type t1 = visit(parent.expr(0));
     Type t2 = visit(parent.expr(1));
@@ -402,6 +441,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitUnary_oper(Unary_operContext ctx) {
+    System.out.println("visiting unray op");
     ExprContext parent = (ExprContext) ctx.getParent();
     Type type = visit(parent.expr(0));
     int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
@@ -447,5 +487,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     return null;
   }
 
-
+  @Override
+  public Type visitType(TypeContext ctx) {
+    System.out.println("visiting type");
+    return visit(ctx.getChild(0));
+  }
 }
