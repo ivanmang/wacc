@@ -49,8 +49,8 @@ public class Main {
     frame.setSize(1000,1000);
     frame.setVisible(true);
 
-    SemanticChecker checker = new SemanticChecker();
-    checker.visit(tree);
+    //SemanticChecker checker = new SemanticChecker();
+    //checker.visit(tree);
 
     //print LISP-style tree
 //    System.out.println(tree.toStringTree(parser));
