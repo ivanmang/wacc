@@ -25,7 +25,7 @@ public class SymbolTable {
   }
 
   public SymbolTable enterScope(SymbolTable cur) {
-    return new SymbolTable(null, cur);
+    return new SymbolTable(cur, cur);
   }
 
   public SymbolTable exitScope(SymbolTable cur) {
@@ -59,6 +59,10 @@ public class SymbolTable {
   public boolean contain(String name){
     //It can't find any name in it previously
       return !(this.lookupAll(name) == null);
+  }
+
+  public SymbolTable getOuterSymbolTable() {
+    return outerSymbolTable;
   }
 
   public SymbolTable getInnerSymbolTable() {

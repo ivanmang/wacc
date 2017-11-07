@@ -68,7 +68,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.ident().IDENT().getText(), expected,
               actual);
-    } else if (symbolTable.contain(identName)) {
+    } else if (symbolTable.contain(identName) && !symbolTable
+        .getOuterSymbolTable().contain(identName)) {
       visitorErrorHandler.variableRedefineError(ctx, identName);
     } else {
       symbolTable.insert(ctx.ident().getText(), expected);
@@ -150,10 +151,17 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     }
 
     if (ctx.stat(1) != null) { //have if, then, else
+      symbolTable = symbolTable.enterScope(symbolTable);
       Type fstat = visit(ctx.stat(0));
+      symbolTable = symbolTable.exitScope(symbolTable);
+
+      symbolTable = symbolTable.enterScope(symbolTable);
       Type sstat = visit(ctx.stat(1));
+      symbolTable = symbolTable.exitScope(symbolTable);
     } else { //only have if then , no else
+      symbolTable = symbolTable.enterScope(symbolTable);
       Type stat = visit(ctx.stat(0));
+      symbolTable = symbolTable.exitScope(symbolTable);
     }
     return null;
 
@@ -162,10 +170,12 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitWhileStat(WhileStatContext ctx) {
     System.out.println("visiting while stat");
+    symbolTable = symbolTable.enterScope(symbolTable);
     Type conditon = visit(ctx.expr());
     if (!typeChecker(boolType, conditon)) {
       visitorErrorHandler.incompatibleTypeError(ctx, conditon);
     }
+    symbolTable = symbolTable.exitScope(symbolTable);
     return visit(ctx.stat());
   }
 
@@ -175,7 +185,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     symbolTable = symbolTable.enterScope(symbolTable);
     Type stat = visit(ctx.stat());
     symbolTable = symbolTable.exitScope(symbolTable);
-    return stat;
+    return null;
   }
 
   @Override
