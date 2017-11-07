@@ -8,6 +8,7 @@ import antlr.WaccParser.Assign_lhsContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.Base_typeContext;
 import antlr.WaccParser.BeginStatContext;
+import antlr.WaccParser.Binary_operContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
@@ -18,14 +19,16 @@ import antlr.WaccParser.IdentContext;
 import antlr.WaccParser.IfStatContext;
 import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elem_typeContext;
+import antlr.WaccParser.Pair_literContext;
 import antlr.WaccParser.Pair_typeContext;
+import antlr.WaccParser.ParamContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.TypeContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
@@ -316,16 +319,133 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitNew_pair(New_pairContext ctx) {
     Type fst_type = visit(ctx.expr(0));
     Type snd_type = visit(ctx.expr(1));
-    return new PairType(fst_type,snd_type);
+    return new PairType(fst_type, snd_type);
   }
 
   @Override
   public Type visitIdent(IdentContext ctx) {
     String ident = ctx.IDENT().getText();
-    if(!symbolTable.contain(ident)){
-      visitorErrorHandler.variableNotDefinedInScopeError(ctx,ident);
+    if (!symbolTable.contain(ident)) {
+      visitorErrorHandler.variableNotDefinedInScopeError(ctx, ident);
     }
     return symbolTable.lookupAll(ident);
   }
+
+  @Override
+  public Type visitPair_liter(Pair_literContext ctx) {
+    return new PairType();
+  }
+
+  /*
+    @Override
+    public Type visitProg(ProgContext ctx) {
+      for(FuncContext funcContext : ctx.func()){
+        if(symbolTable.contain(funcContext.getText())){
+          //function redeclare
+        }
+        symbolTable.insert(funcContext.getText(),visit(funcContext.type()));
+        visit(funcContext.param_list());
+      }
+      return visitChildren(ctx);
+    }
+   */
+  @Override
+  public Type visitParam(ParamContext ctx) {
+    return visitType(ctx.type());
+  }
+
+  @Override
+  public Type visitBinary_oper(Binary_operContext ctx) {
+    ExprContext parent = (ExprContext) ctx.getParent();
+    Type t1 = visit(parent.expr(0));
+    Type t2 = visit(parent.expr(1));
+    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+    if (op == WaccParser.PLUS || op == WaccParser.MINUS || op == WaccParser.MUL
+        || op == WaccParser.DIV) {
+      if (!typeChecker(intType, t1)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, t1.toString(), intType, t1);
+      }
+      if (!typeChecker(intType, t2)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, t2.toString(), intType, t2);
+      }
+      return intType;
+    }
+
+    if (op == WaccParser.GT || op == WaccParser.LT || op == WaccParser.GET
+        || op == WaccParser.LET) {
+      if (!typeChecker(t1, t2)) {
+        visitorErrorHandler.incompatibleTypeError(ctx, t1.toString(), t1, t2);
+      }
+      return boolType;
+    }
+
+    if (op == WaccParser.EQL || op == WaccParser.NEQL) {
+      return boolType;
+    }
+
+    if (op == WaccParser.AND || op == WaccParser.OR) {
+      if (!typeChecker(boolType, t1)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, t1.toString(), boolType, t1);
+      }
+      if (!typeChecker(boolType, t2)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, t2.toString(), boolType, t2);
+      }
+      return boolType;
+    }
+
+    return null;
+  }
+
+  @Override
+  public Type visitUnary_oper(Unary_operContext ctx) {
+    ExprContext parent = (ExprContext) ctx.getParent();
+    Type type = visit(parent.expr(0));
+    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+    if (op == WaccParser.NOT) {
+      if (!typeChecker(boolType, type)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, type.toString(), boolType, type);
+      }
+      return boolType;
+    }
+
+    if (op == WaccParser.MINUS) {
+      if (!typeChecker(intType, type)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, type.toString(), intType, type);
+      }
+      return intType;
+    }
+
+    if (op == WaccParser.LEN) {
+      if (type.getID() != ID.Array) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, type.toString(), new ArrayType(), type);
+      }
+      return intType;
+    }
+
+    if (op == WaccParser.ORD) {
+      if (!typeChecker(charType, type)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, type.toString(), charType, type);
+      }
+      return intType;
+    }
+
+    if (op == WaccParser.CHR) {
+      if (!typeChecker(intType, type)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, type.toString(), intType, type);
+      }
+      return charType;
+    }
+    return null;
+  }
+
 
 }
