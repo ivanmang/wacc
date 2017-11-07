@@ -9,23 +9,33 @@ func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS 
 param_list     : param (COMMA param)* ;
 param          : type ident ;
 
-stat           : stat_helper
+stat           : SKIP_
+               | type ident EQUAL assign_rhs
+               | assign_lhs EQUAL assign_rhs
+               | READ assign_lhs
+               | FREE expr
+               | EXIT expr
+               | PRINT expr
+               | PRINTLN expr
+               | IF expr THEN stat ELSE stat FI
+               | WHILE expr DO stat DONE
+               | BEGIN stat END
                | RETURN expr
-               | <assoc=right> stat_helper COL stat
+               | <assoc=right> stat COL stat
                ;
 
-stat_helper    : SKIP_                              #skipStat
-               | type ident EQUAL assign_rhs        #declareAndAssignStat
-               | assign_lhs EQUAL assign_rhs        #assignStat
-               | READ assign_lhs                    #readStat
-               | FREE expr                          #freeStat
-               | EXIT expr                          #exitStat
-               | PRINT expr                         #printStat
-               | PRINTLN expr                       #printlnStat
-               | IF expr THEN stat ELSE stat FI     #ifStat
-               | WHILE expr DO stat DONE            #whileStat
-               | BEGIN stat END                     #beginStat
-               ;
+//stat_helper    : SKIP_                              #skipStat
+//               | type ident EQUAL assign_rhs        #declareAndAssignStat
+//               | assign_lhs EQUAL assign_rhs        #assignStat
+//               | READ assign_lhs                    #readStat
+//               | FREE expr                          #freeStat
+//               | EXIT expr                          #exitStat
+//               | PRINT expr                         #printStat
+//               | PRINTLN expr                       #printlnStat
+//               | IF expr THEN stat ELSE stat FI     #ifStat
+//               | WHILE expr DO stat DONE            #whileStat
+//               | BEGIN stat END                     #beginStat
+//               ;
 
 
 assign_lhs     : ident
