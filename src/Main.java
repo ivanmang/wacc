@@ -28,7 +28,7 @@ public class Main {
     WaccParser parser = new WaccParser(tokens);
 
     //set a error handler for parser
-    //parser.setErrorHandler(new ParserErrorHandler());
+    parser.setErrorHandler(new ParserErrorHandler());
 
     //begin parsing at prog rule
     ParseTree tree = parser.prog();
