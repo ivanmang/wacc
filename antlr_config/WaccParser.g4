@@ -5,11 +5,16 @@ options {
 }
 
 prog           : BEGIN (func)* stat END EOF;
-func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS stat END ;
+func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS func_stat END ;
 param_list     : param (COMMA param)* ;
 param          : type ident ;
 
 stat           : stat_helper
+               | RETURN expr
+               | <assoc=right> stat COL stat
+               ;
+
+func_stat      : stat_helper
                | RETURN expr
                | <assoc=right> stat_helper COL stat
                ;
