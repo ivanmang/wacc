@@ -24,6 +24,9 @@ public class ArrayType implements Type {
   //considered equal
   @Override
   public boolean equals(Type other) {
+    if(other instanceof AllType) {
+      return true;
+    }
     if (other.getID() == ID.Array) {
       ArrayType array = (ArrayType) other;
       return elementType.equals(array.getElementType());

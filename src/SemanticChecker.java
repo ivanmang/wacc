@@ -209,7 +209,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     if (!typeChecker(intType, actual)) {
       visitorErrorHandler.incompatibleTypeError(ctx, actual);
     }
-    return null;
+    return new AllType();
   }
 
   @Override

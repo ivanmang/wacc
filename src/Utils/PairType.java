@@ -21,6 +21,9 @@ public class PairType implements Type{
   //returns true if both are pairs and the first and second type matches
   @Override
   public boolean equals(Type other) {
+    if(other instanceof AllType) {
+      return true;
+    }
     if(isNull) {
       return true;
     }

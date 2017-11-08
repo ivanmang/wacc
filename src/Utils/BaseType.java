@@ -29,6 +29,9 @@ public class BaseType implements Type{
   //If the current type is a character array and the other type is a string, their type is
   //considered equal
   public boolean equals(Type other) {
+    if(other instanceof AllType) {
+      return true;
+    }
     if(other.getID() == ID.Base) {
       BaseType base = (BaseType) other;
       return contentId == base.getContentId();
