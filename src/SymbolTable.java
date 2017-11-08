@@ -1,6 +1,5 @@
-import java.util.Dictionary;
+import Utils.Type;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 public class SymbolTable {
@@ -37,7 +36,7 @@ public class SymbolTable {
     return dictionary.put(name, type);
   }
 
-  //the Type to which the specified name is mapped, or null if this map contains no mapping for the Type
+  //the Utils.Type to which the specified name is mapped, or null if this map contains no mapping for the Utils.Type
   public Type lookup(String name){
     return dictionary.get(name);
   }

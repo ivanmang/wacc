@@ -1,3 +1,4 @@
+import Utils.Type;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -38,7 +39,7 @@ public class VisitorErrorHandler {
   }
 
   public void functionNoReturnError(ParseTree ctx, String funcToken) {
-    throwError(ctx, "Function " + funcToken + " is not ended with a return or an exit statement.",
+    throwError(ctx, "Utils.Function " + funcToken + " is not ended with a return or an exit statement.",
         SYNTAX_ERROR_CODE);
   }
 

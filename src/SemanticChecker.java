@@ -1,38 +1,6 @@
+import Utils.*;
 import antlr.WaccParser;
-import antlr.WaccParser.Arg_listContext;
-import antlr.WaccParser.Array_elemContext;
-import antlr.WaccParser.Array_literContext;
-import antlr.WaccParser.Array_typeContext;
-import antlr.WaccParser.AssignStatContext;
-import antlr.WaccParser.Assign_lhsContext;
-import antlr.WaccParser.Assign_rhsContext;
-import antlr.WaccParser.Base_typeContext;
-import antlr.WaccParser.BeginStatContext;
-import antlr.WaccParser.Binary_oper_and_orContext;
-import antlr.WaccParser.Binary_oper_eqlContext;
-import antlr.WaccParser.Binary_oper_mulContext;
-import antlr.WaccParser.Binary_oper_plusContext;
-import antlr.WaccParser.DeclareAndAssignStatContext;
-import antlr.WaccParser.ExitStatContext;
-import antlr.WaccParser.ExprContext;
-import antlr.WaccParser.FreeStatContext;
-import antlr.WaccParser.FuncContext;
-import antlr.WaccParser.Function_callContext;
-import antlr.WaccParser.IdentContext;
-import antlr.WaccParser.IfStatContext;
-import antlr.WaccParser.New_pairContext;
-import antlr.WaccParser.Pair_elemContext;
-import antlr.WaccParser.Pair_elem_typeContext;
-import antlr.WaccParser.Pair_literContext;
-import antlr.WaccParser.Pair_typeContext;
-import antlr.WaccParser.ParamContext;
-import antlr.WaccParser.PrintStatContext;
-import antlr.WaccParser.PrintlnStatContext;
-import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.ReturnStatContext;
-import antlr.WaccParser.TypeContext;
-import antlr.WaccParser.Unary_operContext;
-import antlr.WaccParser.WhileStatContext;
+import antlr.WaccParser.*;
 import antlr.WaccParserBaseVisitor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,16 +25,16 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public boolean typeChecker(Type type1, Type type2) {
     System.out.println("type checking");
     if (type1 == null) {
-      System.out.println("Type 1 null");
+      System.out.println("Utils.Type 1 null");
     }
     if (type2 == null) {
-      System.out.println("Type 2 null");
+      System.out.println("Utils.Type 2 null");
     }
     return type1.isValidType() && type2.isValidType() && type1.equals(type2);
   }
 
 //  @Override
-//  public Type visitProg(ProgContext ctx) {
+//  public Utils.Type visitProg(ProgContext ctx) {
 //    for(ParseTree tree : ctx.stat().children) {
 //      if(tree instanceof StatContext) {
 //        StatContext statTree = (StatContext) tree;
@@ -80,7 +48,72 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //  }
 
 
+  @Override
+  public Type visitProg(ProgContext ctx) {
+    for(FuncContext funcContext : ctx.func()) {
+      List<String> identList = new ArrayList<>();
+      List<Type> typeList = new ArrayList<>();
 
+      Type returnType = visit(funcContext.type());
+
+      if(functionList.containsKey(funcContext.ident().getText())) {
+        visitorErrorHandler.redefineError(funcContext, funcContext.ident().getText());
+      }
+
+      if (funcContext.param_list() != null) {
+        for (ParamContext paramContext : funcContext.param_list().param()) {
+          String ident = paramContext.ident().getText();
+          Type type = visit(paramContext.type());
+          identList.add(ident);
+          typeList.add(type);
+        }
+      }
+
+      functionList.put(funcContext.ident().getText(), new Function(returnType, identList, typeList));
+    }
+    visitChildren(ctx);
+    return null;
+  }
+
+  public Type visitFunc(FuncContext ctx) {
+    System.out.println("visiting func");
+
+    List<String> identList = new ArrayList<>();
+    List<Type> typeList = new ArrayList<>();
+
+    Type expected = visit(ctx.type());
+
+//    if(functionList.containsKey(ctx.ident().getText())) {
+//      visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
+//    }
+
+    symbolTable = symbolTable.enterScope(symbolTable);
+
+    if (ctx.param_list() != null) {
+      for (ParamContext paramContext : ctx.param_list().param()) {
+        String ident = paramContext.ident().getText();
+        Type type = visit(paramContext.type());
+        symbolTable.insert(ident, type);
+//        identList.add(ident);
+//        typeList.add(type);
+      }
+    }
+    System.out.println("getting returnType");
+    Type returnType = visit(ctx.stat());
+
+    if (!typeChecker(expected, returnType)) {
+      visitorErrorHandler
+          .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
+              returnType);
+    }
+
+//    functionList.put(ctx.ident().getText(),
+//        new Function(returnType, identList, typeList));
+
+    symbolTable = symbolTable.exitScope(symbolTable);
+
+    return expected;
+  }
 
   @Override
   public Type visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
@@ -226,7 +259,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     symbolTable = symbolTable.enterScope(symbolTable);
     Type stat = visit(ctx.stat());
     symbolTable = symbolTable.exitScope(symbolTable);
-    return null;
+    return stat;
   }
 
   @Override
@@ -351,61 +384,26 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitFunction_call(Function_callContext ctx) {
     System.out.println("visiting function call");
     String ident = ctx.ident().getText();
+    System.out.println("still");
     Function curFunc = functionList.get(ident);
+    System.out.println("here");
     int expectedSize = curFunc.getParamSize();
     int actualSize = 0;
+    System.out.println("still here");
     if (ctx.arg_list() != null) {
       actualSize = ctx.arg_list().expr().size();
     }
+    System.out.println("died?");
     if (expectedSize != actualSize) {
       visitorErrorHandler
           .incorrectNumberOfParametersError(ctx, ident, expectedSize,
               actualSize);
     }
+    System.out.println("dead");
     if (ctx.arg_list() != null) {
       visit(ctx.arg_list());
     }
     return functionList.get(ident).getReturnType();
-  }
-
-  public Type visitFunc(FuncContext ctx) {
-    System.out.println("visiting func");
-
-    List<String> identList = new ArrayList<>();
-    List<Type> typeList = new ArrayList<>();
-
-    Type expected = visit(ctx.type());
-
-    if(functionList.containsKey(ctx.ident().getText())) {
-      visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
-    }
-
-    symbolTable = symbolTable.enterScope(symbolTable);
-
-    if (ctx.param_list() != null) {
-      for (ParamContext paramContext : ctx.param_list().param()) {
-        String ident = paramContext.ident().getText();
-        Type type = visit(paramContext.type());
-        symbolTable.insert(ident, type);
-        identList.add(ident);
-        typeList.add(type);
-      }
-    }
-    System.out.println("getting returnType");
-    Type returnType = visit(ctx.stat());
-
-    if (!typeChecker(expected, returnType)) {
-      visitorErrorHandler
-          .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
-              returnType);
-    }
-
-    functionList.put(ctx.ident().getText(),
-        new Function(returnType, identList, typeList));
-
-    symbolTable = symbolTable.exitScope(symbolTable);
-
-    return expected;
   }
 
   @Override
@@ -417,7 +415,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   }
 
 //  @Override
-//  public Type visitRetunStat(StatContext ctx) {
+//  public Utils.Type visitRetunStat(StatContext ctx) {
 //    if(symbolTable.getInnerSymbolTable() == null && symbolTable.getOuterSymbolTable() == null){
 //      if(ctx.RETURN() != null){
 //        visitorErrorHandler.cantReturnFromGlobalScope(ctx);
@@ -428,7 +426,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //  }
 
 //  @Override
-//  public Type visitFunc_stat(Func_statContext ctx) {
+//  public Utils.Type visitFunc_stat(Func_statContext ctx) {
 //    System.out.println("VISITING FUNCTION STATEMENT");
 //    if (ctx.RETURN() != null) {
 //      return visit(ctx.expr());

@@ -1,3 +1,5 @@
+package Utils;
+
 public interface Type{
   ID getID();
 

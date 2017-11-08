@@ -1,13 +1,15 @@
+package Utils;
+
 public class PairType implements Type{
   private Type fst;
   private Type snd;
   private boolean isNull = false;
 
-  PairType() {
+  public PairType() {
     isNull =  true;
   }
 
-  PairType(Type fst, Type snd) {
+  public PairType(Type fst, Type snd) {
     this.fst = fst;
     this.snd = snd;
   }
@@ -24,6 +26,9 @@ public class PairType implements Type{
     }
     if(other.getID() == ID.Pair) {
       PairType pair = (PairType) other;
+      if(pair.isNull) {
+        return true;
+      }
       return fst.equals(pair.fst) && snd.equals(pair.snd);
     }
     return false;
@@ -47,6 +52,6 @@ public class PairType implements Type{
     if(fst != null && snd != null) {
       return "(" + fst.toString() + ", " + snd.toString() + ")";
     }
-    return "";
+    return "Pair";
   }
 }

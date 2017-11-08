@@ -1,12 +1,14 @@
+package Utils;
+
 import antlr.WaccParser;
 
 public class BaseType implements Type{
   private final int INVALID_ID = -1;
   private int contentId;
 
-  BaseType() {}
+  public BaseType() {}
 
-  BaseType(int contentId) {
+  public BaseType(int contentId) {
     switch(contentId) {
       case WaccParser.INT:
       case WaccParser.BOOL:
@@ -62,7 +64,7 @@ public class BaseType implements Type{
       case WaccParser.STRING:
         return "CHAR[]";
       default:
-        return "Unknown Type";
+        return "Unknown Utils.Type";
     }
   }
 }

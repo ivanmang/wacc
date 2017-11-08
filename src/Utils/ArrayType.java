@@ -1,12 +1,14 @@
+package Utils;
+
 import antlr.WaccParser;
 
 public class ArrayType implements Type {
 
   private Type elementType;
 
-  ArrayType() {}
+  public ArrayType() {}
 
-  ArrayType(Type elementType) {
+  public ArrayType(Type elementType) {
     this.elementType = elementType;
   }
 

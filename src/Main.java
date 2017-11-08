@@ -52,13 +52,5 @@ public class Main {
     functionReturnChecker.visit(tree);
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
-
-    //print LISP-style tree
-//    System.out.println(tree.toStringTree(parser));
-
-    //System.out.println("====");
-    //MyVisitor visitor = new MyVisitor();
-    //visitor.visit(tree);
-    //System.out.println("====");
   }
 }
