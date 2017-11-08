@@ -4,7 +4,7 @@
 # but do *not* change its name.
 
 path = ARGV[0]
-lib = "bin:lib/antlr-4.4-complete.jar"
+lib = "bin:lib/antlr-4.7-complete.jar"
 system "java -cp #{lib} Main #{path}"
 ret = $?.exitstatus
 if ret==100

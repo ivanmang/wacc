@@ -3,7 +3,12 @@ import antlr.WaccParser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import java.util.Arrays;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import org.antlr.v4.gui.TreeViewer;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -12,11 +17,12 @@ public class Main {
   public static void main(String[] args) throws Exception {
 
     String filename = args[0];
+//    File file = new File(filename);
+//    InputStream fileStream = new FileInputStream(file);
     File file = new File(filename);
     InputStream fileStream = new FileInputStream(file);
-
     //create a CharStream that reads from file stream
-    ANTLRInputStream input = new ANTLRInputStream(fileStream);
+    CharStream input = CharStreams.fromFileName(filename);
 
     //create a lexer that feeds off of input CharStream
     WaccLexer lexer = new WaccLexer(input);
@@ -24,7 +30,7 @@ public class Main {
     //create a buffer of tokens pulled from the lexer
     CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-    //create a parser that feeds off the tokens buffer
+    //a parser that feeds off the tokens buffer
     WaccParser parser = new WaccParser(tokens);
 
     //set a error handler for parser
