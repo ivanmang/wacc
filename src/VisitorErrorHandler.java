@@ -39,7 +39,8 @@ public class VisitorErrorHandler {
   }
 
   public void functionNoReturnError(ParseTree ctx, String funcToken) {
-    throwError(ctx, "Utils.Function " + funcToken + " is not ended with a return or an exit statement.",
+    throwError(ctx,
+        "Utils.Function " + funcToken + " is not ended with a return or an exit statement.",
         SYNTAX_ERROR_CODE);
   }
 

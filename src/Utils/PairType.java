@@ -1,12 +1,13 @@
 package Utils;
 
-public class PairType implements Type{
+public class PairType implements Type {
+
   private Type fst;
   private Type snd;
   private boolean isNull = false;
 
   public PairType() {
-    isNull =  true;
+    isNull = true;
   }
 
   public PairType(Type fst, Type snd) {
@@ -21,15 +22,15 @@ public class PairType implements Type{
   //returns true if both are pairs and the first and second type matches
   @Override
   public boolean equals(Type other) {
-    if(other instanceof AllType) {
+    if (other instanceof AllType) {
       return true;
     }
-    if(isNull) {
+    if (isNull) {
       return true;
     }
-    if(other.getID() == ID.Pair) {
+    if (other.getID() == ID.Pair) {
       PairType pair = (PairType) other;
-      if(pair.isNull) {
+      if (pair.isNull) {
         return true;
       }
       return fst.equals(pair.fst) && snd.equals(pair.snd);
@@ -52,7 +53,7 @@ public class PairType implements Type{
 
   @Override
   public String toString() {
-    if(fst != null && snd != null) {
+    if (fst != null && snd != null) {
       return "(" + fst.toString() + ", " + snd.toString() + ")";
     }
     return "Pair";

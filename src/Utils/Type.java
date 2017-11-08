@@ -1,6 +1,7 @@
 package Utils;
 
-public interface Type{
+public interface Type {
+
   ID getID();
 
   boolean equals(Type other);

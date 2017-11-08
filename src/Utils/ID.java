@@ -1,6 +1,6 @@
 package Utils;
 
-public enum ID{
+public enum ID {
   Base,
   Pair,
   Array,

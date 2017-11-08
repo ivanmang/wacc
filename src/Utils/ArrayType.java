@@ -6,7 +6,8 @@ public class ArrayType implements Type {
 
   private Type elementType;
 
-  public ArrayType() {}
+  public ArrayType() {
+  }
 
   public ArrayType(Type elementType) {
     this.elementType = elementType;
@@ -24,7 +25,7 @@ public class ArrayType implements Type {
   //considered equal
   @Override
   public boolean equals(Type other) {
-    if(other instanceof AllType) {
+    if (other instanceof AllType) {
       return true;
     }
     if (other.getID() == ID.Array) {
@@ -50,7 +51,7 @@ public class ArrayType implements Type {
 
   @Override
   public String toString() {
-    if(elementType != null) {
+    if (elementType != null) {
       return elementType.toString() + "[]";
     }
     return "";

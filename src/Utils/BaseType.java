@@ -2,14 +2,16 @@ package Utils;
 
 import antlr.WaccParser;
 
-public class BaseType implements Type{
+public class BaseType implements Type {
+
   private final int INVALID_ID = -1;
   private int contentId;
 
-  public BaseType() {}
+  public BaseType() {
+  }
 
   public BaseType(int contentId) {
-    switch(contentId) {
+    switch (contentId) {
       case WaccParser.INT:
       case WaccParser.BOOL:
       case WaccParser.CHAR:
@@ -29,15 +31,15 @@ public class BaseType implements Type{
   //If the current type is a character array and the other type is a string, their type is
   //considered equal
   public boolean equals(Type other) {
-    if(other instanceof AllType) {
+    if (other instanceof AllType) {
       return true;
     }
-    if(other.getID() == ID.Base) {
+    if (other.getID() == ID.Base) {
       BaseType base = (BaseType) other;
       return contentId == base.getContentId();
-    } else if(other.getID() == ID.Array && contentId == WaccParser.STRING) {
+    } else if (other.getID() == ID.Array && contentId == WaccParser.STRING) {
       ArrayType array = (ArrayType) other;
-      if(array.getElementType().getID() == ID.Base) {
+      if (array.getElementType().getID() == ID.Base) {
         BaseType base = (BaseType) array.getElementType();
         return base.contentId == WaccParser.CHAR;
       }
@@ -57,7 +59,7 @@ public class BaseType implements Type{
 
   @Override
   public String toString() {
-    switch(contentId) {
+    switch (contentId) {
       case WaccParser.INT:
         return "INT";
       case WaccParser.BOOL:

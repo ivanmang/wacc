@@ -1,8 +1,9 @@
 package Utils;
 
-public class AllType implements  Type{
+public class AllType implements Type {
 
-  public AllType() {}
+  public AllType() {
+  }
 
   @Override
   public ID getID() {

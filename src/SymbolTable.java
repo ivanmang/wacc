@@ -32,32 +32,32 @@ public class SymbolTable {
   }
 
   //the previous name of the specified type in this hash table, or null if it did not have one
-  public Type insert(String name, Type type){
+  public Type insert(String name, Type type) {
     return dictionary.put(name, type);
   }
 
   //the Utils.Type to which the specified name is mapped, or null if this map contains no mapping for the Utils.Type
-  public Type lookup(String name){
+  public Type lookup(String name) {
     return dictionary.get(name);
   }
 
   //lookup name in current and enclosed symbol table, if found return type, else return null
-  public Type lookupAll(String name){
+  public Type lookupAll(String name) {
     SymbolTable symbolTable = this;
-    while(symbolTable != null){
+    while (symbolTable != null) {
       Type type = symbolTable.lookup(name);
-      if(type != null){
+      if (type != null) {
         return type;
-      }else{
+      } else {
         symbolTable = symbolTable.getInnerSymbolTable();
       }
     }
     return null;
   }
 
-  public boolean contain(String name){
+  public boolean contain(String name) {
     //It can't find any name in it previously
-      return !(this.lookupAll(name) == null);
+    return !(this.lookupAll(name) == null);
   }
 
   public SymbolTable getOuterSymbolTable() {
@@ -74,7 +74,7 @@ public class SymbolTable {
 
   public void printTable() {
     System.out.println("--------------");
-    for(String key : dictionary.keySet()) {
+    for (String key : dictionary.keySet()) {
       System.out.println(key + " " + dictionary.get(key));
     }
     System.out.println("--------------");

@@ -13,8 +13,7 @@ public class Main {
   public static void main(String[] args) throws Exception {
 
     String filename = args[0];
-//    File file = new File(filename);
-//    InputStream fileStream = new FileInputStream(file);
+
     File file = new File(filename);
     InputStream fileStream = new FileInputStream(file);
     //create a CharStream that reads from file stream
@@ -35,21 +34,12 @@ public class Main {
     //begin parsing at prog rule
     ParseTree tree = parser.prog();
 
-    //show AST in GUI
-//    JFrame frame = new JFrame("Antlr AST");
-//    JPanel panel = new JPanel();
-//    TreeViewer viewr = new TreeViewer(Arrays.asList(
-//        parser.getRuleNames()),tree);
-//    viewr.setScale(1);//scale a little
-//    panel.add(viewr);
-//    frame.add(panel);
-//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//    frame.setSize(1000,1000);
-//    frame.setVisible(true);
     AssignmentOutOfBoundsChecker assignmentOutOfBoundsChecker = new AssignmentOutOfBoundsChecker();
     assignmentOutOfBoundsChecker.visit(tree);
+
     FunctionReturnChecker functionReturnChecker = new FunctionReturnChecker();
     functionReturnChecker.visit(tree);
+
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
   }
