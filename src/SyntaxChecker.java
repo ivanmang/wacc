@@ -1,19 +1,28 @@
 import antlr.WaccParser.FuncContext;
+import antlr.WaccParser.Func_statContext;
 import antlr.WaccParserBaseVisitor;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-public class SyntaxChecker extends WaccParserBaseVisitor<Type> {
+public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
 
   private VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
 
   @Override
-  public Type visitFunc(FuncContext ctx) {
-    if(ctx.func_stat() == null) {
-      visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
-    } else {
-      if(ctx.func_stat().RETURN() == null) {
-        visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
+  public Boolean visitFunc(FuncContext ctx) {
+    boolean hvReturn = false;
+    for(ParseTree tree : ctx.func_stat().children) {
+      if(tree instanceof Func_statContext) {
+        Func_statContext func_statContext = (Func_statContext) tree;
+        if(func_statContext.RETURN() != null) {
+          hvReturn = true;
+          break;
+        }
       }
     }
-    return null;
+
+    if(!hvReturn) {
+      visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
+    }
+    return hvReturn;
   }
 }
