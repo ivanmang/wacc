@@ -27,6 +27,7 @@ import antlr.WaccParser.Pair_elem_typeContext;
 import antlr.WaccParser.Pair_literContext;
 import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.ParamContext;
+import antlr.WaccParser.Param_listContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ProgContext;
@@ -364,13 +365,22 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     return symbolTable.lookupAll(ctx.ident().getText());
   }
 
-  @Override
   public Type visitFunc(FuncContext ctx) {
     System.out.println("visiting func");
+
     List<String> identList = new ArrayList<>();
     List<Type> typeList = new ArrayList<>();
+
     Type expected = visit(ctx.type());
+
+    if (symbolTable.lookupAll(ctx.ident().getText()) != null) {
+      visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
+    }
+
+    symbolTable.insert(ctx.ident().getText(), expected);
+
     symbolTable = symbolTable.enterScope(symbolTable);
+
     if (ctx.param_list() != null) {
       for (ParamContext paramContext : ctx.param_list().param()) {
         String ident = paramContext.ident().getText();
@@ -380,20 +390,37 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         typeList.add(type);
       }
     }
+
+    symbolTable = symbolTable.exitScope(symbolTable);
+
+
+    symbolTable = symbolTable.enterScope(symbolTable);
+
     Type returnType = visit(ctx.func_stat());
+
     functionList.put(ctx.ident().getText(),
         new Function(returnType, identList, typeList));
+
     if (!typeChecker(expected, returnType)) {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
               returnType);
     }
-    if (symbolTable.lookupAll(ctx.ident().getText()) != null) {
-      visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
+
+    symbolTable = symbolTable.exitScope(symbolTable);
+
+
+    return expected;
+  }
+
+  @Override
+  public Type visitParam_list(Param_listContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
+    for(ParamContext paramContext : ctx.param()){
+      visit(paramContext);
     }
     symbolTable = symbolTable.exitScope(symbolTable);
-    symbolTable.insert(ctx.ident().getText(), expected);
-    return expected;
+    return null;
   }
 
   @Override
