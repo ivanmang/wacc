@@ -4,7 +4,6 @@ import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.FuncContext;
 import antlr.WaccParser.IfStatContext;
-import antlr.WaccParser.Int_literContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ReadStatContext;
@@ -13,7 +12,7 @@ import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.StatToStatContext;
 import antlr.WaccParserBaseVisitor;
 
-public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
+public class FunctionReturnChecker extends WaccParserBaseVisitor<Boolean> {
 
   private VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
 
@@ -130,7 +129,7 @@ public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
   @Override
   public Boolean visitIfStat(IfStatContext ctx) {
     System.out.println("visiting if stat");
-    return false;
+    return visit(ctx.stat(0)) && visit(ctx.stat(1));
   }
 
   @Override
@@ -141,39 +140,18 @@ public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
   @Override
   public Boolean visitStatToStat(StatToStatContext ctx) {
     System.out.println("visiting statement to statement");
+    System.out.println(ctx.stat(0).getText());
     if(ctx.stat(0) instanceof ReturnStatContext){
       return false;
     }
+    System.out.println(ctx.stat(1).getText());
+    if(ctx.stat(1) instanceof IfStatContext) {
+      System.out.println("IS IF STATEMENT");
+      IfStatContext ifStatContext = (IfStatContext) ctx.stat(1);
+      return visit(ifStatContext.stat(0)) && visit(ifStatContext.stat(1));
+    }
     return visit(ctx.stat(1));
   }
-
-  @Override
-  public Boolean visitInt_liter(Int_literContext ctx) {
-    long cur = 0;
-    if(ctx.getChildCount() == 1) {
-      cur = Long.parseLong(ctx.getChild(0).getText());
-      System.out.println("Count = 1, cur = " + cur);
-      if(cur >= VisitorErrorHandler.INT_MAX_VALUE){
-        visitorErrorHandler.intValueOutofBoundsError(ctx);
-      }
-    } else if(ctx.getChildCount() == 2){
-      cur = Long.parseLong(ctx.getChild(1).getText());
-      System.out.println("Count = 2, cur = " + cur);
-      if(ctx.int_sign().MINUS() != null){
-        //negative number
-        if((0-cur) < VisitorErrorHandler.INT_MIN_VALUE){
-          visitorErrorHandler.intValueOutofBoundsError(ctx);
-        }
-      }else if(ctx.int_sign().PLUS() != null){
-        if(cur > VisitorErrorHandler.INT_MAX_VALUE){
-          visitorErrorHandler.intValueOutofBoundsError(ctx);
-        }
-      }
-    }
-    return null;
   }
-
-
-}
 
 

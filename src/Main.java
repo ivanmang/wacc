@@ -3,10 +3,6 @@ import antlr.WaccParser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Arrays;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -50,8 +46,10 @@ public class Main {
 //    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 //    frame.setSize(1000,1000);
 //    frame.setVisible(true);
-    SyntaxChecker syntaxChecker = new SyntaxChecker();
-    syntaxChecker.visit(tree);
+    AssignmentOutOfBoundsChecker assignmentOutOfBoundsChecker = new AssignmentOutOfBoundsChecker();
+    assignmentOutOfBoundsChecker.visit(tree);
+    FunctionReturnChecker functionReturnChecker = new FunctionReturnChecker();
+    functionReturnChecker.visit(tree);
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
 
