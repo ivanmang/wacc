@@ -69,29 +69,31 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     return type1.isValidType() && type2.isValidType() && type1.equals(type2);
   }
 
-  @Override
-  public Type visitProg(ProgContext ctx) {
-    for(ParseTree tree : ctx.stat().children) {
-      if(tree instanceof StatContext) {
-        StatContext statTree = (StatContext) tree;
-        if(statTree.RETURN() != null) {
-          visitorErrorHandler.cantReturnFromGlobalScope(ctx);
-        }
-      }
-    }
-    visitChildren(ctx);
-    return null;
-  }
+//  @Override
+//  public Type visitProg(ProgContext ctx) {
+//    for(ParseTree tree : ctx.stat().children) {
+//      if(tree instanceof StatContext) {
+//        StatContext statTree = (StatContext) tree;
+//        if(statTree.RETURN() != null) {
+//          visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+//        }
+//      }
+//    }
+//    visitChildren(ctx);
+//    return null;
+//  }
 
   @Override
   public Type visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
     System.out.println("Declare and assign");
     System.out.println("CHECKING EXPECTED");
     Type expected = visitType(ctx.type());
+    System.out.println("EXPECTED = " + expected);
     System.out.println("CHECKING ACTUAL");
+    System.out.println("LINE = " + visitorErrorHandler.getLineandPos(ctx));
     Type actual = visit(ctx.assign_rhs());
-    System.out.println(actual);
-    String identName = ctx.ident().IDENT().getText();
+    System.out.println("ACTUAL = " + actual);
+    String identName = ctx.ident().getText();
     if (!typeChecker(expected, actual)) {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
@@ -328,6 +330,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     } else if (ctx.ident() != null) {
       return visit(ctx.ident());
     } else if (ctx.CHAR_LIT() != null) {
+      System.out.println("hi");
+      System.out.println(charType);
       return charType;
     } else if (ctx.CHARACTER_LIT() != null) {
       return stringType;
@@ -362,7 +366,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     if (ctx.arg_list() != null) {
       visit(ctx.arg_list());
     }
-    return symbolTable.lookupAll(ctx.ident().getText());
+    return functionList.get(ident).getReturnType();
   }
 
   public Type visitFunc(FuncContext ctx) {
@@ -373,11 +377,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
     Type expected = visit(ctx.type());
 
-    if (symbolTable.lookupAll(ctx.ident().getText()) != null) {
+    if(functionList.containsKey(ctx.ident().getText())) {
       visitorErrorHandler.redefineError(ctx, ctx.ident().getText());
     }
-
-    symbolTable.insert(ctx.ident().getText(), expected);
 
     symbolTable = symbolTable.enterScope(symbolTable);
 
@@ -390,16 +392,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         typeList.add(type);
       }
     }
-
-    symbolTable = symbolTable.exitScope(symbolTable);
-
-
-    symbolTable = symbolTable.enterScope(symbolTable);
-
+    System.out.println("getting returnType");
     Type returnType = visit(ctx.func_stat());
-
-    functionList.put(ctx.ident().getText(),
-        new Function(returnType, identList, typeList));
 
     if (!typeChecker(expected, returnType)) {
       visitorErrorHandler
@@ -407,20 +401,12 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
               returnType);
     }
 
-    symbolTable = symbolTable.exitScope(symbolTable);
+    functionList.put(ctx.ident().getText(),
+        new Function(returnType, identList, typeList));
 
+    symbolTable = symbolTable.exitScope(symbolTable);
 
     return expected;
-  }
-
-  @Override
-  public Type visitParam_list(Param_listContext ctx) {
-    symbolTable = symbolTable.enterScope(symbolTable);
-    for(ParamContext paramContext : ctx.param()){
-      visit(paramContext);
-    }
-    symbolTable = symbolTable.exitScope(symbolTable);
-    return null;
   }
 
   @Override
@@ -431,12 +417,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitFunc_stat(Func_statContext ctx) {
+    System.out.println("VISITING FUNCTION STATEMENT");
     if (ctx.RETURN() != null) {
+      System.out.println("FOUND RETURN");
       return visit(ctx.expr());
     } else {
-      visitChildren(ctx);
+      return visitChildren(ctx);
     }
-    return null;
   }
 
   @Override

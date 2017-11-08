@@ -62,7 +62,7 @@ public class VisitorErrorHandler {
     return "Wrong error code";
   }
 
-  private String getLineandPos(ParseTree ctx) {
+  public String getLineandPos(ParseTree ctx) {
     int line = 0;
     int pos = 0;
     if (ctx instanceof ParserRuleContext) {
