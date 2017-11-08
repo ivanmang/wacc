@@ -57,6 +57,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       Type returnType = visit(funcContext.type());
 
       if(functionList.containsKey(funcContext.ident().getText())) {
+        System.out.println("test");
         visitorErrorHandler.redefineError(funcContext, funcContext.ident().getText());
       }
 
@@ -132,6 +133,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
               actual);
     } else if(symbolTable.getOuterSymbolTable() != null) {
       if (symbolTable.contain(identName) && !symbolTable.getOuterSymbolTable().contain(identName)) {
+        System.out.println("redefine in declare and assign");
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
         symbolTable.insert(ctx.ident().getText(), expected);
@@ -140,6 +142,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //      System.out.println(identName);
 //      System.out.println(symbolTable.contain(identName));
       if (symbolTable.contain(identName)) {
+        System.out.println("redefine in declare and assign2");
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
         symbolTable.insert(ctx.ident().getText(), expected);
@@ -226,18 +229,21 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
     if (ctx.stat(1) != null) { //have if, then, else
       symbolTable = symbolTable.enterScope(symbolTable);
+      System.out.println("died here0");
       Type fstat = visit(ctx.stat(0));
       symbolTable = symbolTable.exitScope(symbolTable);
 
       symbolTable = symbolTable.enterScope(symbolTable);
+      System.out.println("died here1");
       Type sstat = visit(ctx.stat(1));
       symbolTable = symbolTable.exitScope(symbolTable);
     } else { //only have if then , no else
       symbolTable = symbolTable.enterScope(symbolTable);
+      System.out.println("died here2");
       Type stat = visit(ctx.stat(0));
       symbolTable = symbolTable.exitScope(symbolTable);
     }
-    return null;
+    return visit(ctx.stat(0));
 
   }
 
@@ -513,7 +519,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     System.out.println(firstString);
     System.out.println(secondString);
     int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
-    if (op == WaccParser.MUL || op == WaccParser.DIV) {
+    if (op == WaccParser.MUL || op == WaccParser.DIV || op == WaccParser.MOD) {
       if (!typeChecker(intType, t1)) {
         visitorErrorHandler
             .incompatibleTypeError(ctx, firstString, intType, t1);
