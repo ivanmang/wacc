@@ -50,12 +50,12 @@ public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
     System.out.println("cur = " + cur);
     if(ctx.int_sign() != null){
       //negative number
-      if(cur < VisitorErrorHandler.INT_MIN_VALUE){
+      if(cur <= VisitorErrorHandler.INT_MIN_VALUE){
         visitorErrorHandler.intValueOutofBoundsError(ctx);
       }
       return true;
     }else{
-      if(cur > VisitorErrorHandler.INT_MAX_VALUE){
+      if(cur >= VisitorErrorHandler.INT_MAX_VALUE){
         visitorErrorHandler.intValueOutofBoundsError(ctx);
       }
       return true;
