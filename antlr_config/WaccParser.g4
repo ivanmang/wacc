@@ -16,7 +16,7 @@ stat           : stat_helper
 
 func_stat      : stat_helper
                | RETURN expr
-               | <assoc=right> stat_helper COL stat
+               | <assoc=right> stat_helper COL func_stat
                ;
 
 stat_helper    : SKIP_                              #skipStat

@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
@@ -69,8 +70,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitProg(ProgContext ctx) {
-    if(ctx.stat().RETURN() == null) {
-      visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+    for(ParseTree tree : ctx.stat().children) {
+      if(tree instanceof StatContext) {
+        StatContext statTree = (StatContext) tree;
+        if(statTree.RETURN() != null) {
+          visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+        }
+      }
     }
     visitChildren(ctx);
     return null;
