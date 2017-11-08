@@ -71,4 +71,12 @@ public class SymbolTable {
   public Map<String, Type> getDictionary() {
     return dictionary;
   }
+
+  public void printTable() {
+    System.out.println("--------------");
+    for(String key : dictionary.keySet()) {
+      System.out.println(key + " " + dictionary.get(key));
+    }
+    System.out.println("--------------");
+  }
 }

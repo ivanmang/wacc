@@ -90,6 +90,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
     symbolTable = symbolTable.enterScope(symbolTable);
 
+    System.out.println("function before table");
+    symbolTable.printTable();
+    System.out.println("-------------------------------");
     if (ctx.param_list() != null) {
       for (ParamContext paramContext : ctx.param_list().param()) {
         String ident = paramContext.ident().getText();
@@ -111,6 +114,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //    functionList.put(ctx.ident().getText(),
 //        new Function(returnType, identList, typeList));
 
+    System.out.println("funciton after table");
+    symbolTable.printTable();
+    System.out.println("------------------------------");
     symbolTable = symbolTable.exitScope(symbolTable);
 
     return expected;
@@ -132,10 +138,17 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
           .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
               actual);
     } else if(symbolTable.getOuterSymbolTable() != null) {
+      symbolTable.getOuterSymbolTable().printTable();
+      symbolTable.printTable();
+      if(symbolTable.contain(identName)) {
+        System.out.println(identName + " is in this scope");
+      }
       if (symbolTable.contain(identName) && !symbolTable.getOuterSymbolTable().contain(identName)) {
         System.out.println("redefine in declare and assign");
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
+        System.out.println("line = " + visitorErrorHandler.getLineandPos(ctx));
+        System.out.println("INSERTING - " + ctx.ident().getText());
         symbolTable.insert(ctx.ident().getText(), expected);
       }
     } else if(symbolTable.getOuterSymbolTable() == null) {
@@ -145,6 +158,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
         System.out.println("redefine in declare and assign2");
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
+        System.out.println("INSERTING - " + ctx.ident().getText());
         symbolTable.insert(ctx.ident().getText(), expected);
       }
     }
@@ -226,24 +240,40 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     if (!typeChecker(boolType, condition)) {
       visitorErrorHandler.incompatibleTypeError(ctx, condition);
     }
-
+    System.out.println("BEFORE TABLE");
+    symbolTable.printTable();
+    System.out.println("------------------------");
+    Type stat = null;
     if (ctx.stat(1) != null) { //have if, then, else
+      System.out.println("ENTERING");
       symbolTable = symbolTable.enterScope(symbolTable);
-      System.out.println("died here0");
-      Type fstat = visit(ctx.stat(0));
+      System.out.println("INSIDE");
+      stat = visit(ctx.stat(0));
+      symbolTable.printTable();
       symbolTable = symbolTable.exitScope(symbolTable);
-
+      System.out.println("EXITEDTHEn");
+      symbolTable.printTable();
+      System.out.println("ENTERING");
       symbolTable = symbolTable.enterScope(symbolTable);
-      System.out.println("died here1");
+      System.out.println("INSIDE");
       Type sstat = visit(ctx.stat(1));
+      symbolTable.printTable();
       symbolTable = symbolTable.exitScope(symbolTable);
+      System.out.println("EXITEDELSE");
     } else { //only have if then , no else
+      System.out.println("ENTERING");
       symbolTable = symbolTable.enterScope(symbolTable);
-      System.out.println("died here2");
-      Type stat = visit(ctx.stat(0));
+      System.out.println("INSIDE");
+      stat = visit(ctx.stat(0));
+      symbolTable.printTable();
       symbolTable = symbolTable.exitScope(symbolTable);
+      System.out.println("EXITED");
     }
-    return visit(ctx.stat(0));
+    System.out.println(ctx.getText());
+    System.out.println("AFTER TABLE");
+    symbolTable.printTable();
+    System.out.println("-------------------------");
+    return stat;
 
   }
 
@@ -390,22 +420,22 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitFunction_call(Function_callContext ctx) {
     System.out.println("visiting function call");
     String ident = ctx.ident().getText();
-    System.out.println("still");
+//    System.out.println("still");
     Function curFunc = functionList.get(ident);
-    System.out.println("here");
+//    System.out.println("here");
     int expectedSize = curFunc.getParamSize();
     int actualSize = 0;
-    System.out.println("still here");
+//    System.out.println("still here");
     if (ctx.arg_list() != null) {
       actualSize = ctx.arg_list().expr().size();
     }
-    System.out.println("died?");
+//    System.out.println("died?");
     if (expectedSize != actualSize) {
       visitorErrorHandler
           .incorrectNumberOfParametersError(ctx, ident, expectedSize,
               actualSize);
     }
-    System.out.println("dead");
+//    System.out.println("dead");
     if (ctx.arg_list() != null) {
       visit(ctx.arg_list());
     }
