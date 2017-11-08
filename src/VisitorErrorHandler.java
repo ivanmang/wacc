@@ -6,8 +6,8 @@ public class VisitorErrorHandler {
 
   public static final int SYNTAX_ERROR_CODE = 100;
   public static final int SEMANTIC_ERROR_CODE = 200;
-  public static final int INT_MAX_VALUE = (int) Math.pow(2, 31) - 1;
-  public static final int INT_MIN_VALUE = (int) -Math.pow(2, 31);
+  public static final int INT_MAX_VALUE = 2147483647;
+  public static final int INT_MIN_VALUE = -2147483648;
 
   public void incompatibleTypeError(ParseTree ctx, Type type) {
     throwError(ctx, "Incompatible type " + type, SEMANTIC_ERROR_CODE);

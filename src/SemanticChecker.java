@@ -83,6 +83,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //    return null;
 //  }
 
+
+
+
   @Override
   public Type visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
     System.out.println("Declare and assign");
@@ -411,6 +414,11 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitStat(StatContext ctx) {
+    if(symbolTable.getInnerSymbolTable() == null && symbolTable.getOuterSymbolTable() == null){
+      if(ctx.RETURN() != null){
+        visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+      }
+    }
     visitChildren(ctx);
     return null;
   }
