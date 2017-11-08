@@ -1,6 +1,8 @@
+import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.FuncContext;
 import antlr.WaccParser.Func_statContext;
+import antlr.WaccParser.Stat_helperContext;
 import antlr.WaccParserBaseVisitor;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -10,28 +12,26 @@ public class SyntaxChecker extends WaccParserBaseVisitor<Boolean> {
 
   @Override
   public Boolean visitFunc(FuncContext ctx) {
-    boolean hvReturnOrExit = false;
-    System.out.println(ctx.func_stat().getChildCount());
-    for(ParseTree tree : ctx.func_stat().children) {
-      System.out.println(tree.getText());
-      if(tree instanceof Func_statContext) {
-        System.out.println("1");
-        Func_statContext func_statContext = (Func_statContext) tree;
-        System.out.println(func_statContext.getText());
-        if(func_statContext.RETURN() != null) {
-          hvReturnOrExit = true;
-          break;
-        }
-      }
-      if(tree instanceof ExitStatContext) {
-        hvReturnOrExit = true;
-        break;
-      }
-    }
-
-    if(!hvReturnOrExit) {
+    System.out.println(visit(ctx.func_stat()));
+    if(!visit(ctx.func_stat())) {
       visitorErrorHandler.functionNoReturnError(ctx, ctx.ident().getText());
     }
-    return hvReturnOrExit;
+    return true;
+  }
+
+  @Override
+  public Boolean visitFunc_stat(Func_statContext ctx) {
+    if(ctx.RETURN() != null) {
+      return true;
+    } else if(ctx.stat_helper() != null) {
+      if(ctx.stat_helper() instanceof ExitStatContext) {
+        return true;
+      } else if(ctx.func_stat() != null) {
+        return visit(ctx.func_stat());
+      }
+    }
+    return false;
   }
 }
+
+

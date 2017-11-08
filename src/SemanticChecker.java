@@ -419,7 +419,6 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitFunc_stat(Func_statContext ctx) {
     System.out.println("VISITING FUNCTION STATEMENT");
     if (ctx.RETURN() != null) {
-      System.out.println("FOUND RETURN");
       return visit(ctx.expr());
     } else {
       return visitChildren(ctx);
