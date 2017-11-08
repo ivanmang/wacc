@@ -34,12 +34,15 @@ public class Main {
     //begin parsing at prog rule
     ParseTree tree = parser.prog();
 
+    //Checking if integer assignments is out of bounds
     AssignmentOutOfBoundsChecker assignmentOutOfBoundsChecker = new AssignmentOutOfBoundsChecker();
     assignmentOutOfBoundsChecker.visit(tree);
 
+    //Checking if the functions have return statement
     FunctionReturnChecker functionReturnChecker = new FunctionReturnChecker();
     functionReturnChecker.visit(tree);
 
+    //Checking for semantic errors
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
   }
