@@ -17,7 +17,6 @@ import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.FuncContext;
-import antlr.WaccParser.Func_statContext;
 import antlr.WaccParser.Function_callContext;
 import antlr.WaccParser.IdentContext;
 import antlr.WaccParser.IfStatContext;
@@ -27,12 +26,10 @@ import antlr.WaccParser.Pair_elem_typeContext;
 import antlr.WaccParser.Pair_literContext;
 import antlr.WaccParser.Pair_typeContext;
 import antlr.WaccParser.ParamContext;
-import antlr.WaccParser.Param_listContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
-import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.StatContext;
+import antlr.WaccParser.ReturnStatContext;
 import antlr.WaccParser.TypeContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParser.WhileStatContext;
@@ -41,7 +38,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
@@ -396,7 +392,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       }
     }
     System.out.println("getting returnType");
-    Type returnType = visit(ctx.func_stat());
+    Type returnType = visit(ctx.stat());
 
     if (!typeChecker(expected, returnType)) {
       visitorErrorHandler
@@ -413,25 +409,33 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   }
 
   @Override
-  public Type visitStat(StatContext ctx) {
+  public Type visitReturnStat(ReturnStatContext ctx) {
     if(symbolTable.getInnerSymbolTable() == null && symbolTable.getOuterSymbolTable() == null){
-      if(ctx.RETURN() != null){
         visitorErrorHandler.cantReturnFromGlobalScope(ctx);
-      }
     }
-    visitChildren(ctx);
-    return null;
+    return visit(ctx.expr());
   }
 
-  @Override
-  public Type visitFunc_stat(Func_statContext ctx) {
-    System.out.println("VISITING FUNCTION STATEMENT");
-    if (ctx.RETURN() != null) {
-      return visit(ctx.expr());
-    } else {
-      return visitChildren(ctx);
-    }
-  }
+//  @Override
+//  public Type visitRetunStat(StatContext ctx) {
+//    if(symbolTable.getInnerSymbolTable() == null && symbolTable.getOuterSymbolTable() == null){
+//      if(ctx.RETURN() != null){
+//        visitorErrorHandler.cantReturnFromGlobalScope(ctx);
+//      }
+//    }
+//    visitChildren(ctx);
+//    return null;
+//  }
+
+//  @Override
+//  public Type visitFunc_stat(Func_statContext ctx) {
+//    System.out.println("VISITING FUNCTION STATEMENT");
+//    if (ctx.RETURN() != null) {
+//      return visit(ctx.expr());
+//    } else {
+//      return visitChildren(ctx);
+//    }
+//  }
 
   @Override
   public Type visitArray_elem(Array_elemContext ctx) {

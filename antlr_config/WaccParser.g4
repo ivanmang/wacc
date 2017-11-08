@@ -5,21 +5,21 @@ options {
 }
 
 prog           : BEGIN (func)* stat END EOF;
-func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS func_stat END ;
+func           : type ident OPEN_PARENTHESES (param_list)? CLOSE_PARENTHESES IS stat END ;
 param_list     : param (COMMA param)* ;
 param          : type ident ;
 
-stat           : stat_helper
-               | RETURN expr
-               | <assoc=right> stat COL stat
-               ;
+//stat           : stat_helper
+//               | RETURN expr
+//               | <assoc=right> stat COL stat
+//               ;
+//
+//func_stat      : stat_helper
+//               | RETURN expr
+//               | <assoc=right> stat_helper COL func_stat
+//               ;
 
-func_stat      : stat_helper
-               | RETURN expr
-               | <assoc=right> stat_helper COL func_stat
-               ;
-
-stat_helper    : SKIP_                              #skipStat
+stat           : SKIP_                              #skipStat
                | type ident EQUAL assign_rhs        #declareAndAssignStat
                | assign_lhs EQUAL assign_rhs        #assignStat
                | READ assign_lhs                    #readStat
@@ -30,7 +30,22 @@ stat_helper    : SKIP_                              #skipStat
                | IF expr THEN stat ELSE stat FI     #ifStat
                | WHILE expr DO stat DONE            #whileStat
                | BEGIN stat END                     #beginStat
+               | RETURN expr                        #returnStat
+               | <assoc=right> stat COL stat        #statToStat
                ;
+
+//stat_helper    : SKIP_                              #skipStat
+//               | type ident EQUAL assign_rhs        #declareAndAssignStat
+//               | assign_lhs EQUAL assign_rhs        #assignStat
+//               | READ assign_lhs                    #readStat
+//               | FREE expr                          #freeStat
+//               | EXIT expr                          #exitStat
+//               | PRINT expr                         #printStat
+//               | PRINTLN expr                       #printlnStat
+//               | IF expr THEN stat ELSE stat FI     #ifStat
+//               | WHILE expr DO stat DONE            #whileStat
+//               | BEGIN stat END                     #beginStat
+//               ;
 
 
 assign_lhs     : ident
