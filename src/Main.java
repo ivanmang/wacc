@@ -1,3 +1,4 @@
+import CodeGeneration.CodeGenerator;
 import antlr.WaccLexer;
 import antlr.WaccParser;
 import java.io.File;
@@ -45,5 +46,9 @@ public class Main {
     //Checking for semantic errors
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
+
+    CodeGenerator gen = new CodeGenerator();
+    gen.visit(tree);
+    System.out.println(gen.toString());
   }
 }
