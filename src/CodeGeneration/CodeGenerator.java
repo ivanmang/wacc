@@ -1,5 +1,6 @@
 package CodeGeneration;
 
+import Instructions.AddInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.LtorgLabel;
@@ -12,8 +13,12 @@ import Instructions.Operand2.Operand2Reg;
 import Instructions.PopInstruction;
 import Instructions.PushInstruction;
 import antlr.WaccParser.ExitStatContext;
+import antlr.WaccParser.PrintStatContext;
+import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ProgContext;
+import antlr.WaccParser.ReadStatContext;
 import antlr.WaccParser.SkipStatContext;
+import antlr.WaccParser.StatToStatContext;
 import antlr.WaccParserBaseVisitor;
 
 
@@ -64,4 +69,47 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   public Register visitSkipStat(SkipStatContext ctx) {
     return null;
   }
+
+
+  @Override
+  public Register visitReadStat(ReadStatContext ctx) {
+    builder.appendInstructions("PUSH", "{lr}");
+    machine.add(new PushInstruction(Registers.lr));
+//    machine.add(new MovInstruction(new Operand2Reg(returnReg), Registers.r0));
+//    machine.add(new LoadInstruction(Registers.r0, new Operand2Reg('=', msg)));
+//    machine.add(new AddInstruction(Register.r0, ));
+    builder.appendInstructions("BL", "scanf");
+    machine.add(new PopInstruction(Registers.pc));
+    return null;
+  }
+
+  @Override
+  public Register visitPrintStat(PrintStatContext ctx) {
+    machine.add(new PushInstruction(Registers.lr));
+//    machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+//    machine.add(new AddInstruction(Register.r2, Register.r0, new Operand2Int('#', 4);
+    machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+//    machine.add(new AddInstruction(Register.r2, Register.r0, new Operand2Int('#', 4);
+    builder.appendInstructions("BL", "printf");
+    machine.add(new MovInstruction((Registers.r0), new Operand2Int('#', 0)));
+    builder.appendInstructions("BL", "fflush");
+    machine.add(new PopInstruction(Registers.pc));
+    return null;
+  }
+
+  @Override
+  public Register visitPrintlnStat(PrintlnStatContext ctx) {
+    machine.add(new PushInstruction(Registers.lr));
+//    machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+//    machine.add(new AddInstruction(Register.r2, Register.r0, new Operand2Int('#', 4);
+    machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+//    machine.add(new AddInstruction(Register.r2, Register.r0, new Operand2Int('#', 4);
+    builder.appendInstructions("BL", "printf");
+    machine.add(new MovInstruction((Registers.r0), new Operand2Int('#', 0)));
+    builder.appendInstructions("BL", "fflush");
+    machine.add(new PopInstruction(Registers.pc));
+    return null;
+  }
+
+
 }
