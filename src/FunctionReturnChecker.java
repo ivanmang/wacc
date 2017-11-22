@@ -18,9 +18,9 @@ public class FunctionReturnChecker extends WaccParserBaseVisitor<Boolean> {
 
   @Override
   public Boolean visitFunc(FuncContext ctx) {
-    System.out.println("visiting function");
+//    System.out.println("visiting function");
     if (ctx.stat() instanceof IfStatContext) {
-      System.out.println("Checking if");
+//      System.out.println("Checking if");
       IfStatContext ifStatContext = (IfStatContext) ctx.stat();
       System.out.println(ifStatContext.stat(0).getText());
       System.out.println(ifStatContext.stat(1).getText());
@@ -62,7 +62,7 @@ public class FunctionReturnChecker extends WaccParserBaseVisitor<Boolean> {
 
   @Override
   public Boolean visitSkipStat(SkipStatContext ctx) {
-    System.out.println("visiting skip statement");
+//    System.out.println("visiting skip statement");
     return false;
   }
 
@@ -73,13 +73,13 @@ public class FunctionReturnChecker extends WaccParserBaseVisitor<Boolean> {
 
   @Override
   public Boolean visitReturnStat(ReturnStatContext ctx) {
-    System.out.println("visiting return stat");
+//    System.out.println("visiting return stat");
     return true;
   }
 
   @Override
   public Boolean visitIfStat(IfStatContext ctx) {
-    System.out.println("visiting if stat");
+//    System.out.println("visiting if stat");
     return visit(ctx.stat(0)) && visit(ctx.stat(1));
   }
 
@@ -90,7 +90,7 @@ public class FunctionReturnChecker extends WaccParserBaseVisitor<Boolean> {
 
   @Override
   public Boolean visitStatToStat(StatToStatContext ctx) {
-    System.out.println("visiting statement to statement");
+//    System.out.println("visiting statement to statement");
     if (ctx.stat(0) instanceof ReturnStatContext) {
       return false;
     }

@@ -13,5 +13,18 @@ public class Register {
     return name;
   }
 
-  //TODO: Implement Register
+  @Override
+  public boolean equals(Object o) {
+    if(!(o instanceof Register)) {
+      return false;
+    } else {
+      Register reg = (Register) o;
+      if(name.equals(reg.toString())) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
 }
