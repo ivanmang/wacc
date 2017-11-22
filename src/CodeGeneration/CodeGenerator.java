@@ -1,5 +1,15 @@
 package CodeGeneration;
 
+import Instructions.Branch.BranchLinkInstruction;
+import Instructions.Labels.GlobalMainLabel;
+import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadInstruction;
+import Instructions.Move.MovInstruction;
+import Instructions.Operand2.Operand2;
+import Instructions.Operand2.Operand2Int;
+import Instructions.Operand2.Operand2Reg;
+import Instructions.PopInstruction;
+import Instructions.PushInstruction;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParserBaseVisitor;
@@ -21,24 +31,27 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   @Override
   public Register visitProg(ProgContext ctx) {
-    InstructionStringBuilder instr = new InstructionStringBuilder("");
-    builder.appendProgramStart().appendLabel("main");
-    builder.appendInstructions("PUSH", "{lr}");
+    machine.addFunctionStart("main");
+//    builder.appendInstructions("PUSH", "{lr}");
+    machine.add(new PushInstruction(Registers.lr));
     visitChildren(ctx);
-    builder.appendInstructions("LDR", "r0", "=0");
-    builder.appendInstructions("POP", "{pc}");
-    builder.appendFunctionEnd();
+//    builder.appendInstructions("LDR", "r0", "=0");
+//    builder.appendInstructions("POP", "{pc}");
+    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', 0)));
+    machine.add(new PopInstruction(Registers.pc));
+    machine.add(new TextLabel());
+    machine.add(new GlobalMainLabel());
     return null;
   }
 
   @Override
   public Register visitExitStat(ExitStatContext ctx) {
-    Register usedReg = registers.getRegister();
-    Register paramReg = registers.getReturnRegister();
-    Register exprReg = visit(ctx.expr());
-    builder.appendInstructions("LDR", usedReg.toString(), "=");
-    builder.appendInstructions("MOV", paramReg.toString(), usedReg.toString());
-    builder.appendInstructions("BL", "exit");
+    Register returnReg = visit(ctx.expr());
+
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(returnReg)));
+    machine.add(new BranchLinkInstruction("exit"));
+
+    registers.freeReturnRegisters();
     return null;
   }
 }

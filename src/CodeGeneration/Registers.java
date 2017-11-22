@@ -18,22 +18,25 @@ public class Registers {
   //r13: stack pointer
   //r14:
   //r15: program counter
-  private Register r0 = new Register("r0");
-  private Register r1 = new Register("r1");
-  private Register r2 = new Register("r2");
-  private Register r3 = new Register("r3");
-  private Register r4 = new Register("r4");
-  private Register r5 = new Register("r5");
-  private Register r6 = new Register("r6");
-  private Register r7 = new Register("r7");
-  private Register r8 = new Register("r8");
-  private Register r9 = new Register("r9");
-  private Register r10 = new Register("r10");
-  private Register r11 = new Register("r11");
-  private Register r12 = new Register("r12");
-  private Register r13 = new Register("sp");
-  private Register r14 = new Register("lr");
-  private Register r15 = new Register("pc");
+  public static Register r0 = new Register("r0");
+  public static Register r1 = new Register("r1");
+  public static Register r2 = new Register("r2");
+  public static Register r3 = new Register("r3");
+  public static Register r4 = new Register("r4");
+  public static Register r5 = new Register("r5");
+  public static Register r6 = new Register("r6");
+  public static Register r7 = new Register("r7");
+  public static Register r8 = new Register("r8");
+  public static Register r9 = new Register("r9");
+  public static Register r10 = new Register("r10");
+  public static Register r11 = new Register("r11");
+  public static Register r12 = new Register("r12");
+  public static Register r13 = new Register("sp");
+  public static Register r14 = new Register("lr");
+  public static Register r15 = new Register("pc");
+  public static Register sp = new Register("sp");
+  public static Register lr = new Register("lr");
+  public static Register pc = new Register("pc");
 
   private final List<Register> referenceReturnRegisters = new ArrayList<>(
       Arrays.asList(r0, r1, r2, r3));
@@ -73,6 +76,13 @@ public class Registers {
   //Check if register is in used
   public boolean isRegInUse(Register reg) {
     return usedRegisters.contains(reg);
+  }
+
+  //Remobe all return registers fom used registers
+  public void freeReturnRegisters() {
+    for(Register reg : returnRegisters) {
+      free(reg);
+    }
   }
 
   //Label register as not in use and add it back to the registers for use
