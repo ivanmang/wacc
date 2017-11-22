@@ -9,6 +9,6 @@ public class TextLabel extends Instruction {
 
   @Override
   public String toCode() {
-    return ".text";
+    return ".text\n";
   }
 }

@@ -49,6 +49,6 @@ public class Main {
 
     CodeGenerator gen = new CodeGenerator();
     gen.visit(tree);
-    System.out.println(gen.toString());
+    System.out.println(gen.generateCode());
   }
 }

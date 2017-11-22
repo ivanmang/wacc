@@ -9,6 +9,6 @@ public class DataLabel extends Instruction {
 
   @Override
   public String toCode() {
-    return ".data";
+    return ".data\n";
   }
 }

@@ -11,6 +11,6 @@ public class Operand2Int implements Operand2 {
 
   @Override
   public String toString() {
-    return type + number + "";
+    return type + "" + String.valueOf(number);
   }
 }

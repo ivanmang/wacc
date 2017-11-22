@@ -12,6 +12,6 @@ public class Label extends Instruction {
 
   @Override
   public String toCode() {
-    return name;
+    return name + ":";
   }
 }

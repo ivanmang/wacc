@@ -19,6 +19,7 @@ public class MovInstruction extends Instruction {
     this(dest, operand2, "MOV");
   }
 
+  @Override
   public String toCode() {
     return type + " " + dest + ", " + operand2;
   }

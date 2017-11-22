@@ -2,6 +2,7 @@ package CodeGeneration;
 
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Labels.GlobalMainLabel;
+import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
 import Instructions.Load.LoadInstruction;
 import Instructions.Move.MovInstruction;
@@ -11,6 +12,7 @@ import Instructions.Operand2.Operand2Reg;
 import Instructions.PopInstruction;
 import Instructions.PushInstruction;
 import antlr.WaccParser.ExitStatContext;
+import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParserBaseVisitor;
 
@@ -39,8 +41,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 //    builder.appendInstructions("POP", "{pc}");
     machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', 0)));
     machine.add(new PopInstruction(Registers.pc));
-    machine.add(new TextLabel());
-    machine.add(new GlobalMainLabel());
+    machine.add(new LtorgLabel());
+    machine.endMsg();
     return null;
   }
 
@@ -53,5 +55,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
     registers.freeReturnRegisters();
     return null;
+  }
+
+  @Override
+  public Register visitExpr(ExprContext ctx) {
+    return registers.r0;
   }
 }
