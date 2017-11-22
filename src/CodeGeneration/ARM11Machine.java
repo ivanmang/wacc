@@ -18,12 +18,14 @@ public class ARM11Machine {
   private List<Instruction> currentFunction;
   private List<Instruction> msg;
 
+  //initialise the machine
   public ARM11Machine() {
     functions = new LinkedHashMap<>();
     msg = new LinkedList<>();
     functions.put("msg", msg);
   }
 
+  //add the label for the start of the function and add it to the map
   public void addFunctionStart(String name) {
     currentFunction = new LinkedList<>();
     //TODO: add code for function start
@@ -31,10 +33,15 @@ public class ARM11Machine {
     currentFunction.add(new Label(name));
   }
 
+  //add Instruction to the current function
   public void add(Instruction instr) {
     currentFunction.add(instr);
   }
 
+  //add Instruction in this style:
+  //.msg_(number)
+  //    .word (length)
+  //    .ascii (string)
   public void addMsg(String message) {
     if(msg.isEmpty()) {
       msg.add(new DataLabel());
@@ -45,11 +52,16 @@ public class ARM11Machine {
     msg.add(new StringInstruction(message));
   }
 
+  //Add this to the end of the messages:
+  //.text
+  //
+  //.global main
   public void endMsg() {
     msg.add(new TextLabel());
     msg.add(new GlobalMainLabel());
   }
 
+  //translate the instruction into string for output
   public String toCode() {
     StringBuilder builder = new StringBuilder();
     for(List<Instruction> func : functions.values()) {
