@@ -1,4 +1,6 @@
-package Instructions;
+package Instructions.Labels;
+
+import Instructions.Instruction;
 
 public class Label extends Instruction {
 

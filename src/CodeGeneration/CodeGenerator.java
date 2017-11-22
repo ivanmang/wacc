@@ -10,6 +10,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   private ARM11Machine machine = new ARM11Machine();
   private Registers registers = new Registers();
 
+  public String generateCode() {
+    return machine.toCode();
+  }
+
   @Override
   public String toString() {
     return builder.toString();

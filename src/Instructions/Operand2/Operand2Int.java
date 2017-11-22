@@ -1,4 +1,4 @@
-package Instructions;
+package Instructions.Operand2;
 
 public class Operand2Int implements Operand2 {
   private int number;

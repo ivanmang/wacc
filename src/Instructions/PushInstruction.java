@@ -7,7 +7,7 @@ public class PushInstruction extends Instruction{
   private Register pushReg;
 
   public PushInstruction(Register pushReg) {
-    setIndentation(2);
+    setIndentation(1);
     this.pushReg = pushReg;
   }
 

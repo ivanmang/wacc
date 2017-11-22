@@ -1,4 +1,4 @@
-package Instructions;
+package Instructions.Operand2;
 
 import CodeGeneration.Register;
 

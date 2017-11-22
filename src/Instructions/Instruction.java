@@ -2,7 +2,7 @@ package Instructions;
 
 public abstract class Instruction {
 
-  private int indentation = 0;
+  private int indentation = 1;
 
   public void setIndentation(int indentation) {
     this.indentation = indentation;
