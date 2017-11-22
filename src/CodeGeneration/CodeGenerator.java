@@ -8,6 +8,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   private CodeStringBuilder builder = new CodeStringBuilder("");
   private ARM11Machine machine = new ARM11Machine();
+  private Registers registers = new Registers();
 
   @Override
   public String toString() {
@@ -28,12 +29,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   @Override
   public Register visitExitStat(ExitStatContext ctx) {
-    String exitStatus = ctx.expr().getText();
-    Register usedReg = machine.generalRegisters.pop();
-    Register paramReg = machine.returnRegisters.pop();
-    machine.usedRegisters.push(usedReg);
-    machine.usedRegisters.push(paramReg);
-    builder.appendInstructions("LDR", usedReg.toString(), "=" + exitStatus);
+    Register usedReg = registers.getRegister();
+    Register paramReg = registers.getReturnRegister();
+    Register exprReg = visit(ctx.expr());
+    builder.appendInstructions("LDR", usedReg.toString(), "=");
     builder.appendInstructions("MOV", paramReg.toString(), usedReg.toString());
     builder.appendInstructions("BL", "exit");
     return null;

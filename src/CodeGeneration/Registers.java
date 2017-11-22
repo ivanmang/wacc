@@ -18,22 +18,22 @@ public class Registers {
   //r13: stack pointer
   //r14:
   //r15: program counter
-  Register r0 = new Register("r0");
-  Register r1 = new Register("r1");
-  Register r2 = new Register("r2");
-  Register r3 = new Register("r3");
-  Register r4 = new Register("r4");
-  Register r5 = new Register("r5");
-  Register r6 = new Register("r6");
-  Register r7 = new Register("r7");
-  Register r8 = new Register("r8");
-  Register r9 = new Register("r9");
-  Register r10 = new Register("r10");
-  Register r11 = new Register("r11");
-  Register r12 = new Register("r12");
-  Register r13 = new Register("sp");
-  Register r14 = new Register("lr");
-  Register r15 = new Register("pc");
+  private Register r0 = new Register("r0");
+  private Register r1 = new Register("r1");
+  private Register r2 = new Register("r2");
+  private Register r3 = new Register("r3");
+  private Register r4 = new Register("r4");
+  private Register r5 = new Register("r5");
+  private Register r6 = new Register("r6");
+  private Register r7 = new Register("r7");
+  private Register r8 = new Register("r8");
+  private Register r9 = new Register("r9");
+  private Register r10 = new Register("r10");
+  private Register r11 = new Register("r11");
+  private Register r12 = new Register("r12");
+  private Register r13 = new Register("sp");
+  private Register r14 = new Register("lr");
+  private Register r15 = new Register("pc");
 
   private final List<Register> referenceReturnRegisters = new ArrayList<>(
       Arrays.asList(r0, r1, r2, r3));
