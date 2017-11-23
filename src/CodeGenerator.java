@@ -22,6 +22,7 @@ import Instructions.Store.StoreByteInstruction;
 import Instructions.Store.StoreInstruction;
 import Instructions.StringInstruction;
 import Instructions.SubInstruction;
+import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
@@ -30,6 +31,7 @@ import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.ReturnStatContext;
 import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
@@ -145,7 +147,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   }
 
 
-
   @Override
   public Register visitIfStat(IfStatContext ctx) {
     Register lastRegister = visit(ctx.expr());
@@ -182,6 +183,21 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   }
 
   @Override
+  public Register visitBeginStat(BeginStatContext ctx) {
+//    if ctx is not leaf
+    machine.add(new StoreInstruction(registers.usedRegisters.getFirst(), new Operand2Reg(Registers.sp)));
+    visit(ctx.stat());
+    return null;
+  }
+
+  @Override
+  public Register visitReturnStat(ReturnStatContext ctx) {
+//    if ctx is not leaf
+    machine.add(new LoadInstruction(registers.getRegister(), new Operand2Reg(Registers.sp)));
+    return null;
+  }
+
+  @Override
   public Register visitExitStat(ExitStatContext ctx) {
     Register returnReg = visit(ctx.expr());
     int number = Integer.parseInt(ctx.getChild(1).getText());
@@ -212,13 +228,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     branchName = "bool";
 //    }
     machine.add(new BranchLinkInstruction("p_print_" + branchName));
-
-
-//    22		BL p_print_string
-//    23		LDR r4, =189
-//    24		MOV r0, r4
-//    25		BL p_print_int
-//    26		BL p_print_ln
 
 
 

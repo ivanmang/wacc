@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d890a9b6-ad64-48d4-ba81-ff187ea60f7e" name="Default" comment="">
+    <list default="true" id="d890a9b6-ad64-48d4-ba81-ff187ea60f7e" name="Default" comment="[ckc116] Code Generation IO main flow framework written">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/CodeGenerator.class" afterPath="$PROJECT_DIR$/bin/CodeGenerator.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/CodeGenerator.java" afterPath="$PROJECT_DIR$/src/CodeGenerator.java" />
@@ -22,11 +22,11 @@
       <file leaf-file-name="CodeGenerator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/CodeGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1500">
-              <caret line="259" column="30" lean-forward="true" selection-start-line="259" selection-start-column="30" selection-end-line="259" selection-end-column="30" />
+            <state relative-caret-position="360">
+              <caret line="196" column="16" lean-forward="true" selection-start-line="196" selection-start-column="16" selection-end-line="196" selection-end-column="16" />
               <folding>
-                <element signature="e#6653#6654#0" expanded="true" />
-                <element signature="e#6674#6675#0" expanded="true" />
+                <element signature="e#7194#7195#0" expanded="true" />
+                <element signature="e#7215#7216#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -599,7 +599,14 @@
       <option name="project" value="LOCAL" />
       <updated>1511468588524</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="[ckc116] Code Generation IO main flow framework written">
+      <created>1511470407952</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1511470407952</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -660,7 +667,8 @@
     <MESSAGE value="[ckc116] Code Generation Defined IO" />
     <MESSAGE value="[ckc116] Code Generation minor changes" />
     <MESSAGE value="[ckc116] Code Generation IO generated labels out of main; Operand2 added Operand2Empty to cope with the situation where there are three parameters in AddInstruction" />
-    <option name="LAST_COMMIT_MESSAGE" value="[ckc116] Code Generation IO generated labels out of main; Operand2 added Operand2Empty to cope with the situation where there are three parameters in AddInstruction" />
+    <MESSAGE value="[ckc116] Code Generation IO main flow framework written" />
+    <option name="LAST_COMMIT_MESSAGE" value="[ckc116] Code Generation IO main flow framework written" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1066,11 +1074,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/CodeGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1500">
-          <caret line="259" column="30" lean-forward="true" selection-start-line="259" selection-start-column="30" selection-end-line="259" selection-end-column="30" />
+        <state relative-caret-position="360">
+          <caret line="196" column="16" lean-forward="true" selection-start-line="196" selection-start-column="16" selection-end-line="196" selection-end-column="16" />
           <folding>
-            <element signature="e#6653#6654#0" expanded="true" />
-            <element signature="e#6674#6675#0" expanded="true" />
+            <element signature="e#7194#7195#0" expanded="true" />
+            <element signature="e#7215#7216#0" expanded="true" />
           </folding>
         </state>
       </provider>
