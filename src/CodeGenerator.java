@@ -1,25 +1,22 @@
 import CodeGeneration.*;
-import Instructions.AddInstruction;
+import Instructions.*;
 import Instructions.Branch.BranchEqualInstruction;
 import Instructions.Branch.BranchInstruction;
 import Instructions.Branch.BranchLinkInstruction;
-import Instructions.CmpInstruction;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadByteInstruction;
 import Instructions.Load.LoadInstruction;
-import Instructions.Move.MovInstruction;
+import Instructions.Move.*;
 import Instructions.Operand2.Operand2;
 import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2Reg;
 import Instructions.Operand2.Operand2String;
-import Instructions.PopInstruction;
-import Instructions.PushInstruction;
 import Instructions.Store.StoreByteInstruction;
 import Instructions.Store.StoreInstruction;
-import Instructions.StringInstruction;
-import Instructions.SubInstruction;
+import antlr.WaccParser;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
@@ -28,6 +25,7 @@ import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
@@ -76,11 +74,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     registers.freeReturnRegisters();
     return null;
   }
-
-  @Override
-  public Register visitExpr(ExprContext ctx) {
-    return registers.r0;
-  }
+  
 
   @Override
   public Register visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
@@ -107,9 +101,186 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
     return null;
   }
-
-
-
+  
+  @Override
+  public Register visitExpr(ExprContext ctx) {
+    if (ctx.int_liter() != null) {
+      Register reg = registers.getRegister();
+      int number = Integer.parseInt(ctx.int_liter().getText());
+      machine.add(new LoadInstruction(Registers.r4, new Operand2Int('=', number)));
+      return reg;
+    } else if (ctx.bool_liter() != null) {
+      Register reg = registers.getRegister();
+      int value = ctx.bool_liter().getText().equals("true") ? 1 : 0;
+      machine.add(new MovInstruction(reg, new Operand2Int('#', value)));
+      return reg;
+    } else if (ctx.array_elem() != null) {
+      return visit(ctx.array_elem());
+    } else if (ctx.binary_oper_and_or() != null) {
+      return visit(ctx.binary_oper_and_or());
+    } else if (ctx.binary_oper_eql() != null) {
+      return visit(ctx.binary_oper_eql());
+    } else if (ctx.binary_oper_mul() != null) {
+      return visit(ctx.binary_oper_mul());
+    } else if (ctx.binary_oper_plus() != null) {
+      return visit(ctx.binary_oper_plus());
+    } else if (ctx.pair_liter() != null) {
+      return null;
+    } else if (ctx.unary_oper() != null) {
+      return visit(ctx.unary_oper());
+    } else if (ctx.ident() != null) {
+      return visit(ctx.ident());
+    } else if (ctx.CHAR_LIT() != null) {
+      Register reg = registers.getRegister();
+      char c = ctx.CHAR_LIT().getText().charAt(0);
+      String c_ = "'" + c + "'";
+      machine.add(new MovInstruction(reg, new Operand2String('#', c_)));
+      return reg;
+    } else if (ctx.CHARACTER_LIT() != null) {
+      return null;
+    } else if (ctx.OPEN_PARENTHESES() != null) {
+      return visit(ctx.expr(0));
+    }
+    return null;
+  }
+  
+  @Override
+  public Register visitIdent (WaccParser.IdentContext ctx) {
+    Register reg = registers.getRegister();
+    int offset = symbolTable.getAddress(ctx.getText());
+    Type type = symbolTable.getSymbolInfo(ctx.getText()).getType();
+    if(type.equals(new BaseType(WaccParser.BOOL)) || type.equals(new BaseType(WaccParser.CHAR))) {
+      machine.add(new StoreByteInstruction(reg, new Operand2Reg(Registers.sp, offset)));
+    } else{
+      machine.add(new StoreInstruction(reg, new Operand2Reg(Registers.sp, offset)));
+    }
+    return reg;
+  }
+  
+  @Override
+  public Register visitBinary_oper_mul(WaccParser.Binary_oper_mulContext ctx) {
+    Register reg1 = visit(ctx.getChild(0));
+    Register reg2 = visit(ctx.getChild(2));
+    int op = ((TerminalNode) ctx.getChild(1)).getSymbol().getType();
+    if (op == WaccParser.MUL) {
+      
+    }else if(op == WaccParser.DIV){
+      
+    }else if(op == WaccParser.MOD){
+      
+    }
+    //TODO:implement error handling
+    return reg1;
+  }
+  
+  @Override
+  public Register visitBinary_oper_and_or(WaccParser.Binary_oper_and_orContext ctx) {
+    Register reg1 = visit(ctx.getChild(0));
+    Register reg2 = visit(ctx.getChild(2));
+    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+    switch (op) {
+      case WaccParser.AND:
+        machine.add(new AndInstruction(reg1, reg1, new Operand2Reg(reg2)));
+        break;
+      case WaccParser.OR:
+        machine.add(new OrInstruction(reg1,reg1, new Operand2Reg(reg2)));
+        break;
+      default:
+        break;
+    }
+    return reg1;
+  }
+  
+  @Override
+  public Register visitBinary_oper_eql(WaccParser.Binary_oper_eqlContext ctx) {
+    Register reg1 = visit(ctx.getChild(0));
+    Register reg2 = visit(ctx.getChild(2));
+    int op = ((TerminalNode) ctx.getChild(1)).getSymbol().getType();
+    switch (op) {
+      case WaccParser.EQL:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovEqualInstruction(reg1,new Operand2Int('#',1)));
+        machine.add(new MovNotEqualInstruction(reg1,new Operand2Int('#',0)));
+        break;
+      case WaccParser.NEQL:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovEqualInstruction(reg1,new Operand2Int('#',0)));
+        machine.add(new MovNotEqualInstruction(reg1,new Operand2Int('#',1)));
+        break;
+      case WaccParser.LET:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovGreaterThanInstruction(reg1,new Operand2Int('#',0)));
+        machine.add(new MovLessEqualInstruction(reg1,new Operand2Int('#',1)));
+        break;
+      case WaccParser.LT:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovGreaterEqualInstruction(reg1,new Operand2Int('#',0)));
+        machine.add(new MovLessThanInstruction(reg1,new Operand2Int('#',1)));
+        break;
+      case WaccParser.GET:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovGreaterEqualInstruction(reg1,new Operand2Int('#',1)));
+        machine.add(new MovLessThanInstruction(reg1,new Operand2Int('#',0)));
+        break;
+      case WaccParser.GT:
+        machine.add(new CompareInstruction(reg1,new Operand2Reg(reg2)));
+        machine.add(new MovGreaterThanInstruction(reg1,new Operand2Int('#',1)));
+        machine.add(new MovLessEqualInstruction(reg1,new Operand2Int('#',0)));
+        break;
+      default:
+        break;
+    }
+    return reg1;
+  }
+  
+  @Override
+  public Register visitBinary_oper_plus(WaccParser.Binary_oper_plusContext ctx) {
+    Register reg1 = visit(ctx.getChild(0));
+    Register reg2 = visit(ctx.getChild(2));
+    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+    switch (op) {
+      case WaccParser.PLUS:
+        machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
+        break;
+      case WaccParser.MINUS:
+        machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
+        break;
+      default:
+        break;
+    }
+    return reg1;
+  }
+  
+  @Override
+  public Register visitUnary_oper(WaccParser.Unary_operContext ctx) {
+    Register reg1 = visit(ctx.getChild(0));
+    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+    switch (op) {
+      case WaccParser.NOT:
+        machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
+        break;
+      case WaccParser.MINUS:
+        machine.add(new SubInstruction(reg1,reg1,new Operand2Int('#',1),true,true));
+        break;
+      case WaccParser.LEN:
+        machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+        break;
+      case WaccParser.ORD:
+        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
+        break;
+      case WaccParser.CHR:
+        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
+        break;
+      default:
+        break;
+    }
+    return reg1;
+  }
+  
+  
+  
+  
+  
   @Override
   public Register visitIfStat(IfStatContext ctx) {
     Register lastRegister = visit(ctx.expr());
