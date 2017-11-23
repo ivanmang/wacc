@@ -1,8 +1,12 @@
 package CodeGeneration;
 
 import Instructions.AddInstruction;
+import Instructions.Branch.BranchEqualInstruction;
+import Instructions.Branch.BranchInstruction;
 import Instructions.Branch.BranchLinkInstruction;
+import Instructions.CmpInstruction;
 import Instructions.Labels.GlobalMainLabel;
+import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
 import Instructions.Load.LoadInstruction;
@@ -22,6 +26,7 @@ import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IfStatContext;
 import antlr.WaccParser.ProgContext;
+import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 
 public class CodeGenerator extends WaccParserBaseVisitor<Register>{
@@ -30,6 +35,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   private ARM11Machine machine = new ARM11Machine();
   private Registers registers = new Registers();
   private int string_num = 0;
+  private int labelnumber = 0;
 
   public String generateCode() {
     return machine.toCode();
@@ -88,7 +94,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
             new MovInstruction(reg, new Operand2String('#', chr)));
       } else if (ctx.type().base_type().BOOL() != null) { //bool
         int value = ctx.assign_rhs().getText().equals("true") ? 1 : 0;
-        System.out.println(value);
 
         machine
             .add(new MovInstruction(reg, new Operand2Int('#', value)));
@@ -125,9 +130,34 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     return null;
   }
 
+
+
   @Override
   public Register visitIfStat(IfStatContext ctx) {
-    System.out.println(ctx.expr().getText());
+    Register lastRegister = visit(ctx.expr());
+    machine.add(new CmpInstruction(lastRegister,new Operand2Int('#',0)));
+    Label elseLabel = new Label(labelnumber++); //else label
+    Label thenLabel = new Label(labelnumber); //then label
+    machine.add(new BranchEqualInstruction(elseLabel.toString()));
+    machine.add(new BranchInstruction(thenLabel.toString()));
+    machine.add(elseLabel);
+    visit(ctx.stat(1));
+    machine.add(thenLabel);
+    visit(ctx.stat(0));
+    return null;
+  }
+
+  @Override
+  public Register visitWhileStat(WhileStatContext ctx) {
+    Label startLabel = new Label(labelnumber++);
+    Label loopLabel = new Label(labelnumber);
+    machine.add(new BranchInstruction(startLabel.toString()));
+    machine.add(loopLabel);
+    visit(ctx.stat());
+    machine.add(startLabel);
+    Register lastRegister = visitExpr(ctx.expr());
+    machine.add(new CmpInstruction(lastRegister,new Operand2Int('#',1)));
+    machine.add(new BranchEqualInstruction(loopLabel.toString()));
     return null;
   }
 }

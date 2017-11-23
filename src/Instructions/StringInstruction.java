@@ -9,6 +9,6 @@ public class StringInstruction extends Instruction{
 
   @Override
   public String toCode() {
-    return ".ascii \"" + msg + "\"";
+    return ".ascii\t" + msg;
   }
 }
