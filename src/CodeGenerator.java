@@ -8,7 +8,9 @@ import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
+import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.Operand2;
 import Instructions.Operand2.Operand2Int;
@@ -24,10 +26,15 @@ import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IfStatContext;
+import antlr.WaccParser.PrintStatContext;
+import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.ProgContext;
+import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
+import com.sun.org.apache.regexp.internal.RE;
 
 public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
@@ -66,16 +73,18 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     return null;
   }
 
-  @Override
-  public Register visitExitStat(ExitStatContext ctx) {
-    Register returnReg = visit(ctx.expr());
+//  @Override
+//  public Register visitExitStat(ExitStatContext ctx) {
+//    Register returnReg = visit(ctx.expr());
+//
+//    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(returnReg)));
+//    machine.add(new BranchLinkInstruction("exit"));
+//
+//    registers.freeReturnRegisters();
+//    return null;
+//  }
 
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(returnReg)));
-    machine.add(new BranchLinkInstruction("exit"));
 
-    registers.freeReturnRegisters();
-    return null;
-  }
 
   @Override
   public Register visitExpr(ExprContext ctx) {
@@ -171,4 +180,130 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     String largeIndex = "index too large\n\0";
     machine.addMsg("ArrayIndexOutOfBoundsError:");
   }
+
+  @Override
+  public Register visitExitStat(ExitStatContext ctx) {
+    Register returnReg = visit(ctx.expr());
+    int number = Integer.parseInt(ctx.getChild(1).getText());
+    machine.add(new LoadInstruction(registers.getRegister(), new Operand2Int('=', number)));
+    machine.add(new MovInstruction(registers.getReturnRegister(), new Operand2Reg(registers.usedRegisters.getFirst())));
+    machine.add(new BranchLinkInstruction("exit"));
+    registers.freeReturnRegisters();
+    return null;
+  }
+
+  @Override
+  public Register visitSkipStat(SkipStatContext ctx) {
+    return null;
+  }
+
+  @Override
+  public Register visitPrintStat(PrintStatContext ctx) {
+    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0
+//    LDR r4, =msg_0
+//    21		MOV r0, r4
+//    22		BL p_print_string
+//    23		LDR r4, =189
+//    24		MOV r0, r4
+//    25		BL p_print_int
+//    26		BL p_print_ln
+
+
+
+//    if (thingsAfterPrint is String) {
+    String msg = ctx.getChild(1).getText();
+    machine.addMsg(msg);
+    machine.addMsg("\"%.*s\\0\"");
+    generate_printers("string");
+//    }
+//    if (thingsAfterPrint is Int) {
+    machine.addMsg("\"%d\\0\"");
+    generate_printers("int");
+//    }
+//      if (thingsAfterPrint is Bool) {
+    machine.addMsg("\"true\\0\"");
+    machine.addMsg("\"false\\0\"");
+    generate_printers("bool");
+//    }
+
+
+    return null;
+  }
+
+  @Override
+  public Register visitPrintlnStat(PrintlnStatContext ctx) {
+    machine.addMsg("\"\\0\"");
+    generate_printers("ln");
+    return null;
+  }
+
+  @Override
+  public Register visitReadStat(ReadStatContext ctx) {
+//    if (ctx.getChild(1) is an int type) {
+    machine.addMsg("\"%d\\0\"");
+    generate_readers("int");
+//    }
+//    else if (ctx.getChild(1) is a char type){
+    machine.addMsg("\" %c\\0\"");
+    generate_readers("char");
+//    }
+    return null;
+  }
+
+  public void generate_readers (String str) {
+    machine.add((new Label("p_read_" + str)));
+    machine.add(new PushInstruction(Registers.lr));
+    machine.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+    machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg3")));
+    machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+    machine.add(new BranchLinkInstruction("scanf"));
+    machine.add(new PopInstruction(Registers.pc));
+
+  }
+
+  public void generate_printers (String str) {
+    machine.add(new Label("p_print_" + str));
+    if (str == "string") {
+      machine.add(new PushInstruction(Registers.lr));
+      machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(registers.r0))); // LDR r1, [r0]
+      machine.add(new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1), new Operand2Int('#', 4)));
+      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg1")));
+      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+      machine.add(new BranchLinkInstruction("printf"));
+      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      machine.add(new BranchLinkInstruction("fflush"));
+      machine.add(new PopInstruction(Registers.pc));
+
+    } else if (str == "int") {
+      machine.add(new PushInstruction(Registers.lr));
+      machine.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_2")));
+      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      machine.add(new BranchLinkInstruction("printf"));
+      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      machine.add(new BranchLinkInstruction("fflush"));
+      machine.add(new PopInstruction(Registers.pc));
+    } else if (str == "ln") {
+      machine.add(new PushInstruction(Registers.lr));
+      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_3")));
+      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      machine.add(new BranchLinkInstruction("puts"));
+      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      machine.add(new BranchLinkInstruction("fflush"));
+      machine.add(new PopInstruction(Registers.pc));
+    } else if (str == "bool") {
+      machine.add(new PushInstruction(Registers.lr));
+      machine.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
+      machine.add(new LoadNotEqualInstruction(Registers.r0, new Operand2String('=', "msg_true")));
+      machine.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_false")));
+      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      machine.add(new BranchLinkInstruction("printf"));
+      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      machine.add(new BranchLinkInstruction("fflush"));
+      machine.add(new PopInstruction(Registers.pc));
+    }
+  }
+
 }
+
+
