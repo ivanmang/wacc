@@ -2,122 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d890a9b6-ad64-48d4-ba81-ff187ea60f7e" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/AssignmentOutOfBoundsChecker.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/ARM11Machine.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/CodeGenerator.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/CodeStringBuilder.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/InstructionStringBuilder.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/Register.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/Registers.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGeneration/Stack.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/CodeGenerator.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/FunctionReturnChecker.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/AddInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/AndInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Branch/BranchEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Branch/BranchInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Branch/BranchLinkEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Branch/BranchLinkInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Branch/BranchLinkNotEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/CmpInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Instruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Labels/DataLabel.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Labels/GlobalMainLabel.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Labels/Label.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Labels/LtorgLabel.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Labels/TextLabel.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Load/LoadByteInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Load/LoadEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Load/LoadInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Load/LoadNotEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Move/MovEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Move/MovGreaterEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Move/MovInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Move/MovLessThanInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Move/MovNotEqualInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Operand2/Operand2.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Operand2/Operand2Empty.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Operand2/Operand2Int.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Operand2/Operand2Reg.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Operand2/Operand2String.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/OrInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/PopInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/PushInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Store/StoreByteInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/Store/StoreInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/StringInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/SubInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Instructions/WordInstruction.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Main.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/ParserErrorHandler.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/SemanticChecker.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/SymbolTable.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/AllType.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/ArrayType.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/BaseType.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/Function.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/ID.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/PairType.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/SymbolInfo.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/Utils/Type.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/VisitorErrorHandler.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccLexer.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Arg_listContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Array_elemContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Array_literContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Array_typeContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$AssignStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Assign_lhsContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Assign_rhsContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Base_typeContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$BeginStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Binary_oper_and_orContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Binary_oper_eqlContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Binary_oper_mulContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Binary_oper_plusContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Bool_literContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$DeclareAndAssignStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ExitStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ExprContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$FreeStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$FuncContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Function_callContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$IdentContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$IfStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Int_literContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Int_signContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$New_pairContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Pair_elemContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Pair_elem_typeContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Pair_literContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Pair_typeContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ParamContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Param_listContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$PrintStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$PrintlnStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ProgContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ReadStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$ReturnStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$SkipStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$StatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$StatToStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$TypeContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$Unary_operContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser$WhileStatContext.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParser.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParserBaseVisitor.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/bin/antlr/WaccParserVisitor.class" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/wacc_examples" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/antlr_4_7_complete.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccLexer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccLexer.tokens" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccParser.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccParser.tokens" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccParserBaseVisitor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/antlr/WaccParserVisitor.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/CodeGenerator.class" afterPath="$PROJECT_DIR$/bin/CodeGenerator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/CodeGenerator.java" afterPath="$PROJECT_DIR$/src/CodeGenerator.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -135,8 +22,8 @@
       <file leaf-file-name="CodeGenerator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/CodeGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="216" column="32" lean-forward="true" selection-start-line="216" selection-start-column="32" selection-end-line="216" selection-end-column="32" />
+            <state relative-caret-position="1500">
+              <caret line="259" column="30" lean-forward="true" selection-start-line="259" selection-start-column="30" selection-end-line="259" selection-end-column="30" />
               <folding>
                 <element signature="e#6653#6654#0" expanded="true" />
                 <element signature="e#6674#6675#0" expanded="true" />
@@ -344,38 +231,6 @@
               <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="wacc_28" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="antlr" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wacc_28" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="CodeGeneration" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wacc_28" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="Instructions" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wacc_28" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="Instructions" type="462c0819:PsiDirectoryNode" />
-              <item name="Branch" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="wacc_28" type="b2602c69:ProjectViewProjectNode" />
-              <item name="wacc_28" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="Instructions" type="462c0819:PsiDirectoryNode" />
-              <item name="Operand2" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
@@ -384,10 +239,10 @@
   </component>
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/lib/antlr-4.7-complete.jar!/" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="jdk.selected.JAVA_MODULE" value="1.8" />
   </component>
   <component name="RunDashboard">
@@ -737,7 +592,14 @@
       <option name="project" value="LOCAL" />
       <updated>1511467855583</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="[ckc116] Code Generation IO generated labels out of main; Operand2 added Operand2Empty to cope with the situation where there are three parameters in AddInstruction">
+      <created>1511468588524</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1511468588524</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -749,11 +611,11 @@
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36" sideWeight="0.5024184" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32937366" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36" sideWeight="0.49758163" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24123338" sideWeight="0.49356914" order="0" side_tool="false" content_ui="combo" />
@@ -807,8 +669,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/PairType.java" />
-    <entry file="file://$PROJECT_DIR$/src/SyntaxChecker.java" />
     <entry file="file://$PROJECT_DIR$/src/SemanticChecker.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1512">
@@ -1104,8 +964,8 @@
         <state relative-caret-position="360">
           <caret line="20" column="14" lean-forward="false" selection-start-line="20" selection-start-column="14" selection-end-line="20" selection-end-column="14" />
           <folding>
-            <element signature="e#469#470#0" expanded="true" />
-            <element signature="e#495#496#0" expanded="true" />
+            <element signature="e#469#470#0" expanded="false" />
+            <element signature="e#495#496#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1188,10 +1048,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/untitled.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wacc_28.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/CodeGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="216" column="32" lean-forward="true" selection-start-line="216" selection-start-column="32" selection-end-line="216" selection-end-column="32" />
+        <state relative-caret-position="1500">
+          <caret line="259" column="30" lean-forward="true" selection-start-line="259" selection-start-column="30" selection-end-line="259" selection-end-column="30" />
           <folding>
             <element signature="e#6653#6654#0" expanded="true" />
             <element signature="e#6674#6675#0" expanded="true" />

@@ -199,9 +199,21 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
-    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0
-//    LDR r4, =msg_0
-//    21		MOV r0, r4
+//  if the number behind print is int then use Operand2Int
+    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0, it can be a number
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(registers.usedRegisters.getFirst())));
+    registers.free(registers.usedRegisters.getFirst());
+    String branchName = "string";
+//    if (ctx.getChild(1) is of the type int) {
+    branchName = "int";
+//    } else if (ctx.getChild(1) is of the type char) {
+    branchName = "char";
+//    } else if (ctx.getChild(1) is of the type bool) {
+    branchName = "bool";
+//    }
+    machine.add(new BranchLinkInstruction("p_print_" + branchName));
+
+
 //    22		BL p_print_string
 //    23		LDR r4, =189
 //    24		MOV r0, r4
@@ -232,6 +244,19 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
+    //  if the number behind print is int then use Operand2Int
+    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0, it can be a number
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(registers.usedRegisters.getFirst())));
+    registers.free(registers.usedRegisters.getFirst());
+    String branchName = "string";
+//    if (ctx.getChild(1) is of the type int) {
+    branchName = "int";
+//    } else if (ctx.getChild(1) is of the type char) {
+    branchName = "char";
+//    } else if (ctx.getChild(1) is of the type bool) {
+    branchName = "bool";
+//    }
+    machine.add(new BranchLinkInstruction("p_print_" + branchName));
     machine.addMsg("\"\\0\"");
     generate_printers("ln");
     return null;
