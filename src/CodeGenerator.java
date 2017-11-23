@@ -85,13 +85,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   @Override
   public Register visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
     if (ctx.type().base_type() != null) { //base type
-      int reserveByte = (ctx.type().base_type().BOOL() != null
-          || ctx.type().base_type().CHAR() != null) ? 1 : 4;
 
+      int reserveByte = symbolTable.getSize();
+
+      machine.add(
+          new SubInstruction(Registers.sp, new Operand2Int('#',reserveByte )));
 
       Register reg = registers.getRegister();
-      machine.add(
-          new SubInstruction(Registers.sp, new Operand2Int('#', reserveByte)));
 
       if (ctx.type().base_type().CHAR() != null) { //char
         String chr = ctx.assign_rhs().getText();
@@ -119,10 +119,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
       if(ctx.type().base_type().CHAR()!= null || ctx.type().base_type().BOOL()!=null){
         machine.add(new StoreByteInstruction(reg,
-            new Operand2Reg(Registers.sp, 0)));
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }else{
         machine.add(new StoreInstruction(reg,
-            new Operand2Reg(Registers.sp, 0)));
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }
 
 

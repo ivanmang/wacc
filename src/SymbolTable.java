@@ -19,6 +19,14 @@ public class SymbolTable {
     return size;
   }
 
+  public SymbolInfo getSymbolInfo(String name){
+    return dictionary.get(name);
+  }
+
+  public int getAddress(String name){
+    return dictionary.get(name).getAddress();
+  }
+
   public SymbolTable(SymbolTable childSymbolTable, SymbolTable parentSymbolTable) {
     this.childSymbolTable = childSymbolTable;
     this.parentSymbolTable = parentSymbolTable;
