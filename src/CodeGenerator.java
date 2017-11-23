@@ -92,6 +92,15 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
           new SubInstruction(Registers.sp, new Operand2Int('#',reserveByte )));
       Register reg = visit(ctx.assign_rhs().expr());
 
+      if(ctx.type().base_type().STRING()!=null){ //string
+        String string = ctx.assign_rhs().getText();
+        machine.addMsg(string);
+        machine.add(new LoadInstruction(reg,
+            new Operand2String('=', "msg_"+string_num)));
+        string_num++;
+      }
+
+
       if(ctx.type().base_type().CHAR()!= null || ctx.type().base_type().BOOL()!=null){
         machine.add(new StoreByteInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
@@ -100,13 +109,16 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }
 
+      registers.free(reg);
+
       machine.add(
           new AddInstruction(Registers.sp, new Operand2Int('#', reserveByte)));
     }
 
-
     return null;
   }
+
+
 
 
 
@@ -142,6 +154,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   public void ArrayIndexOutOfBoundsError(){
     String negIndex = "negative index\n\0";
     String largeIndex = "index too large\n\0";
-    machine.addMsg("ArrayIndexOutOfBoundsError:");
+    machine.add(new Label("p_throw_runtime_error"));
+    machine.add(new BranchLinkInstruction("p_print_string"));
+    machine.add(new MovInstruction(Registers.r0,new Operand2Int('#',-1)));
+    machine.addMsg("ArrayIndexOutOfBoundsError: "+negIndex);
+    machine.addMsg("ArrayIndexOutOfBoundsError: "+largeIndex);
   }
+
+
 }
