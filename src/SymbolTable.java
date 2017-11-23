@@ -5,30 +5,32 @@ import java.util.Map;
 public class SymbolTable {
 
   private Map<String, Type> dictionary;
-  private SymbolTable innerSymbolTable;
-  private SymbolTable outerSymbolTable;
+  private SymbolTable childSymbolTable;
+  private SymbolTable parentSymbolTable;
 
 
-  public SymbolTable(SymbolTable innerSymbolTable, SymbolTable outerSymbolTable) {
-    this.innerSymbolTable = innerSymbolTable;
-    this.outerSymbolTable = outerSymbolTable;
+  public SymbolTable(SymbolTable childSymbolTable, SymbolTable parentSymbolTable) {
+    this.childSymbolTable = childSymbolTable;
+    this.parentSymbolTable = parentSymbolTable;
     dictionary = new Hashtable<>();
   }
 
-  public void setInnerSymbolTable(SymbolTable innerSymbolTable) {
-    this.innerSymbolTable = innerSymbolTable;
+  public void setChildSymbolTable(SymbolTable childSymbolTable) {
+    this.childSymbolTable = childSymbolTable;
   }
 
-  public void setOuterSymbolTable(SymbolTable outerSymbolTable) {
-    this.outerSymbolTable = outerSymbolTable;
+  public void setParentSymbolTable(SymbolTable parentSymbolTable) {
+    this.parentSymbolTable = parentSymbolTable;
   }
 
   public SymbolTable enterScope(SymbolTable cur) {
-    return new SymbolTable(cur, cur);
+    SymbolTable childSymbolTable = new SymbolTable(null, cur);
+    this.childSymbolTable = childSymbolTable;
+    return childSymbolTable;
   }
 
   public SymbolTable exitScope(SymbolTable cur) {
-    return cur.outerSymbolTable;
+    return cur.parentSymbolTable;
   }
 
   //the previous name of the specified type in this hash table, or null if it did not have one
@@ -49,7 +51,7 @@ public class SymbolTable {
       if (type != null) {
         return type;
       } else {
-        symbolTable = symbolTable.getInnerSymbolTable();
+        symbolTable = symbolTable.getParentSymbolTable();
       }
     }
     return null;
@@ -60,12 +62,12 @@ public class SymbolTable {
     return !(this.lookupAll(name) == null);
   }
 
-  public SymbolTable getOuterSymbolTable() {
-    return outerSymbolTable;
+  public SymbolTable getParentSymbolTable() {
+    return parentSymbolTable;
   }
 
-  public SymbolTable getInnerSymbolTable() {
-    return innerSymbolTable;
+  public SymbolTable getChildSymbolTable() {
+    return childSymbolTable;
   }
 
   public Map<String, Type> getDictionary() {
@@ -73,10 +75,17 @@ public class SymbolTable {
   }
 
   public void printTable() {
-    System.out.println("--------------");
-    for (String key : dictionary.keySet()) {
-      System.out.println(key + " " + dictionary.get(key));
+    SymbolTable currentTable = this;
+    int indentation = 0;
+    while(currentTable != null) {
+      for (String key : currentTable.getDictionary().keySet()) {
+        for(int i = 0; i < indentation; i++) {
+          System.out.print("\t");
+        }
+        System.out.println(key + " " + currentTable.getDictionary().get(key));
+      }
+      currentTable = currentTable.getChildSymbolTable();
+      indentation++;
     }
-    System.out.println("--------------");
   }
 }

@@ -160,4 +160,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     return null;
   }
+
+  public void ArrayIndexOutOfBoundsError(){
+    String negIndex = "negative index\n\0";
+    String largeIndex = "index too large\n\0";
+    machine.addMsg("ArrayIndexOutOfBoundsError:");
+  }
 }

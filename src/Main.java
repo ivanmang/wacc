@@ -46,6 +46,9 @@ public class Main {
     //Checking for semantic errors
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
+    System.out.println("---Printing symbol table---");
+    checker.getGlobalSymbolTable().printTable();
+    System.out.println("---Finished---");
 
     CodeGenerator gen = new CodeGenerator();
     gen.visit(tree);

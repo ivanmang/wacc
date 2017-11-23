@@ -11,15 +11,16 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   public VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
-  private SymbolTable symbolTable = new SymbolTable(null, null);
+  private final SymbolTable globalSymbolTable = new SymbolTable(null, null);
+  private SymbolTable symbolTable = globalSymbolTable;
   private Map<String, Function> functionList = new HashMap<>();
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
   private Type boolType = new BaseType(WaccParser.BOOL);
   private Type stringType = new BaseType(WaccParser.STRING);
 
-  public SymbolTable getSymbolTable() {
-    return symbolTable;
+  public SymbolTable getGlobalSymbolTable() {
+    return globalSymbolTable;
   }
 
   public boolean typeChecker(Type type1, Type type2) {
@@ -99,14 +100,14 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
               actual);
-    } else if (symbolTable.getOuterSymbolTable() != null) {
-      symbolTable.getOuterSymbolTable().printTable();
-      if (symbolTable.contain(identName) && !symbolTable.getOuterSymbolTable().contain(identName)) {
+    } else if (symbolTable.getParentSymbolTable() != null) {
+//      symbolTable.getParentSymbolTable().printTable();
+      if (symbolTable.contain(identName) && !symbolTable.getParentSymbolTable().contain(identName)) {
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
         symbolTable.insert(ctx.ident().getText(), expected);
       }
-    } else if (symbolTable.getOuterSymbolTable() == null) {
+    } else if (symbolTable.getParentSymbolTable() == null) {
       if (symbolTable.contain(identName)) {
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
@@ -340,13 +341,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitAssign_rhs(Assign_rhsContext ctx) {
-    System.out.println("visiting assign rhs");
+//    System.out.println("visiting assign rhs");
     return visitChildren(ctx);
   }
 
   @Override
   public Type visitFunction_call(Function_callContext ctx) {
-    System.out.println("visiting function call");
+//    System.out.println("visiting function call");
     String ident = ctx.ident().getText();
     Function curFunc = functionList.get(ident);
     int expectedSize = curFunc.getParamSize();
@@ -367,7 +368,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitReturnStat(ReturnStatContext ctx) {
-    if (symbolTable.getInnerSymbolTable() == null && symbolTable.getOuterSymbolTable() == null) {
+    if (symbolTable.getChildSymbolTable() == null && symbolTable.getParentSymbolTable() == null) {
       visitorErrorHandler.cantReturnFromGlobalScope(ctx);
     }
     return visit(ctx.expr());
