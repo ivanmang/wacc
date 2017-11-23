@@ -90,32 +90,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
       machine.add(
           new SubInstruction(Registers.sp, new Operand2Int('#',reserveByte )));
-
-      Register reg = registers.getRegister();
-
-      if (ctx.type().base_type().CHAR() != null) { //char
-        String chr = ctx.assign_rhs().getText();
-        machine.add(
-            new MovInstruction(reg, new Operand2String('#', chr)));
-      } else if (ctx.type().base_type().BOOL() != null) { //bool
-        int value = ctx.assign_rhs().getText().equals("true") ? 1 : 0;
-
-        machine
-            .add(new MovInstruction(reg, new Operand2Int('#', value)));
-      }
-
-
-      if (ctx.type().base_type().INT() != null) { //int
-        int number = Integer.parseInt(ctx.assign_rhs().getChild(0).getText());
-        machine.add(
-            new LoadInstruction(reg, new Operand2Int('=', number)));
-      } else if(ctx.type().base_type().STRING()!=null){ //string
-        String string = ctx.assign_rhs().getText();
-        machine.addMsg(string);
-        machine.add(new LoadInstruction(reg,
-            new Operand2String('=', "msg_"+string_num)));
-        string_num++;
-      }
+      Register reg = visit(ctx.assign_rhs().expr());
 
       if(ctx.type().base_type().CHAR()!= null || ctx.type().base_type().BOOL()!=null){
         machine.add(new StoreByteInstruction(reg,
@@ -124,8 +99,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
         machine.add(new StoreInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }
-
-
 
       machine.add(
           new AddInstruction(Registers.sp, new Operand2Int('#', reserveByte)));
