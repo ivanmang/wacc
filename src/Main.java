@@ -1,4 +1,3 @@
-import CodeGeneration.CodeGenerator;
 import antlr.WaccLexer;
 import antlr.WaccParser;
 import java.io.File;
@@ -50,7 +49,7 @@ public class Main {
     checker.getGlobalSymbolTable().printTable();
     System.out.println("---Finished---");
 
-    CodeGenerator gen = new CodeGenerator();
+    CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolTable());
     gen.visit(tree);
     System.out.println(gen.generateCode());
   }

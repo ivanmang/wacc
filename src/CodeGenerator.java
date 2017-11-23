@@ -1,5 +1,4 @@
-package CodeGeneration;
-
+import CodeGeneration.*;
 import Instructions.AddInstruction;
 import Instructions.Branch.BranchEqualInstruction;
 import Instructions.Branch.BranchInstruction;
@@ -28,6 +27,7 @@ import antlr.WaccParser.IfStatContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
+import Utils.*;
 
 public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
@@ -36,6 +36,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   private Registers registers = new Registers();
   private int string_num = 0;
   private int labelnumber = 0;
+  private SymbolTable symbolTable;
+
+  public CodeGenerator(SymbolTable symbolTable) {
+    this.symbolTable = symbolTable;
+  }
 
   public String generateCode() {
     return machine.toCode();

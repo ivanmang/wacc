@@ -1,18 +1,28 @@
+import Utils.SymbolInfo;
 import Utils.Type;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SymbolTable {
 
-  private Map<String, Type> dictionary;
+
+  private Map<String, SymbolInfo> dictionary;
   private SymbolTable childSymbolTable;
   private SymbolTable parentSymbolTable;
 
+  public int getSize() {
+    int size = 0;
+    for(SymbolInfo symbolInfo : dictionary.values()) {
+      size += symbolInfo.getType().getSize();
+    }
+    return size;
+  }
 
   public SymbolTable(SymbolTable childSymbolTable, SymbolTable parentSymbolTable) {
     this.childSymbolTable = childSymbolTable;
     this.parentSymbolTable = parentSymbolTable;
-    dictionary = new Hashtable<>();
+    dictionary = new LinkedHashMap<>();
   }
 
   public void setChildSymbolTable(SymbolTable childSymbolTable) {
@@ -34,13 +44,24 @@ public class SymbolTable {
   }
 
   //the previous name of the specified type in this hash table, or null if it did not have one
-  public Type insert(String name, Type type) {
-    return dictionary.put(name, type);
+  public void insert(String name, Type type) {
+    dictionary.put(name, new SymbolInfo(type));
+  }
+
+  public void setAddress(String name, int address) {
+    if(dictionary.get(name) == null) {
+      System.out.println("Ident " + name + " not found");
+    } else {
+      dictionary.get(name).setAddress(address);
+    }
   }
 
   //the Utils.Type to which the specified name is mapped, or null if this map contains no mapping for the Utils.Type
   public Type lookup(String name) {
-    return dictionary.get(name);
+    if(dictionary.get(name) == null) {
+      return null;
+    }
+    return dictionary.get(name).getType();
   }
 
   //lookup name in current and enclosed symbol table, if found return type, else return null
@@ -70,7 +91,7 @@ public class SymbolTable {
     return childSymbolTable;
   }
 
-  public Map<String, Type> getDictionary() {
+  public Map<String, SymbolInfo> getDictionary() {
     return dictionary;
   }
 
@@ -82,7 +103,7 @@ public class SymbolTable {
         for(int i = 0; i < indentation; i++) {
           System.out.print("\t");
         }
-        System.out.println(key + " " + currentTable.getDictionary().get(key));
+        System.out.println(key + " " + currentTable.getDictionary().get(key).getType());
       }
       currentTable = currentTable.getChildSymbolTable();
       indentation++;

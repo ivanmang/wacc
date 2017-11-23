@@ -72,4 +72,18 @@ public class BaseType implements Type {
         return "Unknown Utils.Type";
     }
   }
+
+  @Override
+  public int getSize() {
+    switch(contentId) {
+      case WaccParser.INT:
+      case WaccParser.STRING:
+        return 4;
+      case WaccParser.BOOL:
+      case WaccParser.CHAR:
+        return 1;
+      default:
+        return 0;
+    }
+  }
 }

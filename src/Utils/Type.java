@@ -9,4 +9,6 @@ public interface Type {
   boolean isValidType();
 
   String toString();
+
+  int getSize();
 }

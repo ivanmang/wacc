@@ -19,4 +19,9 @@ public class AllType implements Type {
   public boolean isValidType() {
     return true;
   }
+
+  @Override
+  public int getSize() {
+    return 0;
+  }
 }

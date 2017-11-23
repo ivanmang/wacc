@@ -56,4 +56,9 @@ public class ArrayType implements Type {
     }
     return "";
   }
+
+  @Override
+  public int getSize() {
+    return 0;//TODO: implemnt array size
+  }
 }
