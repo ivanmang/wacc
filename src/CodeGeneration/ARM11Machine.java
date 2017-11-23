@@ -17,6 +17,7 @@ public class ARM11Machine {
   private Map<String, List<Instruction>> functions;
   private List<Instruction> currentFunction;
   private List<Instruction> msg;
+  private Map<String, List<Instruction>> printFunctions;
 
   //initialise the machine
   public ARM11Machine() {
@@ -42,7 +43,7 @@ public class ARM11Machine {
   //.msg_(number)
   //    .word (length)
   //    .ascii (string)
-  public void addMsg(String message) {
+  public int addMsg(String message) {
     if(msg.isEmpty()) {
       msg.add(new DataLabel());
     }
@@ -50,6 +51,14 @@ public class ARM11Machine {
     msg.add(new Label("msg_" + msgIndex));
     msg.add(new WordInstruction(message.length()));
     msg.add(new StringInstruction(message));
+    return msgIndex;
+  }
+
+  public void addPrintIntFunction() {
+    List<Instruction> printInt = new LinkedList<>();
+    //TODO: add msgs for printInt
+    //TODO: add instructions for printInt
+    printFunctions.put("p_print_int", printInt);
   }
 
   //Add this to the end of the messages:

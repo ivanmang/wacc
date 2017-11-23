@@ -61,6 +61,6 @@ public class PairType implements Type {
 
   @Override
   public int getSize() {
-    return 0;//TODO Implemnt pair size
+    return 4;
   }
 }

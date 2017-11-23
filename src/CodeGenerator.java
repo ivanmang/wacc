@@ -20,6 +20,7 @@ import Instructions.Store.StoreByteInstruction;
 import Instructions.Store.StoreInstruction;
 import Instructions.StringInstruction;
 import Instructions.SubInstruction;
+import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
@@ -117,9 +118,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
     return null;
   }
-
-
-
 
 
   @Override
