@@ -575,28 +575,38 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = registers.getRegister();
       String text = ctx.CHAR_LIT().getText();
       String c_ = "";
-      if (text.length()>3){
-        if (text.equals(String.valueOf('\0'))) {
-          c_ = Integer.toString(0);
-        }else if(text.equals(String.valueOf('\b'))){
-          c_ = Integer.toString(8);
-        }else if(text.equals(String.valueOf('\t'))){
-          c_ = Integer.toString(9);
-        }else if(text.equals(String.valueOf('\n'))){
-          c_ = Integer.toString(10);
-        }else if(text.equals(String.valueOf('\f'))){
-          c_ = Integer.toString(12);
-        }else if(text.equals(String.valueOf('\r'))){
-          c_ = Integer.toString(13);
-        }else if(text.equals(String.valueOf('\''))){
-          c_ = Integer.toString(39);
-        }else if(text.equals(String.valueOf('\"'))){
-          c_ = Integer.toString(34);
-        }else if(text.equals(String.valueOf('\\'))){
-          c_ = Integer.toString(92);
+//      System.out.println(text + " length = " + text.length());
+      if (text.length() > 3){
+        switch (text) {
+          case "\'\\0\'":
+            c_ = Integer.toString(0);
+            break;
+          case "\'\\b\'":
+            c_ = Integer.toString(8);
+            break;
+          case "\'\\t\'":
+            c_ = Integer.toString(9);
+            break;
+          case "\'\\n\'":
+            c_ = Integer.toString(10);
+            break;
+          case "\'\\f\'":
+            c_ = Integer.toString(12);
+            break;
+          case "\'\\r\'":
+            c_ = Integer.toString(13);
+            break;
+          case "\'\\'\'":
+            c_ = "\'\\\'\'";
+            break;
+          case "\'\\\"\'":
+            c_ = "\'\"\'";
+            break;
+          case "\'\\\\\'":
+            c_ = "\'\\\'";
+            break;
         }
-      }
-      else {
+      } else {
         char c = text.charAt(1);
         c_ = "'" + c + "'";
       }
