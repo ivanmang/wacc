@@ -574,23 +574,23 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       String text = ctx.CHAR_LIT().getText();
       String c_ = "";
       if (text.length()>3){
-        if (text.equals("'\0'") ){
+        if (text.equals(String.valueOf('\0'))) {
           c_ = Integer.toString(0);
-        }else if(text.equals("'\b'")){
+        }else if(text.equals(String.valueOf('\b'))){
           c_ = Integer.toString(8);
-        }else if(text.equals("'\t'")){
+        }else if(text.equals(String.valueOf('\t'))){
           c_ = Integer.toString(9);
-        }else if(text.equals("'\n'")){
+        }else if(text.equals(String.valueOf('\n'))){
           c_ = Integer.toString(10);
-        }else if(text.equals("'\f'")){
+        }else if(text.equals(String.valueOf('\f'))){
           c_ = Integer.toString(12);
-        }else if(text.equals("'\r'")){
+        }else if(text.equals(String.valueOf('\r'))){
           c_ = Integer.toString(13);
-        }else if(text.equals("'\''")){
+        }else if(text.equals(String.valueOf('\''))){
           c_ = Integer.toString(39);
-        }else if(text.equals("'\"'")){
+        }else if(text.equals(String.valueOf('\"'))){
           c_ = Integer.toString(34);
-        }else if(text.equals("'\\'")){
+        }else if(text.equals(String.valueOf('\\'))){
           c_ = Integer.toString(92);
         }
       }

@@ -72,7 +72,7 @@ public class Registers {
     }
     Register dest = generalRegisters.pop();
     usedRegisters.push(dest);
-    System.out.println("using " + dest);
+//    System.out.println("using " + dest);
     return dest;
   }
 
