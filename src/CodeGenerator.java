@@ -40,6 +40,7 @@ import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
+import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -128,7 +129,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     SymbolTable main = symbolTable;
     symbolTable = functionList.get(ctx.getChild(1).getText()).getSymbolTable();
   
-    int address = 0;
+    int address = 4;
+    int size = 0;
     
     
     //get the symbol table with it's address and type
@@ -137,10 +139,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     for (String name : dict.keySet()) {
       dict.get(name).setAddress(address);
       address += dict.get(name).getType().getSize();
+      if(!functionList.get(ctx.getChild(1).getText()).getIdentList().contains(name)) {
+        size += dict.get(name).getType().getSize();
+      }
     }
   
     //get the size of the variable store
-    int reserveByte = symbolTable.getSize();
+    int reserveByte = size;
   
     //if size exceed max stack size reserve, Push max_size first
     while (reserveByte > MAX_STACK_SIZE) {
@@ -149,13 +154,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     }
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
-    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    if (reserveByte!=0) {
+      machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    }
     reserveByte = symbolTable.getSize();
     
-    
-    if (ctx.param_list()!=null) {
-      visit(ctx.param_list());
-    }
     visit(ctx.stat());
   
     //if size exceed max stack size reserve, Push max_size first
@@ -164,7 +167,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       reserveByte -= MAX_STACK_SIZE;
     }
     //Pop the variables
-    machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    if (reserveByte!=0) {
+      machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    }
     
     
     machine.add(new PopInstruction(Registers.pc));
