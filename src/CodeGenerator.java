@@ -49,6 +49,8 @@ import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
+
+import java.util.Deque;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -61,6 +63,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   private SymbolTable symbolTable;
   private Map<String, Function> functionList;
   private GetTypeFromExpr exprTypeGetter = new GetTypeFromExpr();
+  private String previousFunction;
+  private String currentFunction = "main";
 
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
@@ -130,6 +134,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitFunc(WaccParser.FuncContext ctx) {
+    previousFunction = currentFunction;
+    currentFunction = ctx.getChild(1).getText();
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
     visit(ctx.stat());
@@ -137,6 +143,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
     machine.addFunctionEnd();
+    currentFunction = previousFunction;
+    previousFunction = null;
     return null;
   }
 
@@ -543,15 +551,46 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
       Register reg = registers.getRegister();
-      int offset = symbolTable.getAddress(ctx.getChild(0).getText());
+      int offset;
+      if (currentFunction.equals("main")) {
+        offset = symbolTable.getAddress(ctx.getChild(0).getText());
+      }
+      else{
+        offset = functionList.get(currentFunction).getAddress(ctx.getChild(0).getText());
+      }
       System.out.printf((ctx.getChild(0)).getText());
       System.out.printf(Integer.toString(offset));
       machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
-      char c = ctx.CHAR_LIT().getText().charAt(1);
-      String c_ = "'" + c + "'";
+      String text = ctx.CHAR_LIT().getText();
+      String c_ = "";
+      if (text.length()>3){
+        if (text.equals("'\0'") ){
+          c_ = Integer.toString(0);
+        }else if(text.equals("'\b'")){
+          c_ = Integer.toString(8);
+        }else if(text.equals("'\t'")){
+          c_ = Integer.toString(9);
+        }else if(text.equals("'\n'")){
+          c_ = Integer.toString(10);
+        }else if(text.equals("'\f'")){
+          c_ = Integer.toString(12);
+        }else if(text.equals("'\r'")){
+          c_ = Integer.toString(13);
+        }else if(text.equals("'\''")){
+          c_ = Integer.toString(39);
+        }else if(text.equals("'\"'")){
+          c_ = Integer.toString(34);
+        }else if(text.equals("'\\'")){
+          c_ = Integer.toString(92);
+        }
+      }
+      else {
+        char c = text.charAt(1);
+        c_ = "'" + c + "'";
+      }
       machine.add(new MovInstruction(reg, new Operand2String('#', c_)));
       return reg;
     } else if (ctx.CHARACTER_LIT() != null) {

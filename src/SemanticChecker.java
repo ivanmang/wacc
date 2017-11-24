@@ -40,7 +40,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitProg(ProgContext ctx) {
     for (FuncContext funcContext : ctx.func()) {
-      List<String> identList = new ArrayList<>();
+      ArrayList<String> identList = new ArrayList<>();
       List<Type> typeList = new ArrayList<>();
 
       Type returnType = visit(funcContext.type());
