@@ -1,10 +1,16 @@
 package CodeGeneration;
 
-import Instructions.Instruction;
+import Instructions.*;
+import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Labels.DataLabel;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadInstruction;
+import Instructions.Move.MovInstruction;
+import Instructions.Operand2.Operand2Int;
+import Instructions.Operand2.Operand2Reg;
+import Instructions.Operand2.Operand2String;
 import Instructions.StringInstruction;
 import Instructions.WordInstruction;
 import java.util.LinkedHashMap;
@@ -56,6 +62,44 @@ public class ARM11Machine {
 
   public void addPrintIntFunction() {
     List<Instruction> printInt = new LinkedList<>();
+    //TODO: add msgs for printInt
+    //TODO: add instructions for printInt
+    printFunctions.put("p_print_int", printInt);
+  }
+
+  public void addPrintStringFunction(int labelNum) {
+    List<Instruction> printString = new LinkedList<>();
+    //TODO: add msgs for printInt
+    //TODO: add instructions for printInt
+    printString.add(new PushInstruction(Registers.lr));
+    printString.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0))); // LDR r1, [r0]
+    printString.add(new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1), new Operand2Int('#', 4)));
+    printString.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg1")));
+    printString.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+    printString.add(new BranchLinkInstruction("printf"));
+    printString.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+    printString.add(new BranchLinkInstruction("fflush"));
+    printString.add(new PopInstruction(Registers.pc));
+
+    printFunctions.put("p_print_int", printInt);
+  }
+
+  public void addPrintCharFunction() {
+    List<Instruction> printChar = new LinkedList<>();
+    //TODO: add msgs for printInt
+    //TODO: add instructions for printInt
+    printFunctions.put("p_print_int", printInt);
+  }
+
+  public void addPrintBoolFunction() {
+    List<Instruction> printBool = new LinkedList<>();
+    //TODO: add msgs for printInt
+    //TODO: add instructions for printInt
+    printFunctions.put("p_print_int", printInt);
+  }
+
+  public void addPrintlnFunction() {
+    List<Instruction> println = new LinkedList<>();
     //TODO: add msgs for printInt
     //TODO: add instructions for printInt
     printFunctions.put("p_print_int", printInt);

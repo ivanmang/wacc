@@ -47,7 +47,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   private CodeStringBuilder builder = new CodeStringBuilder("");
   private ARM11Machine machine = new ARM11Machine();
   private Registers registers = new Registers();
-  private int string_num = 0;
   private int labelnumber = 0;
   private SymbolTable symbolTable;
 
@@ -109,9 +108,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
       if(ctx.type().base_type().STRING()!=null){ //string
         String string = ctx.assign_rhs().getText();
-        machine.addMsg(string);
+        int msg_num = machine.addMsg(string);
         machine.add(new LoadInstruction(reg,
-            new Operand2String('=', "msg_"+string_num)));
+            new Operand2String('=', "msg_"+msg_num)));
         string_num++;
       }
 
