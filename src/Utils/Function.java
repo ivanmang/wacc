@@ -45,7 +45,7 @@ public class Function {
     return symbolInfoList.get(getIndex(key)).getAddress();
   }
 
-  public void setAddress(int index) {
-    symbolInfoList.get(index).setAddress(index);
+  public void setAddress(String key,int address) {
+    symbolInfoList.get(getIndex(key)).setAddress(address);
   }
 }

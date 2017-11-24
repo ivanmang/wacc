@@ -138,6 +138,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     currentFunction = ctx.getChild(1).getText();
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
+    visit(ctx.param_list());
     visit(ctx.stat());
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new PopInstruction(Registers.pc));
@@ -145,6 +146,22 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.addFunctionEnd();
     currentFunction = previousFunction;
     previousFunction = null;
+    return null;
+  }
+  
+  @Override
+  public Register visitParam_list(WaccParser.Param_listContext ctx){
+    int address = 4;
+    System.out.println(ctx.getChild(0).getChild(1).getText());
+    System.out.println(ctx.getChildCount());
+    for (int i = 0; i <= (ctx.getChildCount()); i = i +2) {
+      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
+      if (ctx.getChild(i).getChild(0).getText().equals("char") || ctx.getChild(i).getChild(0).getText().equals("bool")) {
+        address += 1;
+      } else {
+        address += 4;
+      }
+    }
     return null;
   }
 
@@ -204,7 +221,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      if (currentFunction.equals("main")) {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      }
+      else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+      }
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
       machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
@@ -212,6 +234,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register destReg = visit(ctx.assign_lhs().pair_elem());
       machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
     }
+    registers.free(srcReg);
     return null;
   }
 
@@ -486,9 +509,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       switch (op) {
         case WaccParser.PLUS:
           machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
+          machine.throwOverThrowError(CheckOverFlowErrorMsg());
           break;
         case WaccParser.MINUS:
           machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
+          machine.throwOverThrowError(CheckOverFlowErrorMsg());
           break;
         default:
           break;
@@ -503,11 +528,14 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //      System.out.printf((ctx.getChild(1)).getChild(0).getText());
       if (op == WaccParser.MUL) {
         machine.add(new SMulInstruction(reg1,reg2));
+        machine.add(new CompareInstruction(reg2,new Operand2Shift(reg1,"ASR",31)));
+        machine.throwOverThrowError(CheckOverFlowErrorMsg());
       }else if(op == WaccParser.DIV){
         Register rreg1= registers.getReturnRegister();
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
+        machine.throwOverThrowError(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
@@ -517,6 +545,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
+        machine.throwOverThrowError(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
@@ -699,7 +728,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public int CheckDividedByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    machine.add(new BranchLinkInstruction(" __aeabi_idiv"));
     return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
   }
 
@@ -724,7 +752,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public void pairThrowRunTimeError(){
     machine.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
-
   }
 
   @Override
