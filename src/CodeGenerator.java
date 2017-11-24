@@ -2,9 +2,7 @@ import CodeGeneration.*;
 import Instructions.*;
 import Instructions.Branch.BranchEqualInstruction;
 import Instructions.Branch.BranchInstruction;
-import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
-import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
@@ -517,11 +515,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       switch (op) {
         case WaccParser.PLUS:
           machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.addOverflowErrorFunction();
+          machine.addOverflowErrorFunction(false);
           break;
         case WaccParser.MINUS:
           machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.addOverflowErrorFunction();
+          machine.addOverflowErrorFunction(false);
           break;
         default:
           break;
@@ -537,13 +535,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       if (op == WaccParser.MUL) {
         machine.add(new SMulInstruction(reg1,reg2));
         machine.add(new CompareInstruction(reg2,new Operand2Shift(reg1,"ASR",31)));
-        machine.addOverflowErrorFunction();
+        machine.addOverflowErrorFunction(true);
       }else if(op == WaccParser.DIV){
         Register rreg1= registers.getReturnRegister();
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction();
+        machine.addOverflowErrorFunction(false);
         machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
@@ -553,7 +551,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction();
+        machine.addOverflowErrorFunction(false);
         machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
@@ -737,14 +735,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     registers.free(lastRegister);
     return null;
   }
-
-
-
-
-
-
-
-
 
   @Override
   public Register visitSkipStat(SkipStatContext ctx) {

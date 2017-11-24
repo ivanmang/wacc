@@ -49,9 +49,16 @@ public class Main {
     //Checking for semantic errors
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
-//    System.out.println("---Printing symbol table---");
-//    checker.getGlobalSymbolTable().printTable();
-//    System.out.println("---Finished---");
+
+    for(String ident : checker.getFunctionList().keySet()) {
+      System.out.println("Symbol table for " + ident);
+      checker.getFunctionList().get(ident).getSymbolTable().printTable();
+      System.out.println("Finished");
+    }
+
+    System.out.println("---Printing symbol table---");
+    checker.getGlobalSymbolTable().printTable();
+    System.out.println("---Finished---");
 
     CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolTable(), checker.getFunctionList());
     gen.visit(tree);

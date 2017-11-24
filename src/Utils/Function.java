@@ -1,6 +1,5 @@
 package Utils;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 public class Function {
@@ -9,6 +8,7 @@ public class Function {
   private String ident;
   private ArrayList<String> identList;
   private List<SymbolInfo> symbolInfoList = new LinkedList<>();
+  private SymbolTable symbolTable;
 
   public Function(Type returnType, ArrayList<String> identList,
       List<Type> typeList) {
@@ -17,6 +17,14 @@ public class Function {
     for(Type type : typeList) {
       symbolInfoList.add(new SymbolInfo(type));
     }
+  }
+
+  public void setSymbolTable(SymbolTable symbolTable) {
+    this.symbolTable = symbolTable;
+  }
+
+  public SymbolTable getSymbolTable() {
+    return symbolTable;
   }
 
   public Type getReturnType() {

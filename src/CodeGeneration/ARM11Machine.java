@@ -5,6 +5,7 @@ import Instructions.Branch.BrachLinkCSInstrcution;
 import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Branch.BranchLinkLargerThanInstruction;
+import Instructions.Branch.BranchLinkNEInstruction;
 import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Instruction;
@@ -264,49 +265,25 @@ public class ARM11Machine {
     msg.add(new GlobalMainLabel());
   }
 
-  public void addCheckArrayIndexTooLargeErrorFunction(){
+
+
+  public void addCheckArrayBoundFunction(){
     if (!printFunctions.containsKey("p_check_array_bounds")) {
       add(new BranchLinkInstruction("p_check_array_bounds"));
-      int arrayMsg = addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
+      int negMsg = addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
+      int largeMsg = addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
       List<Instruction> arrayBoundError = new LinkedList<>();
       arrayBoundError.add(new Label("p_check_array_bounds"));
       arrayBoundError.add(new PushInstruction(Registers.lr));
       arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
 
-      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + arrayMsg)));
+      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + negMsg)));
       arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
 
       arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1))); //TODO:What is r1
       arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1)); //TODO:What is r1
       arrayBoundError
-          .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + arrayMsg)));
-      arrayBoundError.add(new BrachLinkCSInstrcution("p_throw_runtime_error"));
-      arrayBoundError.add(new PopInstruction(Registers.pc));
-
-
-
-
-      printFunctions.put("p_check_array_bounds", arrayBoundError);
-      addRuntimeErrorInstruction();
-    }
-  }
-
-  public void addCheckArrayNegErrorFunction(){
-    if (!printFunctions.containsKey("p_check_array_bounds")) {
-      add(new BranchLinkInstruction("p_check_array_bounds"));
-      int arrayMsg = addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
-      List<Instruction> arrayBoundError = new LinkedList<>();
-      arrayBoundError.add(new Label("p_check_array_bounds"));
-      arrayBoundError.add(new PushInstruction(Registers.lr));
-      arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
-
-      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + arrayMsg)));
-      arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
-
-      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1))); //TODO:What is r1
-      arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1)); //TODO:What is r1
-      arrayBoundError
-          .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + arrayMsg)));
+          .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + largeMsg)));
       arrayBoundError.add(new BrachLinkCSInstrcution("p_throw_runtime_error"));
       arrayBoundError.add(new PopInstruction(Registers.pc));
 
@@ -355,9 +332,13 @@ public class ARM11Machine {
   }
 
 
-  public void addOverflowErrorFunction() {
+  public void addOverflowErrorFunction(boolean isMul) {
     if (!printFunctions.containsKey("p_throw_overflow_error")) {
-      add(new BranchLinkVSInstruction("p_throw_overflow_error"));
+      if(isMul){
+        add(new BranchLinkNEInstruction("p_throw_overflow_error"));
+      }else{
+        add(new BranchLinkVSInstruction("p_throw_overflow_error"));
+      }
       int overflowMsg = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> overflowError = new LinkedList<>();
       overflowError.add(new Label("p_throw_overflow_error"));
@@ -368,6 +349,7 @@ public class ARM11Machine {
       addRuntimeErrorInstruction();
     }
   }
+
 
   public void addRuntimeErrorInstruction() {
     if (!printFunctions.containsKey("p_throw_runtime_error")) {

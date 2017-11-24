@@ -1,7 +1,7 @@
 import Utils.ArrayType;
 import Utils.BaseType;
-import Utils.ID;
 import Utils.PairType;
+import Utils.SymbolTable;
 import Utils.Type;
 import antlr.WaccParser;
 import antlr.WaccParser.Array_elemContext;

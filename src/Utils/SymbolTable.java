@@ -1,6 +1,5 @@
-import Utils.SymbolInfo;
-import Utils.Type;
-import java.util.Hashtable;
+package Utils;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 

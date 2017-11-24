@@ -57,11 +57,14 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
           typeList.add(type);
         }
       }
-
       functionList
           .put(funcContext.ident().getText(), new Function(returnType, identList, typeList));
+
     }
-    visitChildren(ctx);
+    for (FuncContext funcContext : ctx.func()) {
+      visit(funcContext);
+    }
+    visit(ctx.stat());
     return null;
   }
 
@@ -87,8 +90,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
           .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
               returnType);
     }
-
+    functionList.get(ctx.ident().getText()).setSymbolTable(symbolTable);
     symbolTable = symbolTable.exitScope(symbolTable);
+    symbolTable.setChildSymbolTable(null);
 
     return expected;
   }
