@@ -2,12 +2,14 @@ import CodeGeneration.*;
 import Instructions.AddInstruction;
 import Instructions.Branch.BranchEqualInstruction;
 import Instructions.Branch.BranchInstruction;
+import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.Operand2;
@@ -149,14 +151,40 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     return null;
   }
 
-  public void ArrayIndexOutOfBoundsError(){
-    String negIndex = "negative index\n\0";
-    String largeIndex = "index too large\n\0";
-    machine.add(new Label("p_throw_runtime_error"));
+  public int ArrayIndexNegErrorMsg(){
+    return machine.addMsg("ArrayIndexOutOfBoundsError: negative index\n\0");
+  }
+
+  public int ArrayIndexTooLargeErrorMsg(){
+    return machine.addMsg("ArrayIndexOutOfBoundsError: index too large\n\0");
+  }
+
+  public int DividedByZeroMsg(){
+    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+  }
+
+  public int overFlowErrorMsg(){
+    return machine.addMsg("OverflowError: the result is too small/large to store in a 4-byte signed-integer");
+  }
+
+  public int NullReferenceMsg(){
+    return machine.addMsg("NullReferenceError: dereference a null reference\\n\\0");
+  }
+
+  public void throwRuntimeError(){
+    machine.add(new Label("p_throw_runtime_error:"));
     machine.add(new BranchLinkInstruction("p_print_string"));
     machine.add(new MovInstruction(Registers.r0,new Operand2Int('#',-1)));
-    machine.addMsg("ArrayIndexOutOfBoundsError: "+negIndex);
-    machine.addMsg("ArrayIndexOutOfBoundsError: "+largeIndex);
+    machine.add(new BranchLinkInstruction("exit"));
+  }
+
+
+  public void checkNullPointer(int nullReferenceMsg){
+    machine.add(new PushInstruction(Registers.lr));
+    machine.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
+    machine.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=',"msg"+nullReferenceMsg)));
+    machine.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
+    machine.add(new PopInstruction(Registers.pc));
   }
 
 
