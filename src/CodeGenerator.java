@@ -415,6 +415,16 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitArray_elem(Array_elemContext ctx) {
     Register reg1 = registers.getRegister();
+    Type type = symbolTable.getDictionary().get(ctx.ident().getText()).getType();
+    Type elementType = null;
+    if(type instanceof BaseType) {
+      if(type.equals(stringType)) {
+        elementType = charType;
+      }
+    } else if (type instanceof ArrayType) {
+      ArrayType arrayType = (ArrayType) type;
+      elementType = arrayType.getElementType();
+    }
     int offset = symbolTable.getAddress(ctx.getChild(0).getText());
     machine.add(new AddInstruction(reg1,Registers.sp,new Operand2Int('#',offset)));
     Register reg2 = visit(ctx.getChild(2));
@@ -425,8 +435,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
     //TODO:check array type and check is array out of bound
     machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
-    machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
-    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+    if(elementType.equals(charType) || elementType.equals(boolType)) {
+      machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2)));
+    } else {
+      machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
+    }
+
+//    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
     registers.free(reg2);
     registers.free(rreg1);
     registers.free(rreg2);
