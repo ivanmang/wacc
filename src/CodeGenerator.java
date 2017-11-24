@@ -196,9 +196,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
       if (ctx.type().base_type().STRING() != null) { //string
         machine.add((new StoreInstruction(reg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText())))));
-      }
-
-      if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
+      } else if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
         machine.add(new StoreByteInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       } else {
@@ -223,7 +221,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
 //      if (currentFunction.equals("main")) {
-        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
 //      }
 //      else {
 //        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
