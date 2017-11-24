@@ -94,7 +94,7 @@ public class ARM11Machine {
       printInt.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_num)));
       printInt.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       printInt.add(new BranchLinkInstruction("printf"));
       printInt.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
@@ -117,12 +117,12 @@ public class ARM11Machine {
       printString.add(new LoadInstruction(Registers.r1,
           new Operand2Reg(Registers.r0, true))); // LDR r1, [r0]
       printString.add(
-          new AddInstruction(Registers.r2, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r2, Registers.r0,
               new Operand2Int('#', 4)));
       printString.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_num)));
       printString.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       printString.add(new BranchLinkInstruction("printf"));
       printString
@@ -150,7 +150,7 @@ public class ARM11Machine {
       printBool.add(new LoadEqualInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_false)));
       printBool.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       printBool.add(new BranchLinkInstruction("printf"));
       printBool.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
@@ -172,7 +172,7 @@ public class ARM11Machine {
       println.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_newline)));
       println.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       println.add(new BranchLinkInstruction("puts"));
       println.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
@@ -195,7 +195,7 @@ public class ARM11Machine {
       readInt.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_readInt)));
       readInt.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       readInt.add(new BranchLinkInstruction("scanf"));
       readInt.add(new PopInstruction(Registers.pc));
@@ -215,7 +215,7 @@ public class ARM11Machine {
       readChar.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_readChar)));
       readChar.add(
-          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+          new AddInstruction(Registers.r0, Registers.r0,
               new Operand2Int('#', 4)));
       readChar.add(new BranchLinkInstruction("scanf"));
       readChar.add(new PopInstruction(Registers.pc));

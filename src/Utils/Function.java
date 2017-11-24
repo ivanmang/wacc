@@ -1,6 +1,7 @@
 package Utils;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,13 +10,15 @@ public class Function {
   private Type returnType;
   private String ident;
   private List<String> identList;
-  private List<SymbolInfo> typeList;
+  private List<SymbolInfo> symbolInfoList = new LinkedList<>();
 
   public Function(Type returnType, List<String> identList,
-      List<SymbolInfo> typeList) {
+      List<Type> typeList) {
     this.returnType = returnType;
     this.identList = identList;
-    this.typeList = typeList;
+    for(Type type : typeList) {
+      symbolInfoList.add(new SymbolInfo(type));
+    }
   }
 
   public Type getReturnType() {
@@ -31,18 +34,18 @@ public class Function {
   }
 
   public Type getType(int index) {
-    return typeList.get(index).getType();
+    return symbolInfoList.get(index).getType();
   }
 
   public SymbolInfo getSymbolInfo(int index) {
-    return typeList.get(index);
+    return symbolInfoList.get(index);
   }
 
   public int getAddress(int index) {
-    return typeList.get(index).getAddress();
+    return symbolInfoList.get(index).getAddress();
   }
 
   public void setAddress(int index) {
-    typeList.get(index).setAddress(index);
+    symbolInfoList.get(index).setAddress(index);
   }
 }

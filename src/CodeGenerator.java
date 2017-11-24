@@ -60,7 +60,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public static final int MAX_STACK_SIZE = 1024;
 
-  public CodeGenerator(SymbolTable symbolTable) {
   public CodeGenerator(SymbolTable symbolTable, Map<String, Function> functionList) {
     this.symbolTable = symbolTable;
     this.functionList = functionList;
@@ -284,21 +283,21 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
     //if size exceed max stack size reserve, Push max_size first
     while (reserveByte > MAX_STACK_SIZE) {
-      machine.add(new SubInstruction(Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
       reserveByte -= MAX_STACK_SIZE;
     }
-    machine.add(new SubInstruction(Registers.sp, new Operand2Int('#', reserveByte)));
+    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
     reserveByte = symbolTable.getSize();
 
     visit(ctx.stat());
 
     //if size exceed max stack size reserve, Push max_size first
     while (reserveByte > MAX_STACK_SIZE) {
-      machine.add(new AddInstruction(Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
       reserveByte -= MAX_STACK_SIZE;
     }
     //Pop the variables
-    machine.add(new AddInstruction(Registers.sp, new Operand2Int('#', reserveByte)));
+    machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
 
     symbolTable = symbolTable.exitScope(symbolTable);
     return null;
@@ -572,8 +571,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public int NullReferenceMsg() {
     return machine.addMsg("NullReferenceError: dereference a null reference\\n\\0");
   }
-
-}
 
   @Override
   public Register visitSkipStat(SkipStatContext ctx) {
