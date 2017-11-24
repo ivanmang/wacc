@@ -58,6 +58,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   private int labelnumber = 0;
   private SymbolTable symbolTable;
   private Map<String, Function> functionList;
+  private GetTypeFromExpr exprTypeGetter = new GetTypeFromExpr();
+
+  private Type intType = new BaseType(WaccParser.INT);
+  private Type charType = new BaseType(WaccParser.CHAR);
+  private Type boolType = new BaseType(WaccParser.BOOL);
+  private Type stringType = new BaseType(WaccParser.STRING);
 
   public static final int MAX_STACK_SIZE = 1024;
 
@@ -169,9 +175,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       return visit(ctx.new_pair());
     } else if (ctx.pair_elem() != null) {
       Register addressRegister = visit(ctx.pair_elem());
-      //TODO: check whether expression is a bool or character to determine whether it is LDR or LDRSB
-      //Get content from address
-      machine.add(new LoadInstruction(addressRegister, new Operand2Reg(addressRegister, true)));
+      if(exprTypeIsCharOrBool(ctx.pair_elem().expr())) {
+        //Get content from address
+        machine.add(new LoadByteInstruction(addressRegister, new Operand2Reg(addressRegister, true)));
+      } else {
+        machine.add(new LoadInstruction(addressRegister, new Operand2Reg(addressRegister, true)));
+      }
       return addressRegister;
     }
     return null;
@@ -185,11 +194,18 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new MovInstruction(registers.r0, new Operand2Reg(exprRegister)));
     //TODO check for null pointer
 
-    //TODO: check whether expression is a bool or character to determine whether it is LDR or LDRSB
-    if(ctx.FST() != null) {
-      machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister)));
-    } else if(ctx.SND() != null) {
-      machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister, 4)));
+    if(exprTypeIsCharOrBool(ctx.expr())) {
+      if(ctx.FST() != null) {
+        machine.add(new LoadByteInstruction(exprRegister, new Operand2Reg(exprRegister)));
+      } else if(ctx.SND() != null) {
+        machine.add(new LoadByteInstruction(exprRegister, new Operand2Reg(exprRegister, 4)));
+      }
+    } else {
+      if(ctx.FST() != null) {
+        machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister)));
+      } else if(ctx.SND() != null) {
+        machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister, 4)));
+      }
     }
 
     return exprRegister;
@@ -201,8 +217,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     int size = ctx.expr().size();
 
     //Getting the size of the type of the elements in the array: integer size -> 4
-    //TODO: different size for different types
-    int typeSize = 4;
+    int typeSize = getSizeFromExpr(ctx.expr(0));
 
     //Load the size of the array to r0 and call malloc to allocate memory on the heap for the array
     machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', typeSize * size + 4)));
@@ -213,13 +228,18 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new MovInstruction(addressRegister, registers.r0));
 
     int pos = 1;
+    boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
     //For each element in the array literal, load the expression to the register and store it to the corresponding address in the heap
     for (ExprContext exprContext : ctx.expr()) {
       Register exprRegister = visit(exprContext);
-      //TODO: use storeByte for char and bool
-      machine.add(
-          new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
-      registers.free(exprRegister);
+      if(isCharOrBool) {
+        machine.add(
+            new StoreByteInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
+      } else {
+        machine.add(
+            new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
+      }
+    registers.free(exprRegister);
     }
     //Put the size of the array literal to the first element (first address) of the array
     Register sizeRegister = registers.getRegister();
@@ -243,7 +263,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //First expression
     //Get the result of the first expression to a register
     Register fstRegister = visit(ctx.expr(0));
-    int fstTypeSize = 4; //TODO: get the size of the expression base on the type of the expression
+    int fstTypeSize = getSizeFromExpr(ctx.expr(0));
     //Allocate memory for the first element
     machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', fstTypeSize)));
     machine.add(new BranchLinkInstruction("malloc"));
@@ -255,7 +275,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //Second expression
     //Get the result of the second expression to a register
     Register sndRegister = visit(ctx.expr(1));
-    int sndTypeSize = 4; //TODO: get the size of the expression base on the type of the expression
+    int sndTypeSize = getSizeFromExpr(ctx.expr(1));
     //Allocate memory for the second element
     machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', sndTypeSize)));
     machine.add(new BranchLinkInstruction("malloc"));
@@ -528,7 +548,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register lastRegister = visit(ctx.expr());
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
     Label elseLabel = new Label(labelnumber++); //else label
-    Label thenLabel = new Label(labelnumber); //then label
+    Label thenLabel = new Label(labelnumber++); //then label
     machine.add(new BranchEqualInstruction(elseLabel.toString()));
     machine.add(new BranchInstruction(thenLabel.toString()));
     machine.add(elseLabel);
@@ -541,7 +561,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitWhileStat(WhileStatContext ctx) {
     Label startLabel = new Label(labelnumber++);
-    Label loopLabel = new Label(labelnumber);
+    Label loopLabel = new Label(labelnumber++);
     machine.add(new BranchInstruction(startLabel.toString()));
     machine.add(loopLabel);
     visit(ctx.stat());
@@ -564,8 +584,17 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public int CheckDividedByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
+    machine.add(new BranchLinkInstruction(" __aeabi_idiv"));
     return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
   }
+
+  public int CheckModByZeroMsg() {
+    machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
+    machine.add(new BranchLinkInstruction(" __aeabi_imod"));
+    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+  }
+
+
 
   public int CheckOverFlowErrorMsg() {
     machine.add(new BranchLinkVSInstruction("p_throw_overflow_error"));
@@ -590,86 +619,79 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
-//  if the number behind print is int then use Operand2Int
-//    int num = ctx.getChild.get(1);
-//  if the number behind print is char then use Operand2Char
-//    char chr = ctx.getChild.get(1);
-//  if the number behind print is string then use Operand2String
-//    String str = ctx.getChild.get(1);
-    int num = 0;
-    char chr = 'N';
-    String str = "NOT YET IMPLEMENTED";
-// TODO: integrate expression into the implementation of print
-    int msg_num = machine.addMsg(str);
-    Register current = registers.getRegister();
-    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
-    registers.free(current);
-
-//    if number behind print is int
-    machine.add(new BranchLinkInstruction("p_print_int"));
-//    if behind print is char
-    Register current1 = registers.getRegister();
-    machine.add(new MovInstruction(current, new Operand2Char('#', chr)));
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current1)));
-    registers.free(current1);
-    machine.add(new BranchLinkInstruction("putchar"));
-
-//    if number behind print is string
-    machine.add(new BranchLinkInstruction("p_print_string"));
-
-//    if (ctx.getChild(1) is of the type int) {
-    machine.addPrintIntFunction(str);
-//    } else if (ctx.getChild(1) is of the type string) {
-    machine.addPrintStringFunction(str);
-//    } else if (ctx.getChild(1) is of the type bool) {
-    machine.addPrintBoolFunction();
-//    }
-
-        return null;
+    Register exprRegister = visit(ctx.expr());
+    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+    machine.add(new MovInstruction(Registers.r0, exprRegister));
+    if(exprType.equals(intType)) {
+      machine.add(new BranchLinkInstruction("p_print_int"));
+      machine.addPrintIntFunction();
+    } else if(exprType.equals(charType)) {
+      machine.add(new BranchLinkInstruction("putchar"));
+    } else if(exprType.equals(stringType)) {
+      machine.add(new BranchLinkInstruction("p_print_string"));
+      machine.addPrintStringFunction();
+    } else if(exprType.equals(boolType)) {
+      machine.add(new BranchLinkInstruction("p_print_bool"));
+      machine.addPrintBoolFunction();
+    } else {
+      machine.add(new BranchLinkInstruction("p_print_reference"));
+      machine.addPrintReferenceFunction();
+    }
+    return null;
   }
 
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
-    //  if the number behind print is int then use Operand2Int
-//    String str = ctx.getChild.get(0);
-    String str= "NOT YET IMPLEMENTED";
-    int msg_num = machine.addMsg(str);
-    Register current = registers.getRegister();
-    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
-    registers.free(current);
-
-//    if number behind print is int
-    machine.add(new BranchLinkInstruction("p_print_int"));
-//    if number behind print is string
-    machine.add(new BranchLinkInstruction("p_print_string"));
-    machine.add(new BranchLinkInstruction("p_print_ln"));
-
-//    if (ctx.getChild(1) is of the type int) {
-    machine.addPrintIntFunction(str);
-//    } else if (ctx.getChild(1) is of the type string) {
-    machine.addPrintStringFunction(str);
-//    } else if (ctx.getChild(1) is of the type bool) {
-    machine.addPrintBoolFunction();
-//    }
-
-
+    Register exprRegister = visit(ctx.expr());
+    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+    machine.add(new MovInstruction(Registers.r0, exprRegister));
+    if(exprType.equals(intType)) {
+      machine.add(new BranchLinkInstruction("p_print_int"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+      machine.addPrintIntFunction();
+    } else if(exprType.equals(charType)) {
+      machine.add(new BranchLinkInstruction("putchar"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+    } else if(exprType.equals(stringType)) {
+      machine.add(new BranchLinkInstruction("p_print_string"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+      machine.addPrintStringFunction();
+    } else if(exprType.equals(boolType)) {
+      machine.add(new BranchLinkInstruction("p_print_bool"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+      machine.addPrintBoolFunction();
+    } else {
+      machine.add(new BranchLinkInstruction("p_print_reference"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+      machine.addPrintReferenceFunction();
+    }
     machine.addPrintlnFunction();
     return null;
   }
 
   @Override
   public Register visitReadStat(ReadStatContext ctx) {
-//    if (ctx.getChild(1) is an int type) {
-    machine.addReadIntFunction();
-//    }
-//    else if (ctx.getChild(1) is a char type){
-    machine.addReadCharFunction();
-//    }
+    String ident = ctx.assign_lhs().ident().getText();
+    Register readRegister = visit(ctx.assign_lhs());
+    machine.add(new MovInstruction(Registers.r0, readRegister));
+    if (symbolTable.lookup(ident).equals(intType)) {
+      machine.add(new BranchLinkInstruction("p_read_int"));
+      machine.addReadIntFunction();
+    } else if(symbolTable.lookup(ident).equals(charType)) {
+      machine.add(new BranchLinkInstruction("p_read_char"));
+      machine.addReadCharFunction();
+    }
     return null;
   }
 
+  private int getSizeFromExpr(ExprContext ctx) {
+    return exprTypeGetter.visitExpr(ctx, symbolTable).getSize();
+  }
+
+  private boolean exprTypeIsCharOrBool(ExprContext ctx) {
+    Type type = exprTypeGetter.visitExpr(ctx, symbolTable);
+    return type.equals(boolType) || type.equals(charType);
+  }
 }
 
 

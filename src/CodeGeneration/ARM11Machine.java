@@ -81,7 +81,7 @@ public class ARM11Machine {
     return msgIndex;
   }
 
-  public void addPrintIntFunction(String str) {
+  public void addPrintIntFunction() {
     List<Instruction> printInt = new LinkedList<>();
 
     if (!printFunctions.containsKey("p_print_int")) {
@@ -104,10 +104,8 @@ public class ARM11Machine {
     }
   }
 
-  public void addPrintStringFunction(String str) {
+  public void addPrintStringFunction() {
     List<Instruction> printString = new LinkedList<>();
-
-    addMsg(str);
 
     if (!printFunctions.containsKey("p_print_string")) {
       int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
@@ -157,6 +155,31 @@ public class ARM11Machine {
       printBool.add(new BranchLinkInstruction("fflush"));
       printBool.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_print_bool", printBool);
+    }
+
+  }
+
+  public void addPrintReferenceFunction() {
+    List<Instruction> printReference = new LinkedList<>();
+
+    if (!printFunctions.containsKey("p_print_reference")) {
+      int msg_num = addMsg("\"%p\\0\""); // Restriction: only add once
+
+      printReference.add(new Label("p_print_reference"));
+      printReference.add(new PushInstruction(Registers.lr));
+      printReference.add(new MovInstruction(Registers.r1,
+          new Operand2Reg(Registers.r0))); // LDR r1, r0
+      printReference.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_num)));
+      printReference.add(
+          new AddInstruction(Registers.r0, Registers.r0,
+              new Operand2Int('#', 4)));
+      printReference.add(new BranchLinkInstruction("printf"));
+      printReference
+          .add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      printReference.add(new BranchLinkInstruction("fflush"));
+      printReference.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_print_string", printReference);
     }
 
   }
