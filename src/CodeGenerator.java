@@ -224,17 +224,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Type type;
       if (currentFunction.equals("main")) {
         if(symbolTable.getSymbolInfo(ident).getType().getSize()==1){
-          machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+          
         }else {
           machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
         }
       }
       else {
-        if(symbolTable.getSymbolInfo(ident).getType().getSize()==1){
-          machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
-        }else {
-          machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
-        }
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
       }
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
@@ -565,8 +561,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (ctx.pair_liter() != null) {
       return null;
     } else if (ctx.unary_oper() != null) {
-      Register reg1 = registers.getRegister();
-      int op = ((TerminalNode) ctx.getChild(1).getChild(0)).getSymbol().getType();
+      Register reg1 = visit(ctx.getChild(1));
+      int op = ((TerminalNode) ctx.getChild(0).getChild(0)).getSymbol().getType();
       switch (op) {
         case WaccParser.NOT:
           machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
