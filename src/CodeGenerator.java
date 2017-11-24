@@ -6,19 +6,14 @@ import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
-import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
-import Instructions.Labels.TextLabel;
 import Instructions.Load.LoadByteInstruction;
-import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
 import Instructions.Move.*;
-import Instructions.Operand2.Operand2;
 import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2Reg;
 import Instructions.Operand2.Operand2String;
-import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.*;
 import Instructions.PopInstruction;
@@ -26,12 +21,10 @@ import Instructions.PushInstruction;
 import Instructions.Store.StoreByteInstruction;
 import Instructions.Store.StoreInstruction;
 import antlr.WaccParser;
-import Instructions.StringInstruction;
 import Instructions.SubInstruction;
 import antlr.WaccParser.Array_elemContext;
 import antlr.WaccParser.Array_literContext;
 import antlr.WaccParser.AssignStatContext;
-import antlr.WaccParser.Assign_lhsContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
@@ -44,13 +37,11 @@ import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.ReturnStatContext;
 import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
-import java.util.Deque;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -203,12 +194,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         machine.add(new StoreInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }
-
       registers.free(reg);
-
-    }
-    else{
+    } else  {
       Register reg = visit(ctx.assign_rhs());
+      machine.add(new StoreInstruction(reg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       registers.free(reg);
     }
 
@@ -528,11 +517,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       switch (op) {
         case WaccParser.PLUS:
           machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.throwOverThrowError(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
           break;
         case WaccParser.MINUS:
           machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.throwOverThrowError(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
           break;
         default:
           break;
@@ -548,13 +537,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       if (op == WaccParser.MUL) {
         machine.add(new SMulInstruction(reg1,reg2));
         machine.add(new CompareInstruction(reg2,new Operand2Shift(reg1,"ASR",31)));
-        machine.throwOverThrowError(CheckOverFlowErrorMsg());
+        machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
       }else if(op == WaccParser.DIV){
         Register rreg1= registers.getReturnRegister();
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.throwOverThrowError(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
@@ -564,7 +553,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.throwOverThrowError(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
@@ -577,8 +566,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new LoadInstruction(reg, new Operand2Int('=', 0)));
       return reg;
     } else if (ctx.unary_oper() != null) {
-      Register reg1 = registers.getRegister();
-      int op = ((TerminalNode) ctx.getChild(1).getChild(0)).getSymbol().getType();
+      Register reg1 = visit(ctx.getChild(1));
+      int op = ((TerminalNode) ctx.getChild(0).getChild(0)).getSymbol().getType();
       switch (op) {
         case WaccParser.NOT:
           machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
