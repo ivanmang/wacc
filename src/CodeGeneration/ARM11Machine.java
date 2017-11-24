@@ -103,7 +103,7 @@ public class ARM11Machine {
     if (!printFunctions.containsKey("p_free_pair")) {
       int msg_num = addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
 
-      freePair.add(new Label("p_print_int"));
+      freePair.add(new Label("p_free_pair"));
       freePair.add(new PushInstruction(Registers.lr));
       freePair.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
       freePair.add(new LoadEqualInstruction(Registers.r0,
