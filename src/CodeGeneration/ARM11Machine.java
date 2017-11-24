@@ -148,9 +148,9 @@ public class ARM11Machine {
 
   public void addPrintStringFunction() {
     List<Instruction> printString = new LinkedList<>();
-    System.out.println("bye?");
+//    System.out.println("bye?");
     if (!printFunctions.containsKey("p_print_string")) {
-      System.out.println("hi?");
+//      System.out.println("hi?");
       int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
 
       printString.add(new Label("p_print_string"));

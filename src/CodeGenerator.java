@@ -656,9 +656,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = registers.getRegister();
       int offset;
       Type type;
-      offset = symbolTable.getAddress(ctx.getChild(0).getText());
-      type = symbolTable.getSymbolInfo(ctx.getChild(0).getText()).getType();
-      if(type.getSize()==1) {
+      offset = symbolTable.getAddress(ctx.ident().getText());
+      type = symbolTable.getSymbolInfo(ctx.ident().getText()).getType();
+      if(type.getSize() == 1) {
         machine.add(new LoadByteInstruction(reg, new Operand2Reg(Registers.sp, offset)));
       }
       else{
