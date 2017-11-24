@@ -2,6 +2,8 @@ package CodeGeneration;
 
 import Instructions.AddInstruction;
 import Instructions.Branch.BrachLinkCSInstrcution;
+import Instructions.Branch.BranchEqualInstruction;
+import Instructions.Branch.BranchInstruction;
 import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Branch.BranchLinkLargerThanInstruction;
@@ -93,6 +95,32 @@ public class ARM11Machine {
     msg.add(new WordInstruction(messageCopy.length()));
     msg.add(new StringInstruction(message));
     return msgIndex;
+  }
+
+  public void addFreePairFunction() {
+    List<Instruction> freePair = new LinkedList<>();
+
+    if (!printFunctions.containsKey("p_free_pair")) {
+      int msg_num = addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
+
+      freePair.add(new Label("p_print_int"));
+      freePair.add(new PushInstruction(Registers.lr));
+      freePair.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
+      freePair.add(new LoadEqualInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_num)));
+      freePair.add(new BranchEqualInstruction("p_throw_runtime_error"));
+      freePair.add(new PushInstruction(Registers.r0));
+      freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.r0, true)));
+      freePair.add(new BranchInstruction("free"));
+      freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.sp, true)));
+      freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.r0, 4)));
+      freePair.add(new BranchInstruction("free"));
+      freePair.add(new PopInstruction(Registers.r0));
+      freePair.add(new BranchInstruction("free"));
+      freePair.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_free_pair", freePair);
+      addRuntimeErrorInstruction();
+    }
   }
 
   public void addPrintIntFunction() {

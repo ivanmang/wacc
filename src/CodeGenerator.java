@@ -28,6 +28,7 @@ import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
+import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.IfStatContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
@@ -441,7 +442,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register rreg2 = registers.getReturnRegister();
     machine.add(new MovInstruction(rreg1,new Operand2Reg(reg2)));
     machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
-    //TODO:check array type and check is array out of bound
+    machine.addCheckArrayBoundFunction();
     machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
     if(elementType.equals(charType) || elementType.equals(boolType)) {
       machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2)));
@@ -564,8 +565,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction(false);
-        machine.add(new BranchLinkInstruction("__aeabi_idiv"));
+        machine.CheckDividedByZeroFunction();
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
         registers.free(rreg2);
@@ -574,8 +574,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction(false);
-        machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
+        machine.CheckDividedByModFunction();
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
         registers.free(rreg2);
@@ -674,8 +673,17 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     return null;
   }
 
+  @Override
+  public Register visitFreeStat(FreeStatContext ctx) {
+    Register reg = visit(ctx.expr());
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(reg)));
+    machine.add(new BranchLinkInstruction("p_free_pair"));
+    machine.addFreePairFunction();
+    registers.free(reg);
+    return null;
+  }
 
-//  @Override
+  //  @Override
 //  public Register visitBinary_oper_plus(WaccParser.Binary_oper_plusContext ctx) {
 ////    System.out.println("1"+ctx.getChild(0).toString());
 ////    Register reg1 = visit(ctx.getChild(0));
