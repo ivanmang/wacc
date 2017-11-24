@@ -211,9 +211,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     machine.add(new PopInstruction(Registers.pc));
   }
 
-
-}
-
   @Override
   public Register visitReturnStat(ReturnStatContext ctx) {
 //    if ctx is not leaf
@@ -245,6 +242,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 //    char chr = ctx.getChild.get(1);
 //  if the number behind print is string then use Operand2String
 //    String str = ctx.getChild.get(1);
+    int num = 0;
+    char chr = 'N';
+    String str = "NOT YET IMPLEMENTED";
 // TODO: integrate expression into the implementation of print
     int msg_num = machine.addMsg(str);
     Register current = registers.getRegister();
@@ -255,10 +255,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 //    if number behind print is int
     machine.add(new BranchLinkInstruction("p_print_int"));
 //    if behind print is char
-    Register current = registers.getRegister();
+    Register current1 = registers.getRegister();
     machine.add(new MovInstruction(current, new Operand2Char('#', chr)));
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
-    registers.free(current);
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current1)));
+    registers.free(current1);
     machine.add(new BranchLinkInstruction("putchar"));
 
 //    if number behind print is string
@@ -278,7 +278,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
     //  if the number behind print is int then use Operand2Int
-    String str = ctx.getChild.get(0);
+//    String str = ctx.getChild.get(0);
+    String str= "NOT YET IMPLEMENTED";
     int msg_num = machine.addMsg(str);
     Register current = registers.getRegister();
     machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));

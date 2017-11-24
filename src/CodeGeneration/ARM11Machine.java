@@ -32,6 +32,7 @@ public class ARM11Machine {
     functions = new LinkedHashMap<>();
     msg = new LinkedList<>();
     functions.put("msg", msg);
+    printFunctions = new LinkedHashMap<>();
   }
 
   //add the label for the start of the function and add it to the map
@@ -68,6 +69,7 @@ public class ARM11Machine {
     if (!printFunctions.containsKey("p_print_int")) {
       int msg_num = addMsg("\"%d\\0\"");
 
+      printInt.add(new Label("p_print_int"));
       printInt.add(new PushInstruction(Registers.lr));
       printInt
           .add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
@@ -92,11 +94,12 @@ public class ARM11Machine {
     if (!printFunctions.containsKey("p_print_string")) {
       int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
 
+      printString.add(new Label("p_print_string"));
       printString.add(new PushInstruction(Registers.lr));
       printString.add(new LoadInstruction(Registers.r1,
-          new Operand2Reg(Registers.r0))); // LDR r1, [r0]
+          new Operand2Reg(Registers.r0, true))); // LDR r1, [r0]
       printString.add(
-          new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1),
+          new AddInstruction(Registers.r2, new Operand2Reg(Registers.r0),
               new Operand2Int('#', 4)));
       printString.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_num)));
@@ -121,6 +124,7 @@ public class ARM11Machine {
       int msg_true = addMsg("\"true\\0\"");
       int msg_false = addMsg("\"false\\0\"");
 
+      printBool.add(new Label("p_print_bool"));
       printBool.add(new PushInstruction(Registers.lr));
       printBool.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
       printBool.add(new LoadNotEqualInstruction(Registers.r0,
@@ -145,6 +149,7 @@ public class ARM11Machine {
     if (!printFunctions.containsKey("p_print_ln")) {
       int msg_newline = addMsg("\"\\0\"");
 
+      println.add(new Label("p_print_ln"));
       println.add(new PushInstruction(Registers.lr));
       println.add(new LoadInstruction(Registers.r0,
           new Operand2String('=', "msg_" + msg_newline)));
@@ -163,6 +168,7 @@ public class ARM11Machine {
     List<Instruction> readInt = new LinkedList<>();
 
     if (!printFunctions.containsKey("p_read_int")) {
+      readInt.add(new Label("p_read_int"));
       int msg_readInt = addMsg("\"%d\\0\"");
 
       readInt.add(new PushInstruction(Registers.lr));
@@ -184,7 +190,7 @@ public class ARM11Machine {
 
     if (!printFunctions.containsKey("p_read_char")) {
       int msg_readChar = addMsg("\" %c\\0\"");
-
+      readChar.add(new Label("p_read_char"));
       readChar.add(new PushInstruction(Registers.lr));
       readChar
           .add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
@@ -213,6 +219,14 @@ public class ARM11Machine {
   public String toCode() {
     StringBuilder builder = new StringBuilder();
     for (List<Instruction> func : functions.values()) {
+      for (Instruction instr : func) {
+        for (int num = 0; num < instr.getIndentation(); num++) {
+          builder.append("\t\t");
+        }
+        builder.append(instr.toCode()).append("\n");
+      }
+    }
+    for(List<Instruction> func : printFunctions.values()) {
       for (Instruction instr : func) {
         for (int num = 0; num < instr.getIndentation(); num++) {
           builder.append("\t\t");
