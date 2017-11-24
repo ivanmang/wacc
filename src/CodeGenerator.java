@@ -846,10 +846,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(Registers.r0, destReg));
       registers.free(destReg);
     }
-    if (symbolTable.lookup(ident).equals(intType)) {
+    if (symbolTable.lookupAll(ident).equals(intType)) {
       machine.add(new BranchLinkInstruction("p_read_int"));
       machine.addReadIntFunction();
-    } else if(symbolTable.lookup(ident).equals(charType)) {
+    } else if(symbolTable.lookupAll(ident).equals(charType)) {
       machine.add(new BranchLinkInstruction("p_read_char"));
       machine.addReadCharFunction();
     }
