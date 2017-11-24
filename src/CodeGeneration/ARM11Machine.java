@@ -47,7 +47,7 @@ public class ARM11Machine {
     if(msg.isEmpty()) {
       msg.add(new DataLabel());
     }
-    int msgIndex = msg.size() - 1;
+    int msgIndex = (msg.size() - 1) / 3;
     msg.add(new Label("msg_" + msgIndex));
     msg.add(new WordInstruction(message.length()));
     msg.add(new StringInstruction(message));
