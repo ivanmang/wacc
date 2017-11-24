@@ -1,8 +1,11 @@
 package CodeGeneration;
 
 import Instructions.AddInstruction;
+import Instructions.Branch.BrachLinkCSInstrcution;
 import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
+import Instructions.Branch.BranchLinkLargerThanInstruction;
+import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Instruction;
 import Instructions.Branch.BranchLinkInstruction;
@@ -10,8 +13,10 @@ import Instructions.Labels.DataLabel;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadCSInstruction;
 import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
+import Instructions.Load.LoadLargerThanInstruction;
 import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.Operand2Int;
@@ -259,12 +264,105 @@ public class ARM11Machine {
     msg.add(new GlobalMainLabel());
   }
 
-  public void addOverflowErrorFunction(int overflowMsg) {
+  public void addCheckArrayIndexTooLargeErrorFunction(){
+    if (!printFunctions.containsKey("p_check_array_bounds")) {
+      add(new BranchLinkInstruction("p_check_array_bounds"));
+      int arrayMsg = addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
+      List<Instruction> arrayBoundError = new LinkedList<>();
+      arrayBoundError.add(new Label("p_check_array_bounds"));
+      arrayBoundError.add(new PushInstruction(Registers.lr));
+      arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
+
+      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + arrayMsg)));
+      arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
+
+      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1))); //TODO:What is r1
+      arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1)); //TODO:What is r1
+      arrayBoundError
+          .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + arrayMsg)));
+      arrayBoundError.add(new BrachLinkCSInstrcution("p_throw_runtime_error"));
+      arrayBoundError.add(new PopInstruction(Registers.pc));
+
+
+
+
+      printFunctions.put("p_check_array_bounds", arrayBoundError);
+      addRuntimeErrorInstruction();
+    }
+  }
+
+  public void addCheckArrayNegErrorFunction(){
+    if (!printFunctions.containsKey("p_check_array_bounds")) {
+      add(new BranchLinkInstruction("p_check_array_bounds"));
+      int arrayMsg = addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
+      List<Instruction> arrayBoundError = new LinkedList<>();
+      arrayBoundError.add(new Label("p_check_array_bounds"));
+      arrayBoundError.add(new PushInstruction(Registers.lr));
+      arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
+
+      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + arrayMsg)));
+      arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
+
+      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1))); //TODO:What is r1
+      arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1)); //TODO:What is r1
+      arrayBoundError
+          .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + arrayMsg)));
+      arrayBoundError.add(new BrachLinkCSInstrcution("p_throw_runtime_error"));
+      arrayBoundError.add(new PopInstruction(Registers.pc));
+
+
+
+
+      printFunctions.put("p_check_array_bounds", arrayBoundError);
+      addRuntimeErrorInstruction();
+    }
+  }
+
+  public void CheckDividedByZeroFunction(){
+    if (!printFunctions.containsKey("p_check_divide_by_zero")) {
+      add(new BranchLinkInstruction("p_check_divide_by_zero"));
+      add(new BranchLinkInstruction(" __aeabi_idiv"));
+      int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
+      List<Instruction> checkZeroError = new LinkedList<>();
+      checkZeroError.add(new Label("p_throw_overflow_error"));
+      checkZeroError.add(new PushInstruction(Registers.lr));
+      checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
+      checkZeroError
+          .add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + checkZero)));
+      checkZeroError.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
+      checkZeroError.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_throw_overflow_error", checkZeroError);
+      addRuntimeErrorInstruction();
+    }
+  }
+
+  public void CheckDividedByModFunction(){
+    if (!printFunctions.containsKey("p_check_divide_by_zero")) {
+      add(new BranchLinkInstruction("p_check_divide_by_zero"));
+      add(new BranchLinkInstruction(" __aeabi_imod"));
+      int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
+      List<Instruction> checkZeroError = new LinkedList<>();
+      checkZeroError.add(new Label("p_throw_overflow_error"));
+      checkZeroError.add(new PushInstruction(Registers.lr));
+      checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
+      checkZeroError
+          .add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + checkZero)));
+      checkZeroError.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
+      checkZeroError.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_throw_overflow_error", checkZeroError);
+      addRuntimeErrorInstruction();
+    }
+  }
+
+
+  public void addOverflowErrorFunction() {
     if (!printFunctions.containsKey("p_throw_overflow_error")) {
+      add(new BranchLinkVSInstruction("p_throw_overflow_error"));
+      int overflowMsg = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> overflowError = new LinkedList<>();
       overflowError.add(new Label("p_throw_overflow_error"));
       overflowError
-          .add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg" + overflowMsg)));
+          .add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + overflowMsg)));
       overflowError.add(new BranchLinkInstruction("p_throw_runtime_error"));
       printFunctions.put("p_throw_overflow_error", overflowError);
       addRuntimeErrorInstruction();
@@ -274,6 +372,7 @@ public class ARM11Machine {
   public void addRuntimeErrorInstruction() {
     if (!printFunctions.containsKey("p_throw_runtime_error")) {
       List<Instruction> runTimeError = new LinkedList<>();
+      add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
       runTimeError.add(new Label("p_throw_runtime_error"));
       runTimeError.add(new BranchLinkInstruction("p_print_string"));
       runTimeError.add(new MovInstruction(Registers.r0, new Operand2Int('#', -1)));
@@ -283,17 +382,20 @@ public class ARM11Machine {
     }
   }
 
-  public void addcheckNullPointerInstruction(int nullReferenceMsg) {
+  public void addcheckNullPointerInstruction() {
     if (!printFunctions.containsKey("p_check_null_pointer")) {
+      add(new BranchLinkInstruction("p_check_null_pointer"));
+      int nullReferenceMsg = addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
       List<Instruction> nullPointer = new LinkedList<>();
       nullPointer.add(new Label("p_check_null_pointer"));
       nullPointer.add(new PushInstruction(Registers.lr));
       nullPointer.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
       nullPointer.add(new LoadEqualInstruction(Registers.r0,
-          new Operand2String('=', "msg" + nullReferenceMsg)));
+          new Operand2String('=', "msg_" + nullReferenceMsg)));
       nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
       nullPointer.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_check_null_pointer", nullPointer);
+      addRuntimeErrorInstruction();
     }
   }
 

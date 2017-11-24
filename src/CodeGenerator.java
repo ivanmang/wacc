@@ -278,7 +278,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register exprRegister = visit(ctx.expr());
 
     machine.add(new MovInstruction(Registers.r0, new Operand2Reg(exprRegister)));
-    //TODO check for null pointer
+    machine.addcheckNullPointerInstruction();
 
     if(exprTypeIsCharOrBool(ctx.expr())) {
       if(ctx.FST() != null) {
@@ -517,11 +517,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       switch (op) {
         case WaccParser.PLUS:
           machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction();
           break;
         case WaccParser.MINUS:
           machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction();
           break;
         default:
           break;
@@ -537,13 +537,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       if (op == WaccParser.MUL) {
         machine.add(new SMulInstruction(reg1,reg2));
         machine.add(new CompareInstruction(reg2,new Operand2Shift(reg1,"ASR",31)));
-        machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
+        machine.addOverflowErrorFunction();
       }else if(op == WaccParser.DIV){
         Register rreg1= registers.getReturnRegister();
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction();
         machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
@@ -553,7 +553,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction();
         machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
@@ -738,44 +738,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     return null;
   }
 
-  public int CheckArrayIndexNegErrorMsg() {
-    machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
-  }
-
-  public int CheckArrayIndexTooLargeErrorMsg() {
-    machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
-  }
-
-  public int CheckDividedByZeroMsg() {
-    machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    machine.add(new BranchLinkInstruction(" __aeabi_idiv"));
-    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
-  }
-
-  public int CheckModByZeroMsg() {
-    machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    machine.add(new BranchLinkInstruction(" __aeabi_imod"));
-    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
-  }
 
 
 
-  public int CheckOverFlowErrorMsg() {
-    machine.add(new BranchLinkVSInstruction("p_throw_overflow_error"));
-    return machine
-        .addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
-  }
 
-  public int CheckNullReferenceMsg() {
-    machine.add(new BranchLinkInstruction("p_check_null_pointer"));
-    return machine.addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
-  }
 
-  public void pairThrowRunTimeError(){
-    machine.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
-  }
+
+
 
   @Override
   public Register visitSkipStat(SkipStatContext ctx) {
