@@ -48,6 +48,7 @@ import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 import java.util.Map;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
