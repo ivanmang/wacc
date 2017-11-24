@@ -538,7 +538,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       registers.free(reg2);
       return reg1;
     } else if (ctx.pair_liter() != null) {
-      return null;
+      Register reg = registers.getRegister();
+      machine.add(new LoadInstruction(reg, new Operand2Int('=', 0)));
+      return reg;
     } else if (ctx.unary_oper() != null) {
       Register reg1 = registers.getRegister();
       int op = ((TerminalNode) ctx.getChild(1).getChild(0)).getSymbol().getType();
