@@ -222,6 +222,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
       Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      machine.removeLastInstruciton();
       if(type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
       } else {

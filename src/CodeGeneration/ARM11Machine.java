@@ -67,6 +67,11 @@ public class ARM11Machine {
     currentFunction = previousFunction;
   }
 
+  public void removeLastInstruciton() {
+    int size = currentFunction.size();
+    currentFunction.remove(size - 1);
+  }
+
   //add Instruction to the current function
   public void add(Instruction instr) {
     currentFunction.add(instr);
