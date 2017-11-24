@@ -49,14 +49,14 @@ public class ARM11Machine {
 
   //add the label for the start of the function and add it to the map
   public void addFunctionStart(String name) {
-    if (currentFunction!=null){
+    if (currentFunction != null) {
       previousFunction = currentFunction;
     }
     currentFunction = new LinkedList<>();
     functions.put(name, currentFunction);
     currentFunction.add(new Label(name));
   }
-  
+
   public void addFunctionEnd() {
     currentFunction = previousFunction;
   }
@@ -76,7 +76,10 @@ public class ARM11Machine {
     }
     int msgIndex = (msg.size() - 1) / 3;
     msg.add(new Label("msg_" + msgIndex));
-    msg.add(new WordInstruction(message.length()));
+    String messageCopy = message;
+    messageCopy = messageCopy.replace("\\0", "\0").replace("\\b", "\b").replace("\\t", "\t").replace("\\n", "\n").replace("\\t", "\t")
+        .replace("\\f", "\f").replace("\\r", "\r").replace("\\'", "\'").replace("\\", "\"").replace("\\\\", "\\");
+    msg.add(new WordInstruction(messageCopy.length()));
     msg.add(new StringInstruction(message));
     return msgIndex;
   }
@@ -256,28 +259,42 @@ public class ARM11Machine {
     msg.add(new GlobalMainLabel());
   }
 
-  public void throwOverThrowError(int overThrowErrorMsg){
-    List<Instruction> overThowError = new LinkedList<>();
-    overThowError.add(new LoadInstruction(Registers.r0,new Operand2String('=',"msg"+overThrowErrorMsg)));
-    printFunctions.put("p_throw_overflow_error",overThowError);
+  public void addOverflowErrorFunction(int overflowMsg) {
+    if (!printFunctions.containsKey("p_throw_overflow_error")) {
+      List<Instruction> overflowError = new LinkedList<>();
+      overflowError.add(new Label("p_throw_overflow_error"));
+      overflowError
+          .add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg" + overflowMsg)));
+      overflowError.add(new BranchLinkInstruction("p_throw_runtime_error"));
+      printFunctions.put("p_throw_overflow_error", overflowError);
+      addRuntimeErrorInstruction();
+    }
   }
 
-  public void throwRuntimeError(){
-    List<Instruction> runTimeError = new LinkedList<>();
-    runTimeError.add(new BranchLinkInstruction("p_print_string"));
-    runTimeError.add(new MovInstruction(Registers.r0,new Operand2Int('#',-1)));
-    runTimeError.add(new BranchLinkInstruction("exit"));
-    printFunctions.put("p_throw_runtime_error",runTimeError);
+  public void addRuntimeErrorInstruction() {
+    if (!printFunctions.containsKey("p_throw_runtime_error")) {
+      List<Instruction> runTimeError = new LinkedList<>();
+      runTimeError.add(new Label("p_throw_runtime_error"));
+      runTimeError.add(new BranchLinkInstruction("p_print_string"));
+      runTimeError.add(new MovInstruction(Registers.r0, new Operand2Int('#', -1)));
+      runTimeError.add(new BranchLinkInstruction("exit"));
+      printFunctions.put("p_throw_runtime_error", runTimeError);
+      addPrintStringFunction();
+    }
   }
 
-  public void checkNullPointer(int nullReferenceMsg){
-    List<Instruction> nullPointer = new LinkedList<>();
-    nullPointer.add(new PushInstruction(Registers.lr));
-    nullPointer.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
-    nullPointer.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=',"msg"+nullReferenceMsg)));
-    nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
-    nullPointer.add(new PopInstruction(Registers.pc));
-    printFunctions.put("p_check_null_pointer",nullPointer);
+  public void addcheckNullPointerInstruction(int nullReferenceMsg) {
+    if (!printFunctions.containsKey("p_check_null_pointer")) {
+      List<Instruction> nullPointer = new LinkedList<>();
+      nullPointer.add(new Label("p_check_null_pointer"));
+      nullPointer.add(new PushInstruction(Registers.lr));
+      nullPointer.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
+      nullPointer.add(new LoadEqualInstruction(Registers.r0,
+          new Operand2String('=', "msg" + nullReferenceMsg)));
+      nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
+      nullPointer.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_check_null_pointer", nullPointer);
+    }
   }
 
   //translate the instruction into string for output
@@ -291,7 +308,7 @@ public class ARM11Machine {
         builder.append(instr.toCode()).append("\n");
       }
     }
-    for(List<Instruction> func : printFunctions.values()) {
+    for (List<Instruction> func : printFunctions.values()) {
       for (Instruction instr : func) {
         for (int num = 0; num < instr.getIndentation(); num++) {
           builder.append("\t\t");

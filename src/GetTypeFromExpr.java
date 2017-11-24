@@ -11,6 +11,7 @@ import antlr.WaccParser.Binary_oper_mulContext;
 import antlr.WaccParser.Binary_oper_plusContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IdentContext;
+import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParserBaseVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -23,7 +24,12 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   private Type stringType = new BaseType(WaccParser.STRING);
   private SymbolTable symbolTable;
 
+  public void setSymbolTable(SymbolTable symbolTable) {
+    this.symbolTable = symbolTable;
+  }
+
   public Type visitExpr(ExprContext ctx, SymbolTable symbolTable) {
+    setSymbolTable(symbolTable);
     if (ctx.int_liter() != null) {
       return intType;
     } else if (ctx.bool_liter() != null) {
@@ -43,8 +49,7 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
     } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
-      String ident = ctx.ident().IDENT().getText();
-      return symbolTable.lookupAll(ident);
+      return visit(ctx.ident());
     } else if (ctx.CHAR_LIT() != null) {
       return charType;
     } else if (ctx.CHARACTER_LIT() != null) {
@@ -56,10 +61,12 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   }
 
 
-  @Override
-  public Type visitArray_elem(Array_elemContext ctx) {
+  public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
 //    System.out.println("visiting array elem");
-    Type array = visit(ctx.ident());
+
+    String ident = ctx.ident().getText();
+    Type array = symbolTable.lookupAll(ident);
+//    System.out.println(array);
     if (array instanceof ArrayType) {
       ArrayType arrayBase = (ArrayType) array;
       return arrayBase.getElementType();
@@ -142,5 +149,22 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
       return charType;
     }
     return null;
+  }
+
+  @Override
+  public Type visitPair_elem(Pair_elemContext ctx) {
+    PairType pair = (PairType) visit(ctx.expr());
+    if (ctx.FST() != null) {
+      return pair.getFst();
+    } else if (ctx.SND() != null) {
+      return pair.getSnd();
+    }
+    return null;
+  }
+
+  @Override
+  public Type visitIdent(IdentContext ctx) {
+    String ident = ctx.getText();
+    return symbolTable.lookupAll(ident);
   }
 }

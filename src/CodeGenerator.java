@@ -6,19 +6,14 @@ import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
-import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.LtorgLabel;
-import Instructions.Labels.TextLabel;
 import Instructions.Load.LoadByteInstruction;
-import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
 import Instructions.Move.*;
-import Instructions.Operand2.Operand2;
 import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2Reg;
 import Instructions.Operand2.Operand2String;
-import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.*;
 import Instructions.PopInstruction;
@@ -26,12 +21,10 @@ import Instructions.PushInstruction;
 import Instructions.Store.StoreByteInstruction;
 import Instructions.Store.StoreInstruction;
 import antlr.WaccParser;
-import Instructions.StringInstruction;
 import Instructions.SubInstruction;
 import antlr.WaccParser.Array_elemContext;
 import antlr.WaccParser.Array_literContext;
 import antlr.WaccParser.AssignStatContext;
-import antlr.WaccParser.Assign_lhsContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
@@ -44,13 +37,11 @@ import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
-import antlr.WaccParser.ReturnStatContext;
 import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
-import java.util.Deque;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -63,8 +54,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   private SymbolTable symbolTable;
   private Map<String, Function> functionList;
   private GetTypeFromExpr exprTypeGetter = new GetTypeFromExpr();
-  private String previousFunction;
-  private String currentFunction = "main";
+//  private String previousFunction;
+//  private String currentFunction = "main";
 
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
@@ -134,8 +125,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitFunc(WaccParser.FuncContext ctx) {
-    previousFunction = currentFunction;
-    currentFunction = ctx.getChild(1).getText();
+//    previousFunction = currentFunction;
+//    currentFunction = ctx.getChild(1).getText();
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
     visit(ctx.param_list());
@@ -144,18 +135,18 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
     machine.addFunctionEnd();
-    currentFunction = previousFunction;
-    previousFunction = null;
+//    currentFunction = previousFunction;
+//    previousFunction = null;
     return null;
   }
-  
+
   @Override
   public Register visitParam_list(WaccParser.Param_listContext ctx){
     int address = 4;
     System.out.println(ctx.getChild(0).getChild(1).getText());
     System.out.println(ctx.getChildCount());
     for (int i = 0; i <= (ctx.getChildCount()); i = i +2) {
-      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
+//      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
       if (ctx.getChild(i).getChild(0).getText().equals("char") || ctx.getChild(i).getChild(0).getText().equals("bool")) {
         address += 1;
       } else {
@@ -167,10 +158,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitReturnStat(WaccParser.ReturnStatContext ctx) {
-    Register reg = visit(ctx.getChild(1));
+    Register reg = visit(ctx.expr());
     //Register reg = Registers.r4;
     Register rreg = registers.getReturnRegister();
     machine.add(new MovInstruction(rreg, new Operand2Reg(reg)));
+    registers.free(reg);
     return null;
   }
 
@@ -182,7 +174,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new MovInstruction(Registers.r0, new Operand2Reg(returnReg)));
     machine.add(new BranchLinkInstruction("exit"));
 
-    registers.freeReturnRegisters();
+    registers.free(returnReg);
     return null;
   }
 
@@ -194,22 +186,18 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = visit(ctx.assign_rhs());
 
       if (ctx.type().base_type().STRING() != null) { //string
-        
-      }
-
-      if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
+        machine.add((new StoreInstruction(reg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText())))));
+      } else if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
         machine.add(new StoreByteInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       } else {
         machine.add(new StoreInstruction(reg,
             new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       }
-
       registers.free(reg);
-
-    }
-    else{
+    } else  {
       Register reg = visit(ctx.assign_rhs());
+      machine.add(new StoreInstruction(reg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
       registers.free(reg);
     }
 
@@ -221,23 +209,36 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
-      Type type;
-      if (currentFunction.equals("main")) {
-        if(symbolTable.getSymbolInfo(ident).getType().getSize()==1){
-          
-        }else {
-          machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
-        }
-      }
-      else {
-        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+//      if (currentFunction.equals("main")) {
+//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+//      }
+//      else {
+//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+//      }
+      Type type= symbolTable.getSymbolInfo(ident).getType();
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
       }
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
     } else if(ctx.assign_lhs().pair_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().pair_elem());
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      Type type = exprTypeGetter.visitPair_elem(ctx.assign_lhs().pair_elem());
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
     }
     registers.free(srcReg);
     return null;
@@ -357,6 +358,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //Store the expression in the address allocated
     machine.add(new StoreInstruction(fstRegister, new Operand2Reg(Registers.r0, true)));
     machine.add(new StoreInstruction(Registers.r0, new Operand2Reg(addressRegister, true)));
+    registers.free(fstRegister);
 
     //Second expression
     //Get the result of the second expression to a register
@@ -369,6 +371,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //Store the expression in the address allocated
     machine.add(new StoreInstruction(sndRegister, new Operand2Reg(Registers.r0, true)));
     machine.add(new StoreInstruction(Registers.r0, new Operand2Reg(addressRegister, 4)));
+    registers.free(sndRegister);
 
     return addressRegister;
   }
@@ -514,11 +517,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       switch (op) {
         case WaccParser.PLUS:
           machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.throwOverThrowError(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
           break;
         case WaccParser.MINUS:
           machine.add(new SubInstruction(reg1,reg1,new Operand2Reg(reg2),true));
-          machine.throwOverThrowError(CheckOverFlowErrorMsg());
+          machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
           break;
         default:
           break;
@@ -534,13 +537,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       if (op == WaccParser.MUL) {
         machine.add(new SMulInstruction(reg1,reg2));
         machine.add(new CompareInstruction(reg2,new Operand2Shift(reg1,"ASR",31)));
-        machine.throwOverThrowError(CheckOverFlowErrorMsg());
+        machine.addOverflowErrorFunction(CheckOverFlowErrorMsg());
       }else if(op == WaccParser.DIV){
         Register rreg1= registers.getReturnRegister();
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.throwOverThrowError(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
@@ -550,7 +553,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.throwOverThrowError(CheckDividedByZeroMsg());
+        machine.addOverflowErrorFunction(CheckDividedByZeroMsg());
         machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
@@ -559,7 +562,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       registers.free(reg2);
       return reg1;
     } else if (ctx.pair_liter() != null) {
-      return null;
+      Register reg = registers.getRegister();
+      machine.add(new LoadInstruction(reg, new Operand2Int('=', 0)));
+      return reg;
     } else if (ctx.unary_oper() != null) {
       Register reg1 = visit(ctx.getChild(1));
       int op = ((TerminalNode) ctx.getChild(0).getChild(0)).getSymbol().getType();
@@ -606,28 +611,38 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = registers.getRegister();
       String text = ctx.CHAR_LIT().getText();
       String c_ = "";
-      if (text.length()>3){
-        if (text.equals("'\0'") ){
-          c_ = Integer.toString(0);
-        }else if(text.equals("'\b'")){
-          c_ = Integer.toString(8);
-        }else if(text.equals("'\t'")){
-          c_ = Integer.toString(9);
-        }else if(text.equals("'\n'")){
-          c_ = Integer.toString(10);
-        }else if(text.equals("'\f'")){
-          c_ = Integer.toString(12);
-        }else if(text.equals("'\r'")){
-          c_ = Integer.toString(13);
-        }else if(text.equals("'\''")){
-          c_ = Integer.toString(39);
-        }else if(text.equals("'\"'")){
-          c_ = Integer.toString(34);
-        }else if(text.equals("'\\'")){
-          c_ = Integer.toString(92);
+//      System.out.println(text + " length = " + text.length());
+      if (text.length() > 3){
+        switch (text) {
+          case "\'\\0\'":
+            c_ = Integer.toString(0);
+            break;
+          case "\'\\b\'":
+            c_ = Integer.toString(8);
+            break;
+          case "\'\\t\'":
+            c_ = Integer.toString(9);
+            break;
+          case "\'\\n\'":
+            c_ = Integer.toString(10);
+            break;
+          case "\'\\f\'":
+            c_ = Integer.toString(12);
+            break;
+          case "\'\\r\'":
+            c_ = Integer.toString(13);
+            break;
+          case "\'\\'\'":
+            c_ = "\'\\\'\'";
+            break;
+          case "\'\\\"\'":
+            c_ = "\'\"\'";
+            break;
+          case "\'\\\\\'":
+            c_ = "\'\\\'";
+            break;
         }
-      }
-      else {
+      } else {
         char c = text.charAt(1);
         c_ = "'" + c + "'";
       }
@@ -710,6 +725,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     visit(ctx.stat(1));
     machine.add(thenLabel);
     visit(ctx.stat(0));
+    registers.free(lastRegister);
     return null;
   }
 
@@ -724,28 +740,30 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register lastRegister = visitExpr(ctx.expr());
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
+    registers.free(lastRegister);
     return null;
   }
 
   public int CheckArrayIndexNegErrorMsg() {
     machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("ArrayIndexOutOfBoundsError: negative index\n\0");
+    return machine.addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
   }
 
   public int CheckArrayIndexTooLargeErrorMsg() {
     machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("ArrayIndexOutOfBoundsError: index too large\n\0");
+    return machine.addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
   }
 
   public int CheckDividedByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+    machine.add(new BranchLinkInstruction(" __aeabi_idiv"));
+    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
   }
 
   public int CheckModByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
     machine.add(new BranchLinkInstruction(" __aeabi_imod"));
-    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
   }
 
 
@@ -753,12 +771,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public int CheckOverFlowErrorMsg() {
     machine.add(new BranchLinkVSInstruction("p_throw_overflow_error"));
     return machine
-        .addMsg("OverflowError: the result is too small/large to store in a 4-byte signed-integer");
+        .addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
   }
 
   public int CheckNullReferenceMsg() {
     machine.add(new BranchLinkInstruction("p_check_null_pointer"));
-    return machine.addMsg("NullReferenceError: dereference a null reference\\n\\0");
+    return machine.addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
   }
 
   public void pairThrowRunTimeError(){
@@ -790,6 +808,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new BranchLinkInstruction("p_print_reference"));
       machine.addPrintReferenceFunction();
     }
+    registers.free(exprRegister);
     return null;
   }
 
@@ -826,8 +845,20 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitReadStat(ReadStatContext ctx) {
     String ident = ctx.assign_lhs().ident().getText();
-    Register readRegister = visit(ctx.assign_lhs());
-    machine.add(new MovInstruction(Registers.r0, readRegister));
+    if(ctx.assign_lhs().ident() != null) {
+      Register readRegister = registers.getRegister();
+      machine.add(new AddInstruction(readRegister, Registers.sp, new Operand2Int('#', symbolTable.getAddress(ident))));
+      machine.add(new MovInstruction(Registers.r0, readRegister));
+      registers.free(readRegister);
+    } else if(ctx.assign_lhs().array_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().array_elem());
+      machine.add(new MovInstruction(Registers.r0, destReg));
+      registers.free(destReg);
+    } else if(ctx.assign_lhs().pair_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().pair_elem());
+      machine.add(new MovInstruction(Registers.r0, destReg));
+      registers.free(destReg);
+    }
     if (symbolTable.lookup(ident).equals(intType)) {
       machine.add(new BranchLinkInstruction("p_read_int"));
       machine.addReadIntFunction();
