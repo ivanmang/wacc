@@ -56,10 +56,11 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   }
 
 
-  @Override
-  public Type visitArray_elem(Array_elemContext ctx) {
+  public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
 //    System.out.println("visiting array elem");
-    Type array = visit(ctx.ident());
+    String ident = ctx.ident().getText();
+    Type array = symbolTable.lookupAll(ident);
+    System.out.println(array);
     if (array instanceof ArrayType) {
       ArrayType arrayBase = (ArrayType) array;
       return arrayBase.getElementType();

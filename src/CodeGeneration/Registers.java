@@ -56,6 +56,7 @@ public class Registers {
   //Return free registers that are used for return values and paramters
   public Register getReturnRegister() {
     if(returnRegisters.isEmpty()) {
+      System.out.println("return registers empty!");
       //TODO: no return registers available
     }
     Register dest = returnRegisters.pop();
@@ -66,10 +67,12 @@ public class Registers {
   //Return free general registers
   public Register getRegister() {
     if(generalRegisters.isEmpty()) {
+      System.out.println("general registers empty!");
       //TODO: no general registers available
     }
     Register dest = generalRegisters.pop();
     usedRegisters.push(dest);
+    System.out.println("using " + dest);
     return dest;
   }
 
