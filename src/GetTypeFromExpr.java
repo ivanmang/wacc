@@ -24,7 +24,12 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   private Type stringType = new BaseType(WaccParser.STRING);
   private SymbolTable symbolTable;
 
+  public void setSymbolTable(SymbolTable symbolTable) {
+    this.symbolTable = symbolTable;
+  }
+
   public Type visitExpr(ExprContext ctx, SymbolTable symbolTable) {
+    setSymbolTable(symbolTable);
     if (ctx.int_liter() != null) {
       return intType;
     } else if (ctx.bool_liter() != null) {
@@ -44,8 +49,7 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
     } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
-      String ident = ctx.ident().IDENT().getText();
-      return symbolTable.lookupAll(ident);
+      return visit(ctx.ident());
     } else if (ctx.CHAR_LIT() != null) {
       return charType;
     } else if (ctx.CHARACTER_LIT() != null) {
@@ -59,9 +63,10 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
 
   public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
 //    System.out.println("visiting array elem");
+
     String ident = ctx.ident().getText();
     Type array = symbolTable.lookupAll(ident);
-    System.out.println(array);
+//    System.out.println(array);
     if (array instanceof ArrayType) {
       ArrayType arrayBase = (ArrayType) array;
       return arrayBase.getElementType();
@@ -155,5 +160,11 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
       return pair.getSnd();
     }
     return null;
+  }
+
+  @Override
+  public Type visitIdent(IdentContext ctx) {
+    String ident = ctx.getText();
+    return symbolTable.lookupAll(ident);
   }
 }
