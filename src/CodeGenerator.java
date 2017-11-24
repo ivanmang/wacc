@@ -764,7 +764,15 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitReadStat(ReadStatContext ctx) {
     String ident = ctx.assign_lhs().ident().getText();
     Register readRegister = visit(ctx.assign_lhs());
-    machine.add(new MovInstruction(Registers.r0, readRegister));
+    if(ctx.assign_lhs().ident() != null) {
+      machine.add(new MovInstruction(Registers.r0, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+    } else if(ctx.assign_lhs().array_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().array_elem());
+      machine.add(new MovInstruction(Registers.r0, destReg));
+    } else if(ctx.assign_lhs().pair_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().pair_elem());
+      machine.add(new MovInstruction(Registers.r0, destReg));
+    }
     if (symbolTable.lookup(ident).equals(intType)) {
       machine.add(new BranchLinkInstruction("p_read_int"));
       machine.addReadIntFunction();
