@@ -52,7 +52,7 @@ public class ARM11Machine {
   //    .word (length)
   //    .ascii (string)
   public int addMsg(String message) {
-    if(msg.isEmpty()) {
+    if (msg.isEmpty()) {
       msg.add(new DataLabel());
     }
     int msgIndex = msg.size() - 1;
@@ -66,17 +66,21 @@ public class ARM11Machine {
     List<Instruction> printInt = new LinkedList<>();
 
     if (!printFunctions.containsKey("p_print_int")) {
-    int msg_num = addMsg("\"%d\\0\"";
+      int msg_num = addMsg("\"%d\\0\"");
 
-    printInt.add(new PushInstruction(Registers.lr));
-    printInt.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
-    printInt.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_num)));
-    printInt.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
-    printInt.add(new BranchLinkInstruction("printf"));
-    printInt.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
-    printInt.add(new BranchLinkInstruction("fflush"));
-    printInt.add(new PopInstruction(Registers.pc));
-    printFunctions.put("p_print_int", printInt);
+      printInt.add(new PushInstruction(Registers.lr));
+      printInt
+          .add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+      printInt.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_num)));
+      printInt.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
+      printInt.add(new BranchLinkInstruction("printf"));
+      printInt.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      printInt.add(new BranchLinkInstruction("fflush"));
+      printInt.add(new PopInstruction(Registers.pc));
+      printFunctions.put("p_print_int", printInt);
     }
   }
 
@@ -89,17 +93,23 @@ public class ARM11Machine {
       int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
 
       printString.add(new PushInstruction(Registers.lr));
-      printString.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0))); // LDR r1, [r0]
-      printString.add(new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1), new Operand2Int('#', 4)));
-      printString.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_num)));
-      printString.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      printString.add(new LoadInstruction(Registers.r1,
+          new Operand2Reg(Registers.r0))); // LDR r1, [r0]
+      printString.add(
+          new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1),
+              new Operand2Int('#', 4)));
+      printString.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_num)));
+      printString.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
       printString.add(new BranchLinkInstruction("printf"));
-      printString.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+      printString
+          .add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
       printString.add(new BranchLinkInstruction("fflush"));
       printString.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_print_string", printString);
     }
-
 
 
   }
@@ -113,9 +123,13 @@ public class ARM11Machine {
 
       printBool.add(new PushInstruction(Registers.lr));
       printBool.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
-      printBool.add(new LoadNotEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_true)));
-      printBool.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_false)));
-      printBool.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      printBool.add(new LoadNotEqualInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_true)));
+      printBool.add(new LoadEqualInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_false)));
+      printBool.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
       printBool.add(new BranchLinkInstruction("printf"));
       printBool.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
       printBool.add(new BranchLinkInstruction("fflush"));
@@ -132,8 +146,11 @@ public class ARM11Machine {
       int msg_newline = addMsg("\"\\0\"");
 
       println.add(new PushInstruction(Registers.lr));
-      println.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_newline)));
-      println.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+      println.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_newline)));
+      println.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
       println.add(new BranchLinkInstruction("puts"));
       println.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
       println.add(new BranchLinkInstruction("fflush"));
@@ -149,9 +166,13 @@ public class ARM11Machine {
       int msg_readInt = addMsg("\"%d\\0\"");
 
       readInt.add(new PushInstruction(Registers.lr));
-      readInt.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
-      readInt.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_readInt));
-      readInt.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+      readInt
+          .add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+      readInt.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_readInt)));
+      readInt.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
       readInt.add(new BranchLinkInstruction("scanf"));
       readInt.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_read_int", readInt);
@@ -165,15 +186,18 @@ public class ARM11Machine {
       int msg_readChar = addMsg("\" %c\\0\"");
 
       readChar.add(new PushInstruction(Registers.lr));
-      readChar.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
-      readChar.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_readChar));
-      readChar.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+      readChar
+          .add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+      readChar.add(new LoadInstruction(Registers.r0,
+          new Operand2String('=', "msg_" + msg_readChar)));
+      readChar.add(
+          new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0),
+              new Operand2Int('#', 4)));
       readChar.add(new BranchLinkInstruction("scanf"));
       readChar.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_read_char", readChar);
     }
   }
-
 
 
   //Add this to the end of the messages:
@@ -188,9 +212,9 @@ public class ARM11Machine {
   //translate the instruction into string for output
   public String toCode() {
     StringBuilder builder = new StringBuilder();
-    for(List<Instruction> func : functions.values()) {
-      for(Instruction instr : func) {
-        for(int num = 0; num < instr.getIndentation(); num++) {
+    for (List<Instruction> func : functions.values()) {
+      for (Instruction instr : func) {
+        for (int num = 0; num < instr.getIndentation(); num++) {
           builder.append("\t\t");
         }
         builder.append(instr.toCode()).append("\n");
