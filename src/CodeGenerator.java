@@ -4,6 +4,7 @@ import Instructions.Branch.BranchEqualInstruction;
 import Instructions.Branch.BranchInstruction;
 import Instructions.Branch.BranchLinkEqualInstruction;
 import Instructions.Branch.BranchLinkInstruction;
+import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
@@ -293,28 +294,36 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     return null;
   }
 
-  public int ArrayIndexNegErrorMsg() {
+  public int CheckArrayIndexNegErrorMsg() {
+    machine.add(new BranchLinkInstruction("p_check_array_bounds"));
     return machine.addMsg("ArrayIndexOutOfBoundsError: negative index\n\0");
   }
 
-  public int ArrayIndexTooLargeErrorMsg() {
+  public int CheckArrayIndexTooLargeErrorMsg() {
+    machine.add(new BranchLinkInstruction("p_check_array_bounds"));
     return machine.addMsg("ArrayIndexOutOfBoundsError: index too large\n\0");
   }
 
-  public int DividedByZeroMsg() {
+  public int CheckDividedByZeroMsg() {
+    machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
     return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
   }
 
-  public int overFlowErrorMsg() {
+  public int CheckOverFlowErrorMsg() {
+    machine.add(new BranchLinkVSInstruction("p_throw_overflow_error"));
     return machine
         .addMsg("OverflowError: the result is too small/large to store in a 4-byte signed-integer");
   }
 
-  public int NullReferenceMsg() {
+  public int CheckNullReferenceMsg() {
+    machine.add(new BranchLinkInstruction("p_check_null_pointer"));
     return machine.addMsg("NullReferenceError: dereference a null reference\\n\\0");
   }
 
-}
+  public void pairThrowRunTimeError(){
+    machine.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
+
+  }
 
   @Override
   public Register visitSkipStat(SkipStatContext ctx) {
