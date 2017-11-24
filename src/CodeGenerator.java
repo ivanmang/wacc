@@ -63,8 +63,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   private SymbolTable symbolTable;
   private Map<String, Function> functionList;
   private GetTypeFromExpr exprTypeGetter = new GetTypeFromExpr();
-  private String previousFunction;
-  private String currentFunction = "main";
+//  private String previousFunction;
+//  private String currentFunction = "main";
 
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
@@ -134,8 +134,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitFunc(WaccParser.FuncContext ctx) {
-    previousFunction = currentFunction;
-    currentFunction = ctx.getChild(1).getText();
+//    previousFunction = currentFunction;
+//    currentFunction = ctx.getChild(1).getText();
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
     visit(ctx.param_list());
@@ -144,8 +144,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
     machine.addFunctionEnd();
-    currentFunction = previousFunction;
-    previousFunction = null;
+//    currentFunction = previousFunction;
+//    previousFunction = null;
     return null;
   }
 
@@ -155,7 +155,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     System.out.println(ctx.getChild(0).getChild(1).getText());
     System.out.println(ctx.getChildCount());
     for (int i = 0; i <= (ctx.getChildCount()); i = i +2) {
-      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
+//      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
       if (ctx.getChild(i).getChild(0).getText().equals("char") || ctx.getChild(i).getChild(0).getText().equals("bool")) {
         address += 1;
       } else {
@@ -222,12 +222,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
-      if (currentFunction.equals("main")) {
+//      if (currentFunction.equals("main")) {
         machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
-      }
-      else {
-        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
-      }
+//      }
+//      else {
+//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+//      }
       Type type= symbolTable.getSymbolInfo(ident).getType();
       if(type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
@@ -604,15 +604,15 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (ctx.ident() != null) {
       Register reg = registers.getRegister();
       int offset;
-      if (currentFunction.equals("main")) {
+//      if (currentFunction.equals("main")) {
         offset = symbolTable.getAddress(ctx.getChild(0).getText());
-      }
-      else{
-        offset = functionList.get(currentFunction).getAddress(ctx.getChild(0).getText());
-      }
-      System.out.printf((ctx.getChild(0)).getText());
-      System.out.printf(Integer.toString(offset));
-      machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
+//      }
+//      else{
+//        offset = functionList.get(currentFunction).getAddress(ctx.getChild(0).getText());
+//      }
+//      System.out.printf((ctx.getChild(0)).getText());
+//      System.out.printf(Integer.toString(offset));
+//      machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
