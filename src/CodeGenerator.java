@@ -213,7 +213,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //      else {
 //        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
 //      }
-      Type type= symbolTable.getSymbolInfo(ident).getType();
+      Type type= symbolTable.lookupAll(ident);
       if(type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
       } else {
@@ -422,7 +422,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitArray_elem(Array_elemContext ctx) {
     Register reg1 = registers.getRegister();
-    Type type = symbolTable.getDictionary().get(ctx.ident().getText()).getType();
+    Type type = symbolTable.lookupAll(ctx.ident().getText());
     Type elementType = null;
     if(type instanceof BaseType) {
       if(type.equals(stringType)) {
@@ -432,7 +432,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       ArrayType arrayType = (ArrayType) type;
       elementType = arrayType.getElementType();
     }
-    int offset = symbolTable.getAddress(ctx.getChild(0).getText());
+    int offset = symbolTable.lookupAllSymbol(ctx.ident().getText()).getAddress();
     machine.add(new AddInstruction(reg1,Registers.sp,new Operand2Int('#',offset)));
     Register reg2 = visit(ctx.getChild(2));
     machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
@@ -780,6 +780,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if(exprType.equals(charType)) {
       machine.add(new BranchLinkInstruction("putchar"));
     } else if(exprType.equals(stringType)) {
+      System.out.println("adding branch print string");
       machine.add(new BranchLinkInstruction("p_print_string"));
       machine.addPrintStringFunction();
     } else if(exprType.equals(boolType)) {

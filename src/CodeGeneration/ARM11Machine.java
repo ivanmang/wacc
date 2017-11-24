@@ -115,8 +115,9 @@ public class ARM11Machine {
 
   public void addPrintStringFunction() {
     List<Instruction> printString = new LinkedList<>();
-
+    System.out.println("bye?");
     if (!printFunctions.containsKey("p_print_string")) {
+      System.out.println("hi?");
       int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
 
       printString.add(new Label("p_print_string"));
@@ -188,7 +189,7 @@ public class ARM11Machine {
           .add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
       printReference.add(new BranchLinkInstruction("fflush"));
       printReference.add(new PopInstruction(Registers.pc));
-      printFunctions.put("p_print_string", printReference);
+      printFunctions.put("p_print_reference", printReference);
     }
 
   }

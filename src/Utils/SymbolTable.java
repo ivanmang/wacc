@@ -23,7 +23,7 @@ public class SymbolTable {
   }
 
   public int getAddress(String name){
-    return dictionary.get(name).getAddress();
+    return this.lookupAllSymbol(name).getAddress();
   }
 
   public SymbolTable(SymbolTable childSymbolTable, SymbolTable parentSymbolTable) {
@@ -61,6 +61,26 @@ public class SymbolTable {
     } else {
       dictionary.get(name).setAddress(address);
     }
+  }
+
+  public SymbolInfo lookupSymbol(String name) {
+    if(dictionary.get(name) == null) {
+      return null;
+    }
+    return dictionary.get(name);
+  }
+
+  public SymbolInfo lookupAllSymbol(String name) {
+    SymbolTable symbolTable = this;
+    while (symbolTable != null) {
+      SymbolInfo symbolInfo = symbolTable.lookupSymbol(name);
+      if (symbolInfo != null) {
+        return symbolInfo;
+      } else {
+        symbolTable = symbolTable.getParentSymbolTable();
+      }
+    }
+    return null;
   }
 
   //the Utils.Type to which the specified name is mapped, or null if this map contains no mapping for the Utils.Type
