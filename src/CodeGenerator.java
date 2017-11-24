@@ -210,7 +210,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //Store the result of the expression to the register
     Register exprRegister = visit(ctx.expr());
 
-    machine.add(new MovInstruction(registers.r0, new Operand2Reg(exprRegister)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(exprRegister)));
     //TODO check for null pointer
 
     if(exprTypeIsCharOrBool(ctx.expr())) {
@@ -239,12 +239,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     int typeSize = getSizeFromExpr(ctx.expr(0));
 
     //Load the size of the array to r0 and call malloc to allocate memory on the heap for the array
-    machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', typeSize * size + 4)));
+    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', typeSize * size + 4)));
     machine.add(new BranchLinkInstruction("malloc"));
 
     //Get the first available register to store the address of the array (address of the first elemnt)
     Register addressRegister = registers.getRegister();
-    machine.add(new MovInstruction(addressRegister, registers.r0));
+    machine.add(new MovInstruction(addressRegister, Registers.r0));
 
     int pos = 1;
     boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
@@ -273,36 +273,36 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitNew_pair(New_pairContext ctx) {
     //Allocate 8 bytes of memory on the heap for the pair, 4 for both the first address and the second address
-    machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', 8)));
+    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', 8)));
     machine.add(new BranchLinkInstruction("malloc"));
 
     //Get the register for storing the address of the addresses
     Register addressRegister = registers.getRegister();
-    machine.add(new MovInstruction(addressRegister, registers.r0));
+    machine.add(new MovInstruction(addressRegister, Registers.r0));
 
     //First expression
     //Get the result of the first expression to a register
     Register fstRegister = visit(ctx.expr(0));
     int fstTypeSize = getSizeFromExpr(ctx.expr(0));
     //Allocate memory for the first element
-    machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', fstTypeSize)));
+    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', fstTypeSize)));
     machine.add(new BranchLinkInstruction("malloc"));
 
     //Store the expression in the address allocated
-    machine.add(new StoreInstruction(fstRegister, new Operand2Reg(registers.r0, true)));
-    machine.add(new StoreInstruction(registers.r0, new Operand2Reg(addressRegister, true)));
+    machine.add(new StoreInstruction(fstRegister, new Operand2Reg(Registers.r0, true)));
+    machine.add(new StoreInstruction(Registers.r0, new Operand2Reg(addressRegister, true)));
 
     //Second expression
     //Get the result of the second expression to a register
     Register sndRegister = visit(ctx.expr(1));
     int sndTypeSize = getSizeFromExpr(ctx.expr(1));
     //Allocate memory for the second element
-    machine.add(new LoadInstruction(registers.r0, new Operand2Int('=', sndTypeSize)));
+    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', sndTypeSize)));
     machine.add(new BranchLinkInstruction("malloc"));
 
     //Store the expression in the address allocated
-    machine.add(new StoreInstruction(sndRegister, new Operand2Reg(registers.r0, true)));
-    machine.add(new StoreInstruction(registers.r0, new Operand2Reg(addressRegister, 4)));
+    machine.add(new StoreInstruction(sndRegister, new Operand2Reg(Registers.r0, true)));
+    machine.add(new StoreInstruction(Registers.r0, new Operand2Reg(addressRegister, 4)));
 
     return addressRegister;
   }
@@ -348,7 +348,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitArray_elem(Array_elemContext ctx) {
     Register reg1 = registers.getRegister();
     int offset = symbolTable.getAddress(ctx.getChild(0).getText());
-    machine.add(new AddInstruction(reg1,registers.sp,new Operand2Int('#',offset)));
+    machine.add(new AddInstruction(reg1,Registers.sp,new Operand2Int('#',offset)));
     Register reg2 = visit(ctx.getChild(2));
     machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
     Register rreg1 = registers.getReturnRegister();

@@ -23,6 +23,7 @@ public class MovInstruction extends Instruction {
   public MovInstruction(Register dest, Register ret){
     this.dest = dest;
     this.ret = ret;
+    this.type = "MOV";
   }
 
   @Override
