@@ -298,33 +298,38 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitArray_liter(Array_literContext ctx) {
     //Getting the size of the array literal: e.g. [0,0,0] has a size of 3
-    int size = ctx.expr().size();
-
-    //Getting the size of the type of the elements in the array: integer size -> 4
-    int typeSize = getSizeFromExpr(ctx.expr(0));
-
-    //Load the size of the array to r0 and call malloc to allocate memory on the heap for the array
-    machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', typeSize * size + 4)));
-    machine.add(new BranchLinkInstruction("malloc"));
-
-    //Get the first available register to store the address of the array (address of the first elemnt)
+    int size = 0;
+    if(ctx.expr() != null) {
+      size = ctx.expr().size();
+    }
     Register addressRegister = registers.getRegister();
-    machine.add(new MovInstruction(addressRegister, Registers.r0));
+    if(size > 0) {
+      //Getting the size of the type of the elements in the array: integer size -> 4
+      int typeSize = getSizeFromExpr(ctx.expr(0));
 
-    int pos = 1;
-    boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
-    //For each element in the array literal, load the expression to the register and store it to the corresponding address in the heap
-    for (ExprContext exprContext : ctx.expr()) {
-      Register exprRegister = visit(exprContext);
-      if(isCharOrBool) {
-        machine.add(
-            new StoreByteInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
-      } else {
-        machine.add(
-            new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
+      //Load the size of the array to r0 and call malloc to allocate memory on the heap for the array
+      machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', typeSize * size + 4)));
+      machine.add(new BranchLinkInstruction("malloc"));
+
+      //Get the first available register to store the address of the array (address of the first elemnt)
+      machine.add(new MovInstruction(addressRegister, Registers.r0));
+
+      int pos = 1;
+      boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
+      //For each element in the array literal, load the expression to the register and store it to the corresponding address in the heap
+      for (ExprContext exprContext : ctx.expr()) {
+        Register exprRegister = visit(exprContext);
+        if (isCharOrBool) {
+          machine.add(
+              new StoreByteInstruction(exprRegister,
+                  new Operand2Reg(addressRegister, pos * typeSize)));
+        } else {
+          machine.add(
+              new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
+        }
+        pos++;
+        registers.free(exprRegister);
       }
-      pos++;
-      registers.free(exprRegister);
     }
     //Put the size of the array literal to the first element (first address) of the array
     Register sizeRegister = registers.getRegister();
@@ -442,7 +447,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
     }
 
-//    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
     registers.free(reg2);
     registers.free(rreg1);
     registers.free(rreg2);
