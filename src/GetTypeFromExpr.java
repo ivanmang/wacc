@@ -11,6 +11,7 @@ import antlr.WaccParser.Binary_oper_mulContext;
 import antlr.WaccParser.Binary_oper_plusContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IdentContext;
+import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParserBaseVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -141,6 +142,17 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
 
     if (op == WaccParser.CHR) {
       return charType;
+    }
+    return null;
+  }
+
+  @Override
+  public Type visitPair_elem(Pair_elemContext ctx) {
+    PairType pair = (PairType) visit(ctx.expr());
+    if (ctx.FST() != null) {
+      return pair.getFst();
+    } else if (ctx.SND() != null) {
+      return pair.getSnd();
     }
     return null;
   }
