@@ -736,11 +736,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Label elseLabel = new Label(labelnumber++); //else label
     Label thenLabel = new Label(labelnumber++); //then label
     machine.add(new BranchEqualInstruction(elseLabel.toString()));
+    visit(ctx.stat(0));
     machine.add(new BranchInstruction(thenLabel.toString()));
     machine.add(elseLabel);
     visit(ctx.stat(1));
     machine.add(thenLabel);
-    visit(ctx.stat(0));
     registers.free(lastRegister);
     symbolTable = symbolTable.exitScope(symbolTable);
     return null;
