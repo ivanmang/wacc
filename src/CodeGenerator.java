@@ -71,12 +71,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   
   @Override
   public Register visitFunc(WaccParser.FuncContext ctx) {
-    machine.addFunctionStart(ctx.getChild(1).getText());
+    machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
     visit(ctx.getChild(5));
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new PopInstruction(Registers.pc));
-    machine.endMsg();
+    machine.add(new LtorgLabel());
     machine.addFunctionEnd();
     return null;
   }
@@ -105,13 +105,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
   @Override
   public Register visitDeclareAndAssignStat(DeclareAndAssignStatContext ctx) {
+    Register reg = visit(ctx.assign_rhs());
     if (ctx.type().base_type() != null) { //base type
 
       int reserveByte = symbolTable.getSize();
 
       machine.add(
           new SubInstruction(Registers.sp,Registers.sp, new Operand2Int('#',reserveByte )));
-      Register reg = visit(ctx.assign_rhs().expr());
 
       if(ctx.type().base_type().CHAR()!= null || ctx.type().base_type().BOOL()!=null){
         machine.add(new StoreByteInstruction(reg,
@@ -130,6 +130,38 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 
     return null;
   }
+  
+  @Override
+  public Register visitFunction_call(WaccParser.Function_callContext ctx){
+    return Registers.r0;
+  }
+  
+  @Override
+  public Register visitArray_liter(WaccParser.Array_literContext ctx) {
+//    if(){
+//
+//    }
+    int memory = ((ctx.getChildCount()-2)/2)*4+8;
+    System.out.printf(Integer.toString(memory));
+    Register reg = registers.getRegister();
+    Register rreg = registers.getReturnRegister();
+    Register reg1;
+    machine.add(new LoadInstruction(rreg, new Operand2Int('=', memory)));
+    machine.add(new BranchLinkInstruction("malloc"));
+    machine.add(new MovInstruction(reg,new Operand2Reg(rreg)));
+    int size = 0;
+    for (int i = 1; i <(ctx.getChildCount()); i = i+2) {
+      reg1 = visit(ctx.getChild(i));
+      size++;
+      machine.add(new StoreInstruction(reg1, new Operand2Reg(reg,(size*4))));
+      registers.free(reg1);
+    }
+    reg1 = registers.getRegister();
+    machine.add(new LoadInstruction(reg1, new Operand2Int('=', size)));
+    machine.add(new StoreInstruction(reg1, new Operand2Reg(reg,true)));
+    return reg;
+  }
+  
   
   @Override
   public Register visitExpr(ExprContext ctx) {
@@ -285,7 +317,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
-      char c = ctx.CHAR_LIT().getText().charAt(0);
+      char c = ctx.CHAR_LIT().getText().charAt(1);
       String c_ = "'" + c + "'";
       machine.add(new MovInstruction(reg, new Operand2String('#', c_)));
       return reg;
