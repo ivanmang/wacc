@@ -30,6 +30,7 @@ import Instructions.StringInstruction;
 import Instructions.SubInstruction;
 import antlr.WaccParser.Array_literContext;
 import antlr.WaccParser.AssignStatContext;
+import antlr.WaccParser.Assign_lhsContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
@@ -155,6 +156,22 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
     }
 
+    return null;
+  }
+
+  @Override
+  public Register visitAssignStat(AssignStatContext ctx) {
+    Register srcReg = visit(ctx.assign_rhs());
+    if(ctx.assign_lhs().ident() != null) {
+      String ident = ctx.assign_lhs().ident().getText();
+      machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+    } else if(ctx.assign_lhs().array_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().array_elem());
+      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+    } else if(ctx.assign_lhs().pair_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().pair_elem());
+      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+    }
     return null;
   }
 
