@@ -12,10 +12,7 @@ import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
 import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
-import Instructions.Operand2.Operand2;
-import Instructions.Operand2.Operand2Int;
-import Instructions.Operand2.Operand2Reg;
-import Instructions.Operand2.Operand2String;
+import Instructions.Operand2.*;
 import Instructions.PopInstruction;
 import Instructions.PushInstruction;
 import Instructions.Store.StoreByteInstruction;
@@ -207,12 +204,29 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
 //  if the number behind print is int then use Operand2Int
-    String str = ctx.getChild.get(0);
+    int num = ctx.getChild.get(1);
+//  if the number behind print is char then use Operand2Char
+    char chr = ctx.getChild.get(1);
+//  if the number behind print is string then use Operand2String
+    String str = ctx.getChild.get(1);
+
     int msg_num = machine.addMsg(str);
     Register current = registers.getRegister();
     machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
     machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
     registers.free(current);
+
+//    if number behind print is int
+    machine.add(new BranchLinkInstruction("p_print_int"));
+//    if behind print is char
+    Register current = registers.getRegister();
+    machine.add(new MovInstruction(current, new Operand2Char('#', chr)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
+    registers.free(current);
+    machine.add(new BranchLinkInstruction("putchar"));
+
+//    if number behind print is string
+    machine.add(new BranchLinkInstruction("p_print_string"));
 
 //    if (ctx.getChild(1) is of the type int) {
     machine.addPrintIntFunction(str);
@@ -221,6 +235,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 //    } else if (ctx.getChild(1) is of the type bool) {
     machine.addPrintBoolFunction();
 //    }
+
         return null;
   }
 
@@ -234,6 +249,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
     registers.free(current);
 
+//    if number behind print is int
+    machine.add(new BranchLinkInstruction("p_print_int"));
+//    if number behind print is string
+    machine.add(new BranchLinkInstruction("p_print_string"));
+    machine.add(new BranchLinkInstruction("p_print_ln"));
+
 //    if (ctx.getChild(1) is of the type int) {
     machine.addPrintIntFunction(str);
 //    } else if (ctx.getChild(1) is of the type string) {
@@ -241,6 +262,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
 //    } else if (ctx.getChild(1) is of the type bool) {
     machine.addPrintBoolFunction();
 //    }
+
 
     machine.addPrintlnFunction();
     return null;
