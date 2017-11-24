@@ -581,15 +581,21 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (ctx.ident() != null) {
       Register reg = registers.getRegister();
       int offset;
+      Type type;
       if (currentFunction.equals("main")) {
         offset = symbolTable.getAddress(ctx.getChild(0).getText());
+        type = symbolTable.getSymbolInfo(ctx.getChild(0).getText()).getType();
       }
       else{
         offset = functionList.get(currentFunction).getAddress(ctx.getChild(0).getText());
+        type = functionList.get(currentFunction).getType(ctx.getChild(0).getText());
       }
-      System.out.printf((ctx.getChild(0)).getText());
-      System.out.printf(Integer.toString(offset));
-      machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
+      if(type.getSize()==1) {
+        machine.add(new LoadByteInstruction(reg, new Operand2Reg(Registers.sp, offset)));
+      }
+      else{
+        machine.add(new LoadInstruction(reg, new Operand2Reg(Registers.sp, offset)));
+      }
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
@@ -808,6 +814,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.addPrintReferenceFunction();
     }
     machine.addPrintlnFunction();
+    registers.free(exprRegister);
     return null;
   }
 

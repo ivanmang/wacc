@@ -33,8 +33,12 @@ public class Function {
   
   public int getIndex(String key) { return identList.indexOf(key);}
 
-  public Type getType(int index) {
-    return symbolInfoList.get(index).getType();
+  public Type getType(int i) {
+    return symbolInfoList.get(i).getType();
+  }
+  
+  public Type getType(String key) {
+    return symbolInfoList.get(getIndex(key)).getType();
   }
 
   public SymbolInfo getSymbolInfo(int index) {
