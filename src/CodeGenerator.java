@@ -93,7 +93,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitFunc(WaccParser.FuncContext ctx) {
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
-    visit(ctx.getChild(5));
+    visit(ctx.stat());
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
@@ -130,10 +130,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = visit(ctx.assign_rhs());
 
       if (ctx.type().base_type().STRING() != null) { //string
-        String string = ctx.assign_rhs().getText();
-        int msg_num = machine.addMsg(string);
-        machine.add(new LoadInstruction(reg,
-            new Operand2String('=', "msg_" + msg_num)));
+        
       }
 
       if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
@@ -146,6 +143,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
       registers.free(reg);
 
+    }
+    else{
+      Register reg = visit(ctx.assign_rhs());
+      registers.free(reg);
     }
 
     return null;
@@ -163,7 +164,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(register, registers.getReturnRegister()));
       return register;
     } else if (ctx.array_liter() != null) {
-      return visit(ctx.new_pair());
+      return visit(ctx.array_liter());
     } else if (ctx.new_pair() != null) {
       return visit(ctx.new_pair());
     } else if (ctx.pair_elem() != null) {
@@ -224,6 +225,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register sizeRegister = registers.getRegister();
     machine.add(new LoadInstruction(sizeRegister, new Operand2Int('=', size)));
     machine.add(new StoreInstruction(sizeRegister, new Operand2Reg(addressRegister, true)));
+    registers.free(sizeRegister);
 
     //return the address register to represent the address of the array literal
     return addressRegister;
@@ -315,7 +317,24 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(reg, new Operand2Int('#', value)));
       return reg;
     } else if (ctx.array_elem() != null) {
-      return visit(ctx.array_elem());
+      Register reg1 = registers.getRegister();
+      System.out.println(ctx.array_elem().getChild(0).getText());
+      int offset = symbolTable.getAddress(ctx.array_elem().getChild(0).getText());
+      machine.add(new AddInstruction(reg1,registers.sp,new Operand2Int('#',offset)));
+      Register reg2 = visit(ctx.array_elem().getChild(2));
+      machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+      Register rreg1 = registers.getReturnRegister();
+      Register rreg2 = registers.getReturnRegister();
+      machine.add(new MovInstruction(rreg1,new Operand2Reg(reg2)));
+      machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
+      //TODO:check array type and check is array out of bound
+      machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
+      machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
+      machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+      registers.free(reg2);
+      registers.free(rreg1);
+      registers.free(rreg2);
+      return reg1;
     } else if (ctx.binary_oper_and_or() != null) {
       Register reg1 = visit(ctx.getChild(0));
       Register reg2 = visit(ctx.getChild(2));
@@ -461,7 +480,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(reg, new Operand2String('#', c_)));
       return reg;
     } else if (ctx.CHARACTER_LIT() != null) {
-      return null;
+      Register reg = registers.getRegister();
+      int i = machine.addMsg(ctx.CHARACTER_LIT().getText());
+      machine.add(new LoadInstruction(reg,new Operand2String('=',"msg_"+Integer.toString(i))));
+      return reg;
     } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
     }
