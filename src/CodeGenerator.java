@@ -196,13 +196,28 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      Type type= symbolTable.getSymbolInfo(ident).getType();
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      }
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem());
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
     } else if(ctx.assign_lhs().pair_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().pair_elem());
-      machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      Type type = exprTypeGetter.visitPair_elem(ctx.assign_lhs().pair_elem());
+      if(type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
     }
     return null;
   }
