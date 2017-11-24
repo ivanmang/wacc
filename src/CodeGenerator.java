@@ -28,6 +28,7 @@ import Instructions.Store.StoreInstruction;
 import antlr.WaccParser;
 import Instructions.StringInstruction;
 import Instructions.SubInstruction;
+import antlr.WaccParser.Array_elemContext;
 import antlr.WaccParser.Array_literContext;
 import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.Assign_lhsContext;
@@ -342,6 +343,28 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     symbolTable = symbolTable.exitScope(symbolTable);
     return null;
   }
+
+  @Override
+  public Register visitArray_elem(Array_elemContext ctx) {
+    Register reg1 = registers.getRegister();
+    int offset = symbolTable.getAddress(ctx.getChild(0).getText());
+    machine.add(new AddInstruction(reg1,registers.sp,new Operand2Int('#',offset)));
+    Register reg2 = visit(ctx.getChild(2));
+    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+    Register rreg1 = registers.getReturnRegister();
+    Register rreg2 = registers.getReturnRegister();
+    machine.add(new MovInstruction(rreg1,new Operand2Reg(reg2)));
+    machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
+    //TODO:check array type and check is array out of bound
+    machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
+    machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
+    machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+    registers.free(reg2);
+    registers.free(rreg1);
+    registers.free(rreg2);
+    return reg1;
+  }
+
   @Override
   public Register visitExpr(ExprContext ctx) {
     if (ctx.int_liter() != null) {
@@ -355,24 +378,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(reg, new Operand2Int('#', value)));
       return reg;
     } else if (ctx.array_elem() != null) {
-      Register reg1 = registers.getRegister();
-      System.out.println(ctx.array_elem().getChild(0).getText());
-      int offset = symbolTable.getAddress(ctx.array_elem().getChild(0).getText());
-      machine.add(new AddInstruction(reg1,registers.sp,new Operand2Int('#',offset)));
-      Register reg2 = visit(ctx.array_elem().getChild(2));
-      machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
-      Register rreg1 = registers.getReturnRegister();
-      Register rreg2 = registers.getReturnRegister();
-      machine.add(new MovInstruction(rreg1,new Operand2Reg(reg2)));
-      machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
-      //TODO:check array type and check is array out of bound
-      machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
-      machine.add(new AddInstruction(reg1,reg1,new Operand2Shift(reg2,"LSL",2)));
-      machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
-      registers.free(reg2);
-      registers.free(rreg1);
-      registers.free(rreg2);
-      return reg1;
+      return visit(ctx.array_elem());
     } else if (ctx.binary_oper_and_or() != null) {
       Register reg1 = visit(ctx.getChild(0));
       Register reg2 = visit(ctx.getChild(2));
