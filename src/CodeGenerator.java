@@ -612,7 +612,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //      }
 //      System.out.printf((ctx.getChild(0)).getText());
 //      System.out.printf(Integer.toString(offset));
-//      machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
+      machine.add(new LoadInstruction(reg,new Operand2Reg(Registers.sp,offset)));
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
