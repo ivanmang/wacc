@@ -35,7 +35,7 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
     } else if (ctx.bool_liter() != null) {
       return boolType;
     } else if (ctx.array_elem() != null) {
-      return visit(ctx.array_elem());
+      return visitArray_elem(ctx.array_elem(), symbolTable);
     } else if (ctx.binary_oper_and_or() != null) {
       return visit(ctx.binary_oper_and_or());
     } else if (ctx.binary_oper_eql() != null) {
@@ -63,16 +63,18 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
 
   public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
 //    System.out.println("visiting array elem");
-
+    System.out.println("checking");
     String ident = ctx.ident().getText();
     Type array = symbolTable.lookupAll(ident);
 //    System.out.println(array);
+    System.out.println("checking");
     if (array instanceof ArrayType) {
       ArrayType arrayBase = (ArrayType) array;
       return arrayBase.getElementType();
     } else if (array instanceof BaseType) {
       return charType;
     }
+    System.out.println("failed");
     return null;
   }
 

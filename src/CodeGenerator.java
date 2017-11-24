@@ -784,7 +784,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
+//    System.out.println("hi");
     Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+//    System.out.println(exprType);
     machine.add(new MovInstruction(Registers.r0, exprRegister));
     if(exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
