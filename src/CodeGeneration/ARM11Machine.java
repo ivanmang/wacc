@@ -6,7 +6,9 @@ import Instructions.Labels.DataLabel;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
+import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2Reg;
@@ -60,50 +62,107 @@ public class ARM11Machine {
     return msgIndex;
   }
 
-  public void addPrintIntFunction() {
+  public void addPrintIntFunction(String str) {
     List<Instruction> printInt = new LinkedList<>();
     //TODO: add msgs for printInt
+    int msg_num = addMsg(str);
     //TODO: add instructions for printInt
+    printInt.add(new PushInstruction(Registers.lr));
+    printInt.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+    printInt.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_num)));
+    printInt.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+    printInt.add(new BranchLinkInstruction("printf"));
+    printInt.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+    printInt.add(new BranchLinkInstruction("fflush"));
+    printInt.add(new PopInstruction(Registers.pc));
     printFunctions.put("p_print_int", printInt);
   }
 
-  public void addPrintStringFunction(int labelNum) {
+  public void addPrintStringFunction(String str) {
     List<Instruction> printString = new LinkedList<>();
-    //TODO: add msgs for printInt
-    //TODO: add instructions for printInt
+    //TODO: add msgs for printStr
+    addMsg(str);
+
+//    Do only if this is the first time added -- Start
+    int msg_num = addMsg("\"%.*s\\0\""); // Restriction: only add once
+    //TODO: add instructions for printIStr
     printString.add(new PushInstruction(Registers.lr));
     printString.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r0))); // LDR r1, [r0]
     printString.add(new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1), new Operand2Int('#', 4)));
-    printString.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg1")));
+    printString.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_num)));
     printString.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
     printString.add(new BranchLinkInstruction("printf"));
     printString.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
     printString.add(new BranchLinkInstruction("fflush"));
     printString.add(new PopInstruction(Registers.pc));
+//    Do only if this is the first time added -- End
 
-    printFunctions.put("p_print_int", printInt);
-  }
-
-  public void addPrintCharFunction() {
-    List<Instruction> printChar = new LinkedList<>();
-    //TODO: add msgs for printInt
-    //TODO: add instructions for printInt
-    printFunctions.put("p_print_int", printInt);
+    printFunctions.put("p_print_string", printString);
   }
 
   public void addPrintBoolFunction() {
     List<Instruction> printBool = new LinkedList<>();
-    //TODO: add msgs for printInt
-    //TODO: add instructions for printInt
-    printFunctions.put("p_print_int", printInt);
+    //TODO: add msgs for printBool
+    int msg_true = addMsg("\"true\\0\"");
+    int msg_false = addMsg("\"false\\0\"");
+
+    //TODO: add instructions for printBool
+    printBool.add(new PushInstruction(Registers.lr));
+    printBool.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
+    printBool.add(new LoadNotEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_true)));
+    printBool.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_false)));
+    printBool.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+    printBool.add(new BranchLinkInstruction("printf"));
+    printBool.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+    printBool.add(new BranchLinkInstruction("fflush"));
+    printBool.add(new PopInstruction(Registers.pc));
+    printFunctions.put("p_print_bool", printBool);
   }
 
   public void addPrintlnFunction() {
     List<Instruction> println = new LinkedList<>();
     //TODO: add msgs for printInt
-    //TODO: add instructions for printInt
-    printFunctions.put("p_print_int", printInt);
+    int msg_newline = addMsg("\"\\0\"");
+
+    println.add(new PushInstruction(Registers.lr));
+    println.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_newline)));
+    println.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
+    println.add(new BranchLinkInstruction("puts"));
+    println.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
+    println.add(new BranchLinkInstruction("fflush"));
+    println.add(new PopInstruction(Registers.pc));
+    printFunctions.put("p_print_ln", println);
   }
+
+  public void addReadIntFunction() {
+    List<Instruction> readInt = new LinkedList<>();
+    //TODO: add msgs for printInt
+    int msg_readInt = addMsg("\"%d\\0\"");
+
+    readInt.add(new PushInstruction(Registers.lr));
+    readInt.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+    readInt.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_readInt));
+    readInt.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+    readInt.add(new BranchLinkInstruction("scanf"));
+    readInt.add(new PopInstruction(Registers.pc));
+    printFunctions.put("p_read_int", readInt);
+  }
+
+  public void addReadCharFunction() {
+    List<Instruction> readInt = new LinkedList<>();
+    //TODO: add msgs for printInt
+    int msg_readChar = addMsg("\" %c\\0\"");
+
+    readInt.add(new PushInstruction(Registers.lr));
+    readInt.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
+    readInt.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_" + msg_readChar));
+    readInt.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
+    readInt.add(new BranchLinkInstruction("scanf"));
+    readInt.add(new PopInstruction(Registers.pc));
+    printFunctions.put("p_read_int", readInt);
+  }
+
+
 
   //Add this to the end of the messages:
   //.text

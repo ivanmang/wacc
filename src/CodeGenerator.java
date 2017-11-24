@@ -207,126 +207,54 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
 //  if the number behind print is int then use Operand2Int
-    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0, it can be a number
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(registers.usedRegisters.getFirst())));
-    registers.free(registers.usedRegisters.getFirst());
-    String branchName = "string";
+    String str = ctx.getChild.get(0);
+    int msg_num = machine.addMsg(str);
+    Register current = registers.getRegister();
+    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
+    registers.free(current);
+
 //    if (ctx.getChild(1) is of the type int) {
-    branchName = "int";
-//    } else if (ctx.getChild(1) is of the type char) {
-    branchName = "char";
+    machine.addPrintIntFunction(str);
+//    } else if (ctx.getChild(1) is of the type string) {
+    machine.addPrintStringFunction(str);
 //    } else if (ctx.getChild(1) is of the type bool) {
-    branchName = "bool";
+    machine.addPrintBoolFunction();
 //    }
-    machine.add(new BranchLinkInstruction("p_print_" + branchName));
-
-
-
-//    if (thingsAfterPrint is String) {
-    String msg = ctx.getChild(1).getText();
-    machine.addMsg(msg);
-    machine.addMsg("\"%.*s\\0\"");
-    generate_printers("string");
-//    }
-//    if (thingsAfterPrint is Int) {
-    machine.addMsg("\"%d\\0\"");
-    generate_printers("int");
-//    }
-//      if (thingsAfterPrint is Bool) {
-    machine.addMsg("\"true\\0\"");
-    machine.addMsg("\"false\\0\"");
-    generate_printers("bool");
-//    }
-
-
-    return null;
+        return null;
   }
 
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
     //  if the number behind print is int then use Operand2Int
-    machine.add(new LoadInstruction(registers.getRegister(), new Operand2String('=', "msg_0"))); // Need to know where to get the msg_0, it can be a number
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(registers.usedRegisters.getFirst())));
-    registers.free(registers.usedRegisters.getFirst());
-    String branchName = "string";
+    String str = ctx.getChild.get(0);
+    int msg_num = machine.addMsg(str);
+    Register current = registers.getRegister();
+    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
+    registers.free(current);
+
 //    if (ctx.getChild(1) is of the type int) {
-    branchName = "int";
-//    } else if (ctx.getChild(1) is of the type char) {
-    branchName = "char";
+    machine.addPrintIntFunction(str);
+//    } else if (ctx.getChild(1) is of the type string) {
+    machine.addPrintStringFunction(str);
 //    } else if (ctx.getChild(1) is of the type bool) {
-    branchName = "bool";
+    machine.addPrintBoolFunction();
 //    }
-    machine.add(new BranchLinkInstruction("p_print_" + branchName));
-    machine.addMsg("\"\\0\"");
-    generate_printers("ln");
+
+    machine.addPrintlnFunction();
     return null;
   }
 
   @Override
   public Register visitReadStat(ReadStatContext ctx) {
 //    if (ctx.getChild(1) is an int type) {
-    machine.addMsg("\"%d\\0\"");
-    generate_readers("int");
+    machine.addReadIntFunction();
 //    }
 //    else if (ctx.getChild(1) is a char type){
-    machine.addMsg("\" %c\\0\"");
-    generate_readers("char");
+    machine.addReadCharFunction();
 //    }
     return null;
-  }
-
-  public void generate_readers (String str) {
-    machine.add((new Label("p_read_" + str)));
-    machine.add(new PushInstruction(Registers.lr));
-    machine.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
-    machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg3")));
-    machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
-    machine.add(new BranchLinkInstruction("scanf"));
-    machine.add(new PopInstruction(Registers.pc));
-
-  }
-
-  public void generate_printers (String str) {
-    machine.add(new Label("p_print_" + str));
-    if (str == "string") {
-      machine.add(new PushInstruction(Registers.lr));
-      machine.add(new LoadInstruction(Registers.r1, new Operand2Reg(registers.r0))); // LDR r1, [r0]
-      machine.add(new AddInstruction(Registers.r2, new Operand2Reg(Registers.r1), new Operand2Int('#', 4)));
-      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg1")));
-      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4) ));
-      machine.add(new BranchLinkInstruction("printf"));
-      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
-      machine.add(new BranchLinkInstruction("fflush"));
-      machine.add(new PopInstruction(Registers.pc));
-
-    } else if (str == "int") {
-      machine.add(new PushInstruction(Registers.lr));
-      machine.add(new MovInstruction(Registers.r1, new Operand2Reg(Registers.r0)));
-      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_2")));
-      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
-      machine.add(new BranchLinkInstruction("printf"));
-      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
-      machine.add(new BranchLinkInstruction("fflush"));
-      machine.add(new PopInstruction(Registers.pc));
-    } else if (str == "ln") {
-      machine.add(new PushInstruction(Registers.lr));
-      machine.add(new LoadInstruction(Registers.r0, new Operand2String('=', "msg_3")));
-      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
-      machine.add(new BranchLinkInstruction("puts"));
-      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
-      machine.add(new BranchLinkInstruction("fflush"));
-      machine.add(new PopInstruction(Registers.pc));
-    } else if (str == "bool") {
-      machine.add(new PushInstruction(Registers.lr));
-      machine.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
-      machine.add(new LoadNotEqualInstruction(Registers.r0, new Operand2String('=', "msg_true")));
-      machine.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_false")));
-      machine.add(new AddInstruction(Registers.r0, new Operand2Reg(Registers.r0), new Operand2Int('#', 4)));
-      machine.add(new BranchLinkInstruction("printf"));
-      machine.add(new MovInstruction(Registers.r0, new Operand2Int('#', 0)));
-      machine.add(new BranchLinkInstruction("fflush"));
-      machine.add(new PopInstruction(Registers.pc));
-    }
   }
 
 }
