@@ -221,11 +221,20 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if(ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
+      Type type;
       if (currentFunction.equals("main")) {
-        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+        if(symbolTable.getSymbolInfo(ident).getType().getSize()==1){
+          machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+        }else {
+          machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+        }
       }
       else {
-        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+        if(symbolTable.getSymbolInfo(ident).getType().getSize()==1){
+          machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+        }else {
+          machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
+        }
       }
     } else if(ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
