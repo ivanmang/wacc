@@ -25,6 +25,7 @@ import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
+import java.util.Map;
 import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -40,9 +41,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
   private int string_num = 0;
   private int labelnumber = 0;
   private SymbolTable symbolTable;
+  private Map<String, Function> functionList;
 
-  public CodeGenerator(SymbolTable symbolTable) {
+  public CodeGenerator(SymbolTable symbolTable, Map<String, Function> functionList) {
     this.symbolTable = symbolTable;
+    this.functionList = functionList;
   }
 
   public String generateCode() {

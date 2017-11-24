@@ -1,11 +1,26 @@
 package CodeGeneration;
 
+import Utils.Type;
+
 public class Register {
 
   public String name;
+  private Type type;
 
   public Register(String name) {
     this.name = name;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public int getSize() {
+    return type.getSize();
   }
 
   @Override

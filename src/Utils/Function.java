@@ -7,10 +7,10 @@ public class Function {
   private Type returnType;
   private String ident;
   private List<String> identList;
-  private List<Type> typeList;
+  private List<SymbolInfo> typeList;
 
   public Function(Type returnType, List<String> identList,
-      List<Type> typeList) {
+      List<SymbolInfo> typeList) {
     this.returnType = returnType;
     this.identList = identList;
     this.typeList = typeList;
@@ -29,6 +29,18 @@ public class Function {
   }
 
   public Type getType(int index) {
+    return typeList.get(index).getType();
+  }
+
+  public SymbolInfo getSymbolInfo(int index) {
     return typeList.get(index);
+  }
+
+  public int getAddress(int index) {
+    return typeList.get(index).getAddress();
+  }
+
+  public void setAddress(int index) {
+    typeList.get(index).setAddress(index);
   }
 }
