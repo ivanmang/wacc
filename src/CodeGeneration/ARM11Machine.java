@@ -1,10 +1,20 @@
 package CodeGeneration;
 
+import Instructions.Branch.BranchLinkEqualInstruction;
+import Instructions.Branch.BranchLinkInstruction;
+import Instructions.CmpInstruction;
 import Instructions.Instruction;
 import Instructions.Labels.DataLabel;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
 import Instructions.Labels.TextLabel;
+import Instructions.Load.LoadEqualInstruction;
+import Instructions.Load.LoadInstruction;
+import Instructions.Move.MovInstruction;
+import Instructions.Operand2.Operand2Int;
+import Instructions.Operand2.Operand2String;
+import Instructions.PopInstruction;
+import Instructions.PushInstruction;
 import Instructions.StringInstruction;
 import Instructions.WordInstruction;
 import java.util.LinkedHashMap;
@@ -68,6 +78,30 @@ public class ARM11Machine {
   public void endMsg() {
     msg.add(new TextLabel());
     msg.add(new GlobalMainLabel());
+  }
+
+  public void throwOverThrowError(int overThrowErrorMsg){
+    List<Instruction> overThowError = new LinkedList<>();
+    overThowError.add(new LoadInstruction(Registers.r0,new Operand2String('=',"msg"+overThrowErrorMsg)));
+    printFunctions.put("p_throw_overflow_error",overThowError);
+  }
+
+  public void throwRuntimeError(){
+    List<Instruction> runTimeError = new LinkedList<>();
+    runTimeError.add(new BranchLinkInstruction("p_print_string"));
+    runTimeError.add(new MovInstruction(Registers.r0,new Operand2Int('#',-1)));
+    runTimeError.add(new BranchLinkInstruction("exit"));
+    printFunctions.put("p_throw_runtime_error",runTimeError);
+  }
+
+  public void checkNullPointer(int nullReferenceMsg){
+    List<Instruction> nullPointer = new LinkedList<>();
+    nullPointer.add(new PushInstruction(Registers.lr));
+    nullPointer.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
+    nullPointer.add(new LoadEqualInstruction(Registers.r0, new Operand2String('=',"msg"+nullReferenceMsg)));
+    nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
+    nullPointer.add(new PopInstruction(Registers.pc));
+    printFunctions.put("p_check_null_pointer",nullPointer);
   }
 
   //translate the instruction into string for output
