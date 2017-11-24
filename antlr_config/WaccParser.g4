@@ -37,7 +37,7 @@ stat           : SKIP_                              #skipStat
 //stat_helper    : SKIP_                              #skipStat
 //               | type ident EQUAL assign_rhs        #declareAndAssignStat
 //               | assign_lhs EQUAL assign_rhs        #assignStat
-//               | READ assign_lhs                    #readStat
+//               | READ assign_lhs                    #readStatg
 //               | FREE expr                          #freeStat
 //               | EXIT expr                          #exitStat
 //               | PRINT expr                         #printStat

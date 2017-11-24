@@ -80,7 +80,7 @@ public class Registers {
 
   //Remobe all return registers fom used registers
   public void freeReturnRegisters() {
-    for(Register reg : returnRegisters) {
+    for(Register reg : referenceReturnRegisters) {
       free(reg);
     }
   }
