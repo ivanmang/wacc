@@ -302,6 +302,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if(ctx.expr() != null) {
       size = ctx.expr().size();
     }
+    System.out.println("Size = " + size);
     Register addressRegister = registers.getRegister();
     if(size > 0) {
       //Getting the size of the type of the elements in the array: integer size -> 4

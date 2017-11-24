@@ -405,16 +405,20 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitArray_liter(Array_literContext ctx) {
 //    System.out.println("visiting array liter");
-    Type first_elem_type = visit(ctx.expr(0));
-    for (ExprContext exprContext : ctx.expr()) {
-      Type typeInArray = visit(exprContext);
-      if (!typeChecker(first_elem_type, typeInArray)) {
-        visitorErrorHandler
-            .incompatibleTypeError(ctx, typeInArray.toString(), first_elem_type,
-                typeInArray);
+    if(ctx.expr() != null && ctx.expr().size() > 0) {
+      Type first_elem_type = visit(ctx.expr(0));
+      for (ExprContext exprContext : ctx.expr()) {
+        Type typeInArray = visit(exprContext);
+        if (!typeChecker(first_elem_type, typeInArray)) {
+          visitorErrorHandler
+              .incompatibleTypeError(ctx, typeInArray.toString(), first_elem_type,
+                  typeInArray);
+        }
       }
+      return new ArrayType(first_elem_type);
+    } else {
+      return new AllType();
     }
-    return new ArrayType(first_elem_type);
   }
 
   @Override
