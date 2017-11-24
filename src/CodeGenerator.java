@@ -751,24 +751,24 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public int CheckArrayIndexNegErrorMsg() {
     machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("ArrayIndexOutOfBoundsError: negative index\n\0");
+    return machine.addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
   }
 
   public int CheckArrayIndexTooLargeErrorMsg() {
     machine.add(new BranchLinkInstruction("p_check_array_bounds"));
-    return machine.addMsg("ArrayIndexOutOfBoundsError: index too large\n\0");
+    return machine.addMsg("\"ArrayIndexOutOfBoundsError: index too large\\n\\0\"");
   }
 
   public int CheckDividedByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
     machine.add(new BranchLinkInstruction(" __aeabi_idiv"));
-    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
   }
 
   public int CheckModByZeroMsg() {
     machine.add(new BranchLinkInstruction("p_check_divide_by_zero"));
     machine.add(new BranchLinkInstruction(" __aeabi_imod"));
-    return machine.addMsg("DivideByZeroError: divide or modulo by zero\n\0");
+    return machine.addMsg("\"DivideByZeroError: divide or modulo by zero\\n\\0\"");
   }
 
 
@@ -776,12 +776,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public int CheckOverFlowErrorMsg() {
     machine.add(new BranchLinkVSInstruction("p_throw_overflow_error"));
     return machine
-        .addMsg("OverflowError: the result is too small/large to store in a 4-byte signed-integer");
+        .addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
   }
 
   public int CheckNullReferenceMsg() {
     machine.add(new BranchLinkInstruction("p_check_null_pointer"));
-    return machine.addMsg("NullReferenceError: dereference a null reference\\n\\0");
+    return machine.addMsg("\"NullReferenceError: dereference a null reference\\n\\0\"");
   }
 
   public void pairThrowRunTimeError(){
