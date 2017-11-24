@@ -22,6 +22,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public SymbolTable getGlobalSymbolTable() {
     return globalSymbolTable;
   }
+  public Map<String, Function> getFunctionList() {
+    return functionList;
+  }
 
   public boolean typeChecker(Type type1, Type type2) {
 //    System.out.println("type checking");

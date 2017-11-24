@@ -2,7 +2,10 @@ import antlr.WaccLexer;
 import antlr.WaccParser;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,7 +18,8 @@ public class Main {
     String filename = args[0];
 
     File file = new File(filename);
-    InputStream fileStream = new FileInputStream(file);
+    String name = file.getName();
+
     //create a CharStream that reads from file stream
     CharStream input = CharStreams.fromFileName(filename);
 
@@ -45,12 +49,30 @@ public class Main {
     //Checking for semantic errors
     SemanticChecker checker = new SemanticChecker();
     checker.visit(tree);
-    System.out.println("---Printing symbol table---");
-    checker.getGlobalSymbolTable().printTable();
-    System.out.println("---Finished---");
+//    System.out.println("---Printing symbol table---");
+//    checker.getGlobalSymbolTable().printTable();
+//    System.out.println("---Finished---");
 
-    CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolTable());
+    CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolTable(), checker.getFunctionList());
     gen.visit(tree);
     System.out.println(gen.generateCode());
+
+
+    String outputFileName = name.substring(0, name.lastIndexOf('.')) + ".s";
+    String program = gen.generateCode();
+    FileWriter writer = null;
+    try {
+      writer = new FileWriter(outputFileName);
+      writer.write(program);
+      writer.flush();
+    } catch (IOException ex) {
+      System.out.println("Error writing file");
+    } finally {
+      try{
+        writer.close();
+      } catch (IOException ex) {
+        System.out.println("Error closing file");
+      }
+    }
   }
 }
