@@ -68,7 +68,29 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register>{
     machine.endMsg();
     return null;
   }
-
+  
+  @Override
+  public Register visitFunc(WaccParser.FuncContext ctx) {
+    machine.addFunctionStart(ctx.getChild(1).getText());
+    machine.add(new PushInstruction(Registers.lr));
+    visit(ctx.getChild(5));
+    machine.add(new PopInstruction(Registers.pc));
+    machine.add(new PopInstruction(Registers.pc));
+    machine.endMsg();
+    machine.addFunctionEnd();
+    return null;
+  }
+  
+  @Override
+  public Register visitReturnStat(WaccParser.ReturnStatContext ctx) {
+    Register reg = visit(ctx.getChild(1));
+    //Register reg = Registers.r4;
+    Register rreg = registers.getReturnRegister();
+    machine.add(new MovInstruction(rreg, new Operand2Reg(reg)));
+    return null;
+  }
+  
+  
   @Override
   public Register visitExitStat(ExitStatContext ctx) {
     Register returnReg = visit(ctx.expr());

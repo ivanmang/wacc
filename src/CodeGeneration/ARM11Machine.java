@@ -15,6 +15,7 @@ import java.util.Map;
 public class ARM11Machine {
 
   private Map<String, List<Instruction>> functions;
+  private List<Instruction> previousFunction;
   private List<Instruction> currentFunction;
   private List<Instruction> msg;
 
@@ -27,10 +28,16 @@ public class ARM11Machine {
 
   //add the label for the start of the function and add it to the map
   public void addFunctionStart(String name) {
+    if (currentFunction!=null){
+      previousFunction = currentFunction;
+    }
     currentFunction = new LinkedList<>();
-    //TODO: add code for function start
     functions.put(name, currentFunction);
     currentFunction.add(new Label(name));
+  }
+  
+  public void addFunctionEnd() {
+    currentFunction = previousFunction;
   }
 
   //add Instruction to the current function
