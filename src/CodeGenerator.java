@@ -11,11 +11,9 @@ import Instructions.Labels.LtorgLabel;
 import Instructions.Labels.TextLabel;
 import Instructions.Load.LoadEqualInstruction;
 import Instructions.Load.LoadInstruction;
+import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
-import Instructions.Operand2.Operand2;
-import Instructions.Operand2.Operand2Int;
-import Instructions.Operand2.Operand2Reg;
-import Instructions.Operand2.Operand2String;
+import Instructions.Operand2.*;
 import Instructions.PopInstruction;
 import Instructions.PushInstruction;
 import Instructions.Store.StoreByteInstruction;
@@ -30,9 +28,14 @@ import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IfStatContext;
+import antlr.WaccParser.PrintStatContext;
+import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.ProgContext;
+import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.ReturnStatContext;
+import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
@@ -73,17 +76,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
     machine.endMsg();
-    return null;
-  }
-
-  @Override
-  public Register visitExitStat(ExitStatContext ctx) {
-    Register returnReg = visit(ctx.expr());
-
-    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(returnReg)));
-    machine.add(new BranchLinkInstruction("exit"));
-
-    registers.freeReturnRegisters();
     return null;
   }
 
@@ -323,3 +315,94 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   }
 
 }
+
+  @Override
+  public Register visitSkipStat(SkipStatContext ctx) {
+    return null;
+  }
+
+  @Override
+  public Register visitPrintStat(PrintStatContext ctx) {
+//  if the number behind print is int then use Operand2Int
+//    int num = ctx.getChild.get(1);
+//  if the number behind print is char then use Operand2Char
+//    char chr = ctx.getChild.get(1);
+//  if the number behind print is string then use Operand2String
+//    String str = ctx.getChild.get(1);
+    int num = 0;
+    char chr = 'N';
+    String str = "NOT YET IMPLEMENTED";
+// TODO: integrate expression into the implementation of print
+    int msg_num = machine.addMsg(str);
+    Register current = registers.getRegister();
+    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
+    registers.free(current);
+
+//    if number behind print is int
+    machine.add(new BranchLinkInstruction("p_print_int"));
+//    if behind print is char
+    Register current1 = registers.getRegister();
+    machine.add(new MovInstruction(current, new Operand2Char('#', chr)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current1)));
+    registers.free(current1);
+    machine.add(new BranchLinkInstruction("putchar"));
+
+//    if number behind print is string
+    machine.add(new BranchLinkInstruction("p_print_string"));
+
+//    if (ctx.getChild(1) is of the type int) {
+    machine.addPrintIntFunction(str);
+//    } else if (ctx.getChild(1) is of the type string) {
+    machine.addPrintStringFunction(str);
+//    } else if (ctx.getChild(1) is of the type bool) {
+    machine.addPrintBoolFunction();
+//    }
+
+        return null;
+  }
+
+  @Override
+  public Register visitPrintlnStat(PrintlnStatContext ctx) {
+    //  if the number behind print is int then use Operand2Int
+//    String str = ctx.getChild.get(0);
+    String str= "NOT YET IMPLEMENTED";
+    int msg_num = machine.addMsg(str);
+    Register current = registers.getRegister();
+    machine.add(new LoadInstruction(current, new Operand2String('=', "msg_" + msg_num)));
+    machine.add(new MovInstruction(Registers.r0, new Operand2Reg(current)));
+    registers.free(current);
+
+//    if number behind print is int
+    machine.add(new BranchLinkInstruction("p_print_int"));
+//    if number behind print is string
+    machine.add(new BranchLinkInstruction("p_print_string"));
+    machine.add(new BranchLinkInstruction("p_print_ln"));
+
+//    if (ctx.getChild(1) is of the type int) {
+    machine.addPrintIntFunction(str);
+//    } else if (ctx.getChild(1) is of the type string) {
+    machine.addPrintStringFunction(str);
+//    } else if (ctx.getChild(1) is of the type bool) {
+    machine.addPrintBoolFunction();
+//    }
+
+
+    machine.addPrintlnFunction();
+    return null;
+  }
+
+  @Override
+  public Register visitReadStat(ReadStatContext ctx) {
+//    if (ctx.getChild(1) is an int type) {
+    machine.addReadIntFunction();
+//    }
+//    else if (ctx.getChild(1) is a char type){
+    machine.addReadCharFunction();
+//    }
+    return null;
+  }
+
+}
+
+
