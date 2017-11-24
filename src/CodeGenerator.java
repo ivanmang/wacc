@@ -323,7 +323,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         machine.add(
             new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
       }
-    registers.free(exprRegister);
+      pos++;
+      registers.free(exprRegister);
     }
     //Put the size of the array literal to the first element (first address) of the array
     Register sizeRegister = registers.getRegister();
@@ -600,7 +601,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         default:
           break;
       }
-      return visit(ctx.unary_oper());
+      return reg1;
     } else if (ctx.ident() != null) {
       Register reg = registers.getRegister();
       int offset;
