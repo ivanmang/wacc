@@ -88,7 +88,37 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.addFunctionStart("main");
 //    builder.appendInstructions("PUSH", "{lr}");
     machine.add(new PushInstruction(Registers.lr));
+
+    int address = 0;
+    //get the symbol table with it's address and type
+    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    //iterate all variables and assign a address to it
+    for (String name : dict.keySet()) {
+      dict.get(name).setAddress(address);
+      address += dict.get(name).getType().getSize();
+    }
+
+    //get the size of the variable store
+    int reserveByte = symbolTable.getSize();
+
+    //if size exceed max stack size reserve, Push max_size first
+    while (reserveByte > MAX_STACK_SIZE) {
+      machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      reserveByte -= MAX_STACK_SIZE;
+    }
+    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    reserveByte = symbolTable.getSize();
+
     visitChildren(ctx);
+
+    //if size exceed max stack size reserve, Push max_size first
+    while (reserveByte > MAX_STACK_SIZE) {
+      machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      reserveByte -= MAX_STACK_SIZE;
+    }
+    //Pop the variables
+    machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+
 //    builder.appendInstructions("LDR", "r0", "=0");
 //    builder.appendInstructions("POP", "{pc}");
     machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', 0)));
@@ -319,6 +349,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       dict.get(name).setAddress(address);
       address += dict.get(name).getType().getSize();
     }
+
     //get the size of the variable store
     int reserveByte = symbolTable.getSize();
 
