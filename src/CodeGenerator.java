@@ -41,6 +41,7 @@ import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
+import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -126,16 +127,59 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitFunc(WaccParser.FuncContext ctx) {
 //    previousFunction = currentFunction;
 //    currentFunction = ctx.getChild(1).getText();
+    SymbolTable main = symbolTable;
+    symbolTable = functionList.get(ctx.getChild(1).getText()).getSymbolTable();
+  
+    int address = 4;
+    int size = 0;
+    
+    
+    //get the symbol table with it's address and type
+    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    //iterate all variables and assign a address to it
+    for (String name : dict.keySet()) {
+      dict.get(name).setAddress(address);
+      address += dict.get(name).getType().getSize();
+      if(!functionList.get(ctx.getChild(1).getText()).getIdentList().contains(name)) {
+        size += dict.get(name).getType().getSize();
+      }
+    }
+  
+    //get the size of the variable store
+    int reserveByte = size;
+  
+    //if size exceed max stack size reserve, Push max_size first
+    while (reserveByte > MAX_STACK_SIZE) {
+      machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      reserveByte -= MAX_STACK_SIZE;
+    }
     machine.addFunctionStart("f_"+ctx.getChild(1).getText());
     machine.add(new PushInstruction(Registers.lr));
-    visit(ctx.param_list());
+    if (reserveByte!=0) {
+      machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    }
+    reserveByte = symbolTable.getSize();
+    
     visit(ctx.stat());
+  
+    //if size exceed max stack size reserve, Push max_size first
+    while (reserveByte > MAX_STACK_SIZE) {
+      machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
+      reserveByte -= MAX_STACK_SIZE;
+    }
+    //Pop the variables
+    if (reserveByte!=0) {
+      machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    }
+    
+    
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new PopInstruction(Registers.pc));
     machine.add(new LtorgLabel());
     machine.addFunctionEnd();
 //    currentFunction = previousFunction;
 //    previousFunction = null;
+    symbolTable = main;
     return null;
   }
 

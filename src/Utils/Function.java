@@ -18,7 +18,11 @@ public class Function {
       symbolInfoList.add(new SymbolInfo(type));
     }
   }
-
+  
+  public ArrayList<String> getIdentList() {
+    return identList;
+  }
+  
   public void setSymbolTable(SymbolTable symbolTable) {
     this.symbolTable = symbolTable;
   }
