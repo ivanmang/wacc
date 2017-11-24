@@ -291,11 +291,16 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if (ctx.expr() != null) {
       return visit(ctx.expr());
     } else if (ctx.function_call() != null) {
-      //TODO: implemnt function call for visit assign
       String function_name = ctx.function_call().ident().getText();
+      SymbolTable main = symbolTable;
+      symbolTable = functionList.get(function_name).getSymbolTable();
+      if(ctx.function_call().arg_list()!=null){
+        visit(ctx.function_call().arg_list());
+      }
       machine.add(new BranchLinkInstruction("f_" + function_name));
       Register register = registers.getRegister();
       machine.add(new MovInstruction(register, registers.getReturnRegister()));
+      symbolTable = main;
       return register;
     } else if (ctx.array_liter() != null) {
       return visit(ctx.array_liter());
@@ -310,6 +315,25 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         machine.add(new LoadInstruction(addressRegister, new Operand2Reg(addressRegister, true)));
       }
       return addressRegister;
+    }
+    return null;
+  }
+  
+  @Override
+  public Register visitArg_list(WaccParser.Arg_listContext ctx){
+    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    for (int i = 0; i <= (ctx.getChildCount()); i = i +2) {
+//      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
+      System.out.println(ctx.getChild(i).getChild(0).getText());
+      if (exprTypeIsCharOrBool((WaccParser.ExprContext)ctx.getChild(i))) {
+        Register reg = visit(ctx.getChild(i));
+        machine.add(new StoreByteInstruction(reg,new Operand2Reg(Registers.sp,-1),true));
+        registers.free(reg);
+      } else {
+        Register reg = visit(ctx.getChild(i));
+        machine.add(new StoreInstruction(reg,new Operand2Reg(Registers.sp,-4),true));
+        registers.free(reg);
+      }
     }
     return null;
   }
@@ -484,7 +508,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register rreg2 = registers.getReturnRegister();
     machine.add(new MovInstruction(rreg1,new Operand2Reg(reg2)));
     machine.add(new MovInstruction(rreg2,new Operand2Reg(reg1)));
-    //TODO:check array type and check is array out of bound
+    machine.addCheckArrayBoundFunction();
     machine.add(new AddInstruction(reg1,reg1,new Operand2Int('#',4)));
     if(elementType.equals(charType) || elementType.equals(boolType)) {
       machine.add(new AddInstruction(reg1,reg1,new Operand2Reg(reg2)));
