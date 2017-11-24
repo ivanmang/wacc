@@ -729,6 +729,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitIfStat(IfStatContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
     Register lastRegister = visit(ctx.expr());
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
     Label elseLabel = new Label(labelnumber++); //else label
@@ -740,11 +741,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(thenLabel);
     visit(ctx.stat(0));
     registers.free(lastRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
     return null;
   }
 
   @Override
   public Register visitWhileStat(WhileStatContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
     machine.add(new BranchInstruction(startLabel.toString()));
@@ -755,6 +758,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     registers.free(lastRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
     return null;
   }
 
@@ -767,6 +771,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitPrintStat(PrintStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
     Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+    System.out.println("Expression type = " + exprType);
+    System.out.println(exprType.equals(new ArrayType(charType)));
     machine.add(new MovInstruction(Registers.r0, exprRegister));
     if(exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
@@ -779,6 +785,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if(exprType.equals(boolType)) {
       machine.add(new BranchLinkInstruction("p_print_bool"));
       machine.addPrintBoolFunction();
+    } else if(exprType.equals(new ArrayType(charType))) {
+      machine.add(new BranchLinkInstruction("p_print_string"));
+      machine.addPrintStringFunction();
     } else {
       machine.add(new BranchLinkInstruction("p_print_reference"));
       machine.addPrintReferenceFunction();
