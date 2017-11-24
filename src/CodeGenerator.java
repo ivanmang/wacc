@@ -571,8 +571,33 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       return reg;
     } else if (ctx.CHAR_LIT() != null) {
       Register reg = registers.getRegister();
-      char c = ctx.CHAR_LIT().getText().charAt(1);
-      String c_ = "'" + c + "'";
+      String text = ctx.CHAR_LIT().getText();
+      String c_ = "";
+      if (text.length()>3){
+        if (text.equals("'\0'") ){
+          c_ = Integer.toString(0);
+        }else if(text.equals("'\b'")){
+          c_ = Integer.toString(8);
+        }else if(text.equals("'\t'")){
+          c_ = Integer.toString(9);
+        }else if(text.equals("'\n'")){
+          c_ = Integer.toString(10);
+        }else if(text.equals("'\f'")){
+          c_ = Integer.toString(12);
+        }else if(text.equals("'\r'")){
+          c_ = Integer.toString(13);
+        }else if(text.equals("'\''")){
+          c_ = Integer.toString(39);
+        }else if(text.equals("'\"'")){
+          c_ = Integer.toString(34);
+        }else if(text.equals("'\\'")){
+          c_ = Integer.toString(92);
+        }
+      }
+      else {
+        char c = text.charAt(1);
+        c_ = "'" + c + "'";
+      }
       machine.add(new MovInstruction(reg, new Operand2String('#', c_)));
       return reg;
     } else if (ctx.CHARACTER_LIT() != null) {
