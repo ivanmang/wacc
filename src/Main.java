@@ -15,13 +15,13 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
 
-    String filename = args[0];
+    String inputFilePath = args[0];
 
-    File file = new File(filename);
-    String name = file.getName();
+    File inputFile = new File(inputFilePath);
+    String inputFileName = inputFile.getName();
 
-    //create a CharStream that reads from file stream
-    CharStream input = CharStreams.fromFileName(filename);
+    //create a CharStream that reads from inputFile stream
+    CharStream input = CharStreams.fromFileName(inputFilePath);
 
     //create a lexer that feeds off of input CharStream
     WaccLexer lexer = new WaccLexer(input);
@@ -65,7 +65,7 @@ public class Main {
     System.out.println(gen.generateCode());
 
 
-    String outputFileName = name.substring(0, name.lastIndexOf('.')) + ".s";
+    String outputFileName = inputFileName.substring(0, inputFileName.lastIndexOf('.')) + ".s";
     String program = gen.generateCode();
     FileWriter writer = null;
     try {
@@ -73,12 +73,12 @@ public class Main {
       writer.write(program);
       writer.flush();
     } catch (IOException ex) {
-      System.out.println("Error writing file");
+      System.out.println("Error writing inputFile");
     } finally {
       try{
         writer.close();
       } catch (IOException ex) {
-        System.out.println("Error closing file");
+        System.out.println("Error closing inputFile");
       }
     }
   }
