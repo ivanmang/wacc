@@ -673,7 +673,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //          machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
           break;
         case WaccParser.CHR:
-          machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
+//          machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
           break;
         default:
           break;
