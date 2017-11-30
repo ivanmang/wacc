@@ -308,7 +308,7 @@ public class ARM11Machine {
       arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + negMsg)));
       arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
 
-      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1)));
+      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1, true)));
       arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1));
       arrayBoundError
           .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + largeMsg)));
