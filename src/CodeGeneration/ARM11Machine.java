@@ -335,7 +335,7 @@ public class ARM11Machine {
       add(new BranchLinkInstruction(" __aeabi_idiv"));
       int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> checkZeroError = new LinkedList<>();
-      checkZeroError.add(new Label("p_throw_overflow_error"));
+      checkZeroError.add(new Label("p_check_divide_by_zero"));
       checkZeroError.add(new PushInstruction(Registers.lr));
       checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
       checkZeroError
@@ -353,7 +353,7 @@ public class ARM11Machine {
       add(new BranchLinkInstruction(" __aeabi_imod"));
       int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> checkZeroError = new LinkedList<>();
-      checkZeroError.add(new Label("p_throw_overflow_error"));
+      checkZeroError.add(new Label("p_check_divide_by_zero"));
       checkZeroError.add(new PushInstruction(Registers.lr));
       checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
       checkZeroError
