@@ -3,6 +3,10 @@
 # You are free to change the language used for this script,
 # but do *not* change its name.
 
+if ARGV.empty?
+  puts "File path expected"
+  exit(8)
+end
 path = ARGV[0]
 lib = "bin:lib/antlr-4.7-complete.jar"
 system "java -cp #{lib} Main #{path}"

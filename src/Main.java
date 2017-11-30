@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.Scanner;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,7 +16,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
 
-    String inputFilePath = args[0];
+    String inputFilePath = "";
+
+    if(args.length == 0) {
+      System.out.println("Please enter a file path:");
+      Scanner s = new Scanner(System.in);
+      inputFilePath = s.next();
+    } else {
+      inputFilePath = args[0];
+    }
 
     File inputFile = new File(inputFilePath);
     String inputFileName = inputFile.getName();
