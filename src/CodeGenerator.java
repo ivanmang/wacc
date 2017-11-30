@@ -478,7 +478,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
       reserveByte -= MAX_STACK_SIZE;
     }
-//    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
     reserveByte = symbolTable.getSize();
 
     visit(ctx.stat());
@@ -489,7 +489,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       reserveByte -= MAX_STACK_SIZE;
     }
     //Pop the variables
-//    machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
+    machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
 
     symbolTable = symbolTable.exitScope(symbolTable);
     return null;
