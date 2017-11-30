@@ -11,7 +11,6 @@ import Instructions.Branch.BranchLinkNEInstruction;
 import Instructions.Branch.BranchLinkVSInstruction;
 import Instructions.CmpInstruction;
 import Instructions.Instruction;
-import Instructions.Branch.BranchLinkInstruction;
 import Instructions.Labels.DataLabel;
 import Instructions.Labels.GlobalMainLabel;
 import Instructions.Labels.Label;
@@ -24,11 +23,6 @@ import Instructions.Load.LoadNotEqualInstruction;
 import Instructions.Move.MovInstruction;
 import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2Reg;
-import Instructions.Operand2.Operand2String;
-import Instructions.Load.LoadEqualInstruction;
-import Instructions.Load.LoadInstruction;
-import Instructions.Move.MovInstruction;
-import Instructions.Operand2.Operand2Int;
 import Instructions.Operand2.Operand2String;
 import Instructions.PopInstruction;
 import Instructions.PushInstruction;
@@ -330,9 +324,13 @@ public class ARM11Machine {
   }
 
   public void CheckDividedByZeroFunction(){
+    add(new BranchLinkInstruction("p_check_divide_by_zero"));
+    add(new BranchLinkInstruction(" __aeabi_idiv"));
+    addDivByZeroFunction();
+  }
+
+  private void addDivByZeroFunction() {
     if (!printFunctions.containsKey("p_check_divide_by_zero")) {
-      add(new BranchLinkInstruction("p_check_divide_by_zero"));
-      add(new BranchLinkInstruction(" __aeabi_idiv"));
       int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> checkZeroError = new LinkedList<>();
       checkZeroError.add(new Label("p_check_divide_by_zero"));
@@ -348,21 +346,9 @@ public class ARM11Machine {
   }
 
   public void CheckDividedByModFunction(){
-    if (!printFunctions.containsKey("p_check_divide_by_mod")) {
-      add(new BranchLinkInstruction("p_check_divide_by_zero"));
-      add(new BranchLinkInstruction(" __aeabi_imod"));
-      int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
-      List<Instruction> checkZeroError = new LinkedList<>();
-      checkZeroError.add(new Label("p_check_divide_by_zero"));
-      checkZeroError.add(new PushInstruction(Registers.lr));
-      checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
-      checkZeroError
-          .add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + checkZero)));
-      checkZeroError.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
-      checkZeroError.add(new PopInstruction(Registers.pc));
-      printFunctions.put("p_check_divide_by_mod", checkZeroError);
-      addRuntimeErrorInstruction();
-    }
+    add(new BranchLinkInstruction("p_check_divide_by_zero"));
+    add(new BranchLinkInstruction(" __aeabi_imod"));
+    addDivByZeroFunction();
   }
 
 
