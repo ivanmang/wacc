@@ -374,7 +374,7 @@ public class ARM11Machine {
   public void addRuntimeErrorInstruction() {
     if (!printFunctions.containsKey("p_throw_runtime_error")) {
       List<Instruction> runTimeError = new LinkedList<>();
-      add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
+     // add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
       runTimeError.add(new Label("p_throw_runtime_error"));
       runTimeError.add(new BranchLinkInstruction("p_print_string"));
       runTimeError.add(new MovInstruction(Registers.r0, new Operand2Int('#', -1)));
