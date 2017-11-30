@@ -454,8 +454,14 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitBeginStat(BeginStatContext ctx) {
     int address = 0;
+    System.out.println("Printing SymbolTable before entering scope");
+    symbolTable.printTable();
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    System.out.println("Printing SymbolTable after entering scope");
+    symbolTable.printTable();
+    System.out.println("Printing finished");
 
-    symbolTable = symbolTable.enterScope(symbolTable);
+
     //get the symbol table with it's address and type
     Map<String, SymbolInfo> dict = symbolTable.getDictionary();
     //iterate all variables and assign a address to it
@@ -809,7 +815,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitIfStat(IfStatContext ctx) {
-    symbolTable = symbolTable.enterScope(symbolTable);
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
     Register lastRegister = visit(ctx.expr());
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
     Label elseLabel = new Label(labelnumber++); //else label
@@ -827,7 +833,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitWhileStat(WhileStatContext ctx) {
-    symbolTable = symbolTable.enterScope(symbolTable);
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
     machine.add(new BranchInstruction(startLabel.toString()));

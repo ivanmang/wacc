@@ -43,7 +43,11 @@ public class SymbolTable {
   public SymbolTable enterScope(SymbolTable cur) {
     SymbolTable childSymbolTable = new SymbolTable(null, cur);
     this.childSymbolTable = childSymbolTable;
-    return childSymbolTable;
+    return cur;
+  }
+
+  public SymbolTable enterScopeCodeGen(SymbolTable cur) {
+    return cur.childSymbolTable;
   }
 
   public SymbolTable exitScope(SymbolTable cur) {
@@ -72,7 +76,12 @@ public class SymbolTable {
 
   public SymbolInfo lookupAllSymbol(String name) {
     SymbolTable symbolTable = this;
+    System.out.println("hi");
+    this.printTable();
+    System.out.println("bye");
     while (symbolTable != null) {
+      System.out.println("printTable");
+      symbolTable.printTable();
       SymbolInfo symbolInfo = symbolTable.lookupSymbol(name);
       if (symbolInfo != null) {
         return symbolInfo;
@@ -80,6 +89,7 @@ public class SymbolTable {
         symbolTable = symbolTable.getParentSymbolTable();
       }
     }
+    System.out.println("test");
     return null;
   }
 
@@ -126,11 +136,16 @@ public class SymbolTable {
     SymbolTable currentTable = this;
     int indentation = 0;
     while(currentTable != null) {
-      for (String key : currentTable.getDictionary().keySet()) {
-        for(int i = 0; i < indentation; i++) {
-          System.out.print("\t");
+      if(currentTable.getDictionary().isEmpty()) {
+        System.out.println("EMPTY");
+      } else {
+        for (String key : currentTable.getDictionary().keySet()) {
+          for (int i = 0; i < indentation; i++) {
+            System.out.print("\t");
+          }
+          System.out.println(
+              key + " " + currentTable.getDictionary().get(key).getType());
         }
-        System.out.println(key + " " + currentTable.getDictionary().get(key).getType());
       }
       currentTable = currentTable.getChildSymbolTable();
       indentation++;
