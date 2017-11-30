@@ -43,13 +43,13 @@ public class SymbolTable {
   public SymbolTable enterScope(SymbolTable cur) {
     SymbolTable childSymbolTable = new SymbolTable(null, cur);
     this.childSymbolTable = childSymbolTable;
-    return cur;
+    return childSymbolTable;
   }
 
   public SymbolTable enterScopeCodeGen(SymbolTable cur) {
     return cur.childSymbolTable;
   }
-
+  
   public SymbolTable exitScope(SymbolTable cur) {
     return cur.parentSymbolTable;
   }
