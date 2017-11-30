@@ -325,7 +325,6 @@ public class ARM11Machine {
 
   public void CheckDividedByZeroFunction(){
     add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    add(new BranchLinkInstruction(" __aeabi_idiv"));
     addDivByZeroFunction();
   }
 
@@ -344,14 +343,8 @@ public class ARM11Machine {
       addRuntimeErrorInstruction();
     }
   }
-
-  public void CheckDividedByModFunction(){
-    add(new BranchLinkInstruction("p_check_divide_by_zero"));
-    add(new BranchLinkInstruction(" __aeabi_imod"));
-    addDivByZeroFunction();
-  }
-
-
+  
+  
   public void addOverflowErrorFunction(boolean isMul) {
     if (!printFunctions.containsKey("p_throw_overflow_error")) {
       if(isMul){
