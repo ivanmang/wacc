@@ -661,7 +661,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
           machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
           break;
         case WaccParser.MINUS:
-          machine.add(new SubInstruction(reg1,reg1,new Operand2Int('#',1),true,true));
+          machine.add(new SubInstruction(reg1,reg1,new Operand2Int('#',0),true,true));
+          machine.addOverflowErrorFunction(false);
           break;
         case WaccParser.LEN:
           machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
@@ -774,31 +775,31 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //    return reg1;
 //  }
 
-  @Override
-  public Register visitUnary_oper(WaccParser.Unary_operContext ctx) {
-    Register reg1 = visit(ctx.getChild(0));
-    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
-    switch (op) {
-      case WaccParser.NOT:
-        machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
-        break;
-      case WaccParser.MINUS:
-        machine.add(new SubInstruction(reg1,reg1,new Operand2Int('#',1),true,true));
-        break;
-      case WaccParser.LEN:
-        machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
-        break;
-      case WaccParser.ORD:
-        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
-        break;
-      case WaccParser.CHR:
-        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
-        break;
-      default:
-        break;
-    }
-    return reg1;
-  }
+//  @Override
+//  public Register visitUnary_oper(WaccParser.Unary_operContext ctx) {
+//    Register reg1 = visit(ctx.getChild(0));
+//    int op = ((TerminalNode) ctx.getChild(0)).getSymbol().getType();
+//    switch (op) {
+//      case WaccParser.NOT:
+//        machine.add(new XorInstruction(reg1,reg1,new Operand2Int('#',1)));
+//        break;
+//      case WaccParser.MINUS:
+//        machine.add(new SubInstruction(reg1,reg1,new Operand2Int('#',1),true,true));
+//        break;
+//      case WaccParser.LEN:
+//        machine.add(new LoadInstruction(reg1,new Operand2Reg(reg1,true)));
+//        break;
+//      case WaccParser.ORD:
+//        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
+//        break;
+//      case WaccParser.CHR:
+//        machine.add(new LoadByteInstruction(reg1,new Operand2Reg(reg1,true)));
+//        break;
+//      default:
+//        break;
+//    }
+//    return reg1;
+//  }
 
 
 
