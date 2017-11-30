@@ -634,6 +634,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
         machine.CheckDividedByZeroFunction();
+        machine.add(new BranchLinkInstruction("__aeabi_idiv"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg1)));
         registers.free(rreg1);
         registers.free(rreg2);
@@ -642,7 +643,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         Register rreg2= registers.getReturnRegister();
         machine.add(new MovInstruction(rreg1,new Operand2Reg(reg1)));
         machine.add(new MovInstruction(rreg2,new Operand2Reg(reg2)));
-        machine.CheckDividedByModFunction();
+        machine.CheckDividedByZeroFunction();
+        machine.add(new BranchLinkInstruction("__aeabi_idivmod"));
         machine.add(new MovInstruction(reg1,new Operand2Reg(rreg2)));
         registers.free(rreg1);
         registers.free(rreg2);
