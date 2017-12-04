@@ -22,6 +22,15 @@ public class VisitorErrorHandler {
         SEMANTIC_ERROR_CODE);
   }
 
+  public void incompatibleTypeError(ParseTree ctx, String token, Type expectedType1,
+      Type expectedType2,
+      Type actualType) {
+    throwError(ctx,
+        "Incompatible type at " + token + " (expected: " + expectedType1 + " or " + expectedType2
+            + ", actual: " + actualType,
+        SEMANTIC_ERROR_CODE);
+  }
+
   public void variableNotDefinedInScopeError(ParseTree ctx, String token) {
     throwError(ctx, "Variable " + token + " is not defined in this scope", SEMANTIC_ERROR_CODE);
   }

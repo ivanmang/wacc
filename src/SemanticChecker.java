@@ -22,6 +22,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public SymbolTable getGlobalSymbolTable() {
     return globalSymbolTable;
   }
+
   public Map<String, Function> getFunctionList() {
     return functionList;
   }
@@ -109,7 +110,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
               actual);
     } else if (symbolTable.getParentSymbolTable() != null) {
 //      symbolTable.getParentSymbolTable().printTable();
-      if (symbolTable.contain(identName) && !symbolTable.getParentSymbolTable().contain(identName)) {
+      if (symbolTable.contain(identName) && !symbolTable.getParentSymbolTable()
+          .contain(identName)) {
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
         symbolTable.insert(ctx.ident().getText(), expected);
@@ -342,6 +344,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return stringType;
     } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
+    } else if (ctx.INC() != null || ctx.DEC() != null) {
+      Type actual = visit(ctx.ident());
+      if (!typeChecker(actual, charType) || !typeChecker(actual, intType)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, ctx.ident().getText(), intType, charType, actual);
+      }
+      return actual;
     }
     return null;
   }
@@ -405,7 +414,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitArray_liter(Array_literContext ctx) {
 //    System.out.println("visiting array liter");
-    if(ctx.expr() != null && ctx.expr().size() > 0) {
+    if (ctx.expr() != null && ctx.expr().size() > 0) {
       Type first_elem_type = visit(ctx.expr(0));
       for (ExprContext exprContext : ctx.expr()) {
         Type typeInArray = visit(exprContext);
@@ -420,6 +429,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return new AllType();
     }
   }
+
 
   @Override
   public Type visitNew_pair(New_pairContext ctx) {
