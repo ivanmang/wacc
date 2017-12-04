@@ -36,6 +36,8 @@ import antlr.WaccParser.New_pairContext;
 import antlr.WaccParser.Pair_elemContext;
 import antlr.WaccParser.ProgContext;
 import antlr.WaccParser.ReadStatContext;
+import antlr.WaccParser.SideEffectStatContext;
+import antlr.WaccParser.Side_effectContext;
 import antlr.WaccParser.SkipStatContext;
 import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
@@ -320,7 +322,38 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     }
     return null;
   }
-  
+
+  @Override
+  public Register visitSide_effect(Side_effectContext ctx) {
+    String identName = ctx.ident().getText();
+    int offset = symbolTable.getAddress(identName);
+    Register register = registers.getRegister();
+    Register register1 = registers.getRegister();
+    machine.add(new LoadInstruction(register,new Operand2Reg(Registers.sp,offset)));
+
+    if (ctx.INC() != null) {
+      if (ctx.getChild(0).getChild(0)!=null){ //ident++
+        machine.add(new AddInstruction(register1,register,new Operand2Int('#',1)));
+        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
+        return register;
+      }else{ //++ident
+        machine.add(new AddInstruction(register,register,new Operand2Int('#',1)));
+        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+        return register;
+      }
+    } else {
+      if (ctx.getChild(0).getChild(0)!=null){ //ident--
+        machine.add(new SubInstruction(register1,register,new Operand2Int('#',1)));
+        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
+        return register;
+      }else{ //--ident
+        machine.add(new SubInstruction(register,register,new Operand2Int('#',1)));
+        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+        return register;
+      }
+    }
+  }
+
   @Override
   public Register visitArg_list(WaccParser.Arg_listContext ctx){
     Map<String, SymbolInfo> dict = symbolTable.getDictionary();
@@ -339,6 +372,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     }
     return null;
   }
+
+
 
   @Override
   public Register visitPair_elem(Pair_elemContext ctx) {
@@ -746,6 +781,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       return reg;
     } else if (ctx.OPEN_PARENTHESES() != null) {
       return visit(ctx.expr(0));
+    } else if(ctx.side_effect() != null){
+      return visit(ctx.side_effect());
     }
     return null;
   }
@@ -940,6 +977,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.addReadCharFunction();
     }
     return null;
+  }
+
+  @Override
+  public Register visitSideEffectStat(SideEffectStatContext ctx) {
+    return visit(ctx.side_effect());
   }
 
   private int getSizeFromExpr(ExprContext ctx) {
