@@ -131,6 +131,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 //    System.out.println("Visiting Assign Stat");
     Type expected = visit(ctx.assign_lhs());
     Type actual = visit(ctx.assign_rhs());
+    System.out.println(expected + " " + actual);
     if (functionList.containsKey(ctx.assign_lhs().getText())) {
       visitorErrorHandler.variableNotDefinedInScopeError(ctx, ctx.assign_lhs().getText());
     }
@@ -322,6 +323,14 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return intType;
     } else if (ctx.bool_liter() != null) {
       return boolType;
+    }  else if (ctx.CHAR_LIT() != null) {
+      return charType;
+    } else if (ctx.CHARACTER_LIT() != null) {
+      return stringType;
+    } else if (ctx.pair_liter() != null) {
+      return new PairType();
+    } else if (ctx.OPEN_PARENTHESES() != null) {
+      return visit(ctx.expr(0));
     } else if (ctx.array_elem() != null) {
       return visit(ctx.array_elem());
     } else if (ctx.binary_oper_and_or() != null) {
@@ -332,28 +341,29 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return visit(ctx.binary_oper_mul());
     } else if (ctx.binary_oper_plus() != null) {
       return visit(ctx.binary_oper_plus());
-    } else if (ctx.pair_liter() != null) {
-      return new PairType();
     } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
       return visit(ctx.ident());
-    } else if (ctx.CHAR_LIT() != null) {
-      return charType;
-    } else if (ctx.CHARACTER_LIT() != null) {
-      return stringType;
-    } else if (ctx.OPEN_PARENTHESES() != null) {
-      return visit(ctx.expr(0));
-    } else if (ctx.INC() != null || ctx.DEC() != null) {
-      Type actual = visit(ctx.ident());
-      if (!typeChecker(actual, charType) || !typeChecker(actual, intType)) {
-        visitorErrorHandler
-            .incompatibleTypeError(ctx, ctx.ident().getText(), intType, charType, actual);
-      }
-      return actual;
+    }else if (ctx.side_effect() != null) {
+      return visit(ctx.side_effect());
     }
     return null;
   }
+
+  @Override
+  public Type visitSide_effect(Side_effectContext ctx) {
+    Type actual = visit(ctx.ident());
+    if (ctx.INC() != null || ctx.DEC() != null) {
+      if (!typeChecker(actual, charType) && !typeChecker(actual, intType)) {
+        visitorErrorHandler
+            .incompatibleTypeError(ctx, ctx.ident().getText(), intType, charType, actual);
+      }
+    }
+    return actual;
+  }
+
+
 
   @Override
   public Type visitAssign_rhs(Assign_rhsContext ctx) {

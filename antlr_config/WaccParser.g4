@@ -32,6 +32,7 @@ stat           : SKIP_                              #skipStat
                | BEGIN stat END                     #beginStat
                | RETURN expr                        #returnStat
                | <assoc=right> stat COL stat        #statToStat
+               | side_effect                        #sideEffectStat
                ;
 
 //stat_helper    : SKIP_                              #skipStat
@@ -58,6 +59,7 @@ assign_rhs     : expr
                | new_pair
                | pair_elem
                | function_call
+               | side_effect
                ;
 
 new_pair       : NEWPAIR OPEN_PARENTHESES expr COMMA expr CLOSE_PARENTHESES;
@@ -104,13 +106,10 @@ expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
                | array_elem
                | OPEN_PARENTHESES expr CLOSE_PARENTHESES
                | unary_oper expr
-               | ident INC
-               | INC ident
-               | ident DEC
-               | DEC ident
+               | side_effect
                ;
 
-
+side_effect    : ident INC | INC ident | ident DEC | DEC ident ;
 
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 
