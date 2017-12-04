@@ -104,7 +104,12 @@ expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
                | array_elem
                | OPEN_PARENTHESES expr CLOSE_PARENTHESES
                | unary_oper expr
+               | ident INC
+               | INC ident
+               | ident DEC
+               | DEC ident
                ;
+
 
 
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;

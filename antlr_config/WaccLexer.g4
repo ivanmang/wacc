@@ -58,6 +58,10 @@ NEQL: '!=';
 AND: '&&' ;
 OR : '||' ;
 
+//increment/decrement
+INC: '++';
+DEC: '--';
+
 //bool
 TRUE: 'true';
 FALSE: 'false';
