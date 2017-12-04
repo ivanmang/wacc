@@ -323,7 +323,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return intType;
     } else if (ctx.bool_liter() != null) {
       return boolType;
-    }  else if (ctx.CHAR_LIT() != null) {
+    } else if (ctx.CHAR_LIT() != null) {
       return charType;
     } else if (ctx.CHARACTER_LIT() != null) {
       return stringType;
@@ -345,7 +345,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
       return visit(ctx.ident());
-    }else if (ctx.side_effect() != null) {
+    } else if (ctx.side_effect() != null) {
       return visit(ctx.side_effect());
     }
     return null;
@@ -354,7 +354,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitSide_effect(Side_effectContext ctx) {
     Type actual = visit(ctx.ident());
-    if (ctx.INC() != null || ctx.DEC() != null) {
+    if (ctx.INC() != null || ctx.DEC() != null || ctx.INCNUM() != null || ctx.DECNUM() != null) {
       if (!typeChecker(actual, charType) && !typeChecker(actual, intType)) {
         visitorErrorHandler
             .incompatibleTypeError(ctx, ctx.ident().getText(), intType, charType, actual);
@@ -362,7 +362,6 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     }
     return actual;
   }
-
 
 
   @Override

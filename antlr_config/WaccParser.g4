@@ -109,7 +109,7 @@ expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
                | side_effect
                ;
 
-side_effect    : ident INC | INC ident | ident DEC | DEC ident ;
+side_effect    : ident INC | INC ident | ident DEC | DEC ident | ident INCNUM expr | ident DECNUM expr;
 
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 

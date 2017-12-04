@@ -61,6 +61,8 @@ OR : '||' ;
 //increment/decrement
 INC: '++';
 DEC: '--';
+INCNUM: '+=';
+DECNUM: '-=';
 
 //bool
 TRUE: 'true';
