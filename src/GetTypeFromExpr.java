@@ -1,6 +1,7 @@
 import Utils.ArrayType;
 import Utils.BaseType;
 import Utils.PairType;
+import Utils.SymbolNode;
 import Utils.SymbolTable;
 import Utils.Type;
 import antlr.WaccParser;
@@ -22,20 +23,20 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   private Type charType = new BaseType(WaccParser.CHAR);
   private Type boolType = new BaseType(WaccParser.BOOL);
   private Type stringType = new BaseType(WaccParser.STRING);
-  private SymbolTable symbolTable;
+  private SymbolNode symbolNode;
 
-  public void setSymbolTable(SymbolTable symbolTable) {
-    this.symbolTable = symbolTable;
+  public void setSymbolNode(SymbolNode symbolNode) {
+    this.symbolNode = symbolNode;
   }
 
-  public Type visitExpr(ExprContext ctx, SymbolTable symbolTable) {
-    setSymbolTable(symbolTable);
+  public Type visitExpr(ExprContext ctx, SymbolNode symbolNode) {
+    setSymbolNode(symbolNode);
     if (ctx.int_liter() != null) {
       return intType;
     } else if (ctx.bool_liter() != null) {
       return boolType;
     } else if (ctx.array_elem() != null) {
-      return visitArray_elem(ctx.array_elem(), symbolTable);
+      return visitArray_elem(ctx.array_elem(), symbolNode);
     } else if (ctx.binary_oper_and_or() != null) {
       return visit(ctx.binary_oper_and_or());
     } else if (ctx.binary_oper_eql() != null) {
@@ -61,11 +62,11 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   }
 
 
-  public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
+  public Type visitArray_elem(Array_elemContext ctx, SymbolNode symbolNode) {
 //    System.out.println("visiting array elem");
     System.out.println("checking");
     String ident = ctx.ident().getText();
-    Type array = symbolTable.lookupAll(ident);
+    Type array = symbolNode.lookupAll(ident);
 //    System.out.println(array);
     System.out.println("checking");
     if (array instanceof ArrayType) {
@@ -167,6 +168,6 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitIdent(IdentContext ctx) {
     String ident = ctx.getText();
-    return symbolTable.lookupAll(ident);
+    return symbolNode.lookupAll(ident);
   }
 }

@@ -11,16 +11,16 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   public VisitorErrorHandler visitorErrorHandler = new VisitorErrorHandler();
-  private final SymbolTable globalSymbolTable = new SymbolTable(null, null);
-  private SymbolTable symbolTable = globalSymbolTable;
+  private final SymbolNode globalSymbolNode = new SymbolNode(new HashMap<>(), null, new ArrayList<>());
+  private SymbolNode symbolNode = globalSymbolNode;
   private Map<String, Function> functionList = new HashMap<>();
   private Type intType = new BaseType(WaccParser.INT);
   private Type charType = new BaseType(WaccParser.CHAR);
   private Type boolType = new BaseType(WaccParser.BOOL);
   private Type stringType = new BaseType(WaccParser.STRING);
 
-  public SymbolTable getGlobalSymbolTable() {
-    return globalSymbolTable;
+  public SymbolNode getGlobalSymbolNode() {
+    return globalSymbolNode;
   }
 
   public Map<String, Function> getFunctionList() {
@@ -74,13 +74,13 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
     Type expected = visit(ctx.type());
 
-    symbolTable = symbolTable.enterScope(symbolTable);
+    symbolNode = symbolNode.enterScope(symbolNode);
 
     if (ctx.param_list() != null) {
       for (ParamContext paramContext : ctx.param_list().param()) {
         String ident = paramContext.ident().getText();
         Type type = visit(paramContext.type());
-        symbolTable.insert(ident, type);
+        symbolNode.insert(ident, type);
       }
     }
 
@@ -91,9 +91,8 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
           .incompatibleTypeError(ctx, ctx.ident().getText(), expected,
               returnType);
     }
-    functionList.get(ctx.ident().getText()).setSymbolTable(symbolTable);
-    symbolTable = symbolTable.exitScope(symbolTable);
-    symbolTable.setChildSymbolTable(null);
+    functionList.get(ctx.ident().getText()).setSymbolNode(symbolNode);
+    symbolNode = symbolNode.exitScope();
 
     return expected;
   }
@@ -108,19 +107,19 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
       visitorErrorHandler
           .incompatibleTypeError(ctx, ctx.assign_rhs().getText(), expected,
               actual);
-    } else if (symbolTable.getParentSymbolTable() != null) {
-//      symbolTable.getParentSymbolTable().printTable();
-      if (symbolTable.contain(identName) && !symbolTable.getParentSymbolTable()
+    } else if (symbolNode.getParent() != null) {
+//      symbolNode.getParentSymbolTable().printTable();
+      if (symbolNode.contain(identName) && !symbolNode.getParent()
           .contain(identName)) {
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
-        symbolTable.insert(ctx.ident().getText(), expected);
+        symbolNode.insert(ctx.ident().getText(), expected);
       }
-    } else if (symbolTable.getParentSymbolTable() == null) {
-      if (symbolTable.contain(identName)) {
+    } else if (symbolNode.getParent() == null) {
+      if (symbolNode.contain(identName)) {
         visitorErrorHandler.redefineError(ctx, identName);
       } else {
-        symbolTable.insert(ctx.ident().getText(), expected);
+        symbolNode.insert(ctx.ident().getText(), expected);
       }
     }
     return null;
@@ -203,17 +202,17 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     }
     Type stat;
     if (ctx.stat(1) != null) { //have if, then, else
-      symbolTable = symbolTable.enterScope(symbolTable);
+      symbolNode = symbolNode.enterScope(symbolNode);
       stat = visit(ctx.stat(0));
-      symbolTable = symbolTable.exitScope(symbolTable);
+      symbolNode = symbolNode.exitScope();
 
-      symbolTable = symbolTable.enterScope(symbolTable);
+      symbolNode = symbolNode.enterScope(symbolNode);
       Type sstat = visit(ctx.stat(1));
-      symbolTable = symbolTable.exitScope(symbolTable);
+      symbolNode = symbolNode.exitScope();
     } else { //only have if then , no else
-      symbolTable = symbolTable.enterScope(symbolTable);
+      symbolNode = symbolNode.enterScope(symbolNode);
       stat = visit(ctx.stat(0));
-      symbolTable = symbolTable.exitScope(symbolTable);
+      symbolNode = symbolNode.exitScope();
     }
     return stat;
 
@@ -222,21 +221,21 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitWhileStat(WhileStatContext ctx) {
 //    System.out.println("visiting while stat");
-    symbolTable = symbolTable.enterScope(symbolTable);
+    symbolNode = symbolNode.enterScope(symbolNode);
     Type conditon = visit(ctx.expr());
     if (!typeChecker(boolType, conditon)) {
       visitorErrorHandler.incompatibleTypeError(ctx, conditon);
     }
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return visit(ctx.stat());
   }
 
   @Override
   public Type visitBeginStat(BeginStatContext ctx) {
 //    System.out.println("visiting begin stat");
-    symbolTable = symbolTable.enterScope(symbolTable);
+    symbolNode = symbolNode.enterScope(symbolNode);
     Type stat = visit(ctx.stat());
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return stat;
   }
 
@@ -393,7 +392,7 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
 
   @Override
   public Type visitReturnStat(ReturnStatContext ctx) {
-    if (symbolTable.getChildSymbolTable() == null && symbolTable.getParentSymbolTable() == null) {
+    if (symbolNode.getParent() == null) {
       visitorErrorHandler.cantReturnFromGlobalScope(ctx);
     }
     return visit(ctx.expr());
@@ -452,10 +451,10 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
   public Type visitIdent(IdentContext ctx) {
 //    System.out.println("visiting ident");
     String ident = ctx.IDENT().getText();
-    if (!symbolTable.contain(ident)) {
+    if (!symbolNode.contain(ident)) {
       visitorErrorHandler.variableNotDefinedInScopeError(ctx, ident);
     }
-    return symbolTable.lookupAll(ident);
+    return symbolNode.lookupAll(ident);
   }
 
   @Override

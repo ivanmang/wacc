@@ -1,11 +1,8 @@
 import antlr.WaccLexer;
 import antlr.WaccParser;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Scanner;
 import javax.swing.JFrame;
@@ -52,16 +49,16 @@ public class Main {
     ParseTree tree = parser.prog();
 
     //show AST in GUI
-    JFrame frame = new JFrame("Antlr AST");
-    JPanel panel = new JPanel();
-    TreeViewer viewr = new TreeViewer(Arrays.asList(
-        parser.getRuleNames()),tree);
-    viewr.setScale(1.5);//scale a little
-    panel.add(viewr);
-    frame.add(panel);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(200,200);
-    frame.setVisible(true);
+//    JFrame frame = new JFrame("Antlr AST");
+//    JPanel panel = new JPanel();
+//    TreeViewer viewr = new TreeViewer(Arrays.asList(
+//        parser.getRuleNames()),tree);
+//    viewr.setScale(1.5);//scale a little
+//    panel.add(viewr);
+//    frame.add(panel);
+//    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//    frame.setSize(200,200);
+//    frame.setVisible(true);
 
     //Checking if integer assignments is out of bounds
     AssignmentOutOfBoundsChecker assignmentOutOfBoundsChecker = new AssignmentOutOfBoundsChecker();
@@ -77,15 +74,15 @@ public class Main {
 
     for(String ident : checker.getFunctionList().keySet()) {
       System.out.println("Symbol table for " + ident);
-      checker.getFunctionList().get(ident).getSymbolTable().printTable();
+      checker.getFunctionList().get(ident).getSymbolNode().printTable(0);
       System.out.println("Finished");
     }
 
     System.out.println("---Printing symbol table---");
-    checker.getGlobalSymbolTable().printTable();
+    checker.getGlobalSymbolNode().printTable(0);
     System.out.println("---Finished---");
 
-    CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolTable(), checker.getFunctionList());
+    CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolNode(), checker.getFunctionList());
     gen.visit(tree);
     System.out.println(gen.generateCode());
 

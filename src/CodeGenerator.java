@@ -43,7 +43,6 @@ import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
-import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -53,7 +52,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   private ARM11Machine machine = new ARM11Machine();
   private Registers registers = new Registers();
   private int labelnumber = 0;
-  private SymbolTable symbolTable;
+  private SymbolNode symbolNode;
   private Map<String, Function> functionList;
   private GetTypeFromExpr exprTypeGetter = new GetTypeFromExpr();
 //  private String previousFunction;
@@ -66,8 +65,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   public static final int MAX_STACK_SIZE = 1024;
 
-  public CodeGenerator(SymbolTable symbolTable, Map<String, Function> functionList) {
-    this.symbolTable = symbolTable;
+  public CodeGenerator(SymbolNode symbolNode, Map<String, Function> functionList) {
+    this.symbolNode = symbolNode;
     this.functionList = functionList;
   }
 
@@ -88,7 +87,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
     int address = 0;
     //get the symbol table with it's address and type
-    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    Map<String, SymbolInfo> dict = symbolNode.getDictionary();
     //iterate all variables and assign a address to it
     for (String name : dict.keySet()) {
       dict.get(name).setAddress(address);
@@ -96,7 +95,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     }
 
     //get the size of the variable store
-    int reserveByte = symbolTable.getSize();
+    int reserveByte = symbolNode.getSize();
 
     //if size exceed max stack size reserve, Push max_size first
     while (reserveByte > MAX_STACK_SIZE) {
@@ -105,7 +104,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       reserveByte -= MAX_STACK_SIZE;
     }
     machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
-    reserveByte = symbolTable.getSize();
+    reserveByte = symbolNode.getSize();
 
     visitChildren(ctx);
 
@@ -131,14 +130,14 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitFunc(WaccParser.FuncContext ctx) {
 //    previousFunction = currentFunction;
 //    currentFunction = ctx.getChild(1).getText();
-    SymbolTable main = symbolTable;
-    symbolTable = functionList.get(ctx.getChild(1).getText()).getSymbolTable();
+    SymbolNode main = symbolNode;
+    symbolNode = functionList.get(ctx.getChild(1).getText()).getSymbolNode();
 
     int address = 4;
     int size = 0;
 
     //get the symbol table with it's address and type
-    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    Map<String, SymbolInfo> dict = symbolNode.getDictionary();
     //iterate all variables and assign a address to it
     for (String name : dict.keySet()) {
       dict.get(name).setAddress(address);
@@ -163,7 +162,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine
           .add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
     }
-    reserveByte = symbolTable.getSize();
+    reserveByte = symbolNode.getSize();
 
     visit(ctx.stat());
 
@@ -185,7 +184,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.addFunctionEnd();
 //    currentFunction = previousFunction;
 //    previousFunction = null;
-    symbolTable = main;
+    symbolNode = main;
     return null;
   }
 
@@ -237,19 +236,19 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
       if (ctx.type().base_type().STRING() != null) { //string
         machine.add((new StoreInstruction(reg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText())))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ctx.ident().getText())))));
       } else if (ctx.type().base_type().CHAR() != null || ctx.type().base_type().BOOL() != null) {
         machine.add(new StoreByteInstruction(reg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ctx.ident().getText()))));
       } else {
         machine.add(new StoreInstruction(reg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ctx.ident().getText()))));
       }
       registers.free(reg);
     } else {
       Register reg = visit(ctx.assign_rhs());
       machine.add(new StoreInstruction(reg,
-          new Operand2Reg(Registers.sp, symbolTable.getAddress(ctx.ident().getText()))));
+          new Operand2Reg(Registers.sp, symbolNode.getAddress(ctx.ident().getText()))));
       registers.free(reg);
     }
 
@@ -262,22 +261,23 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if (ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
 //      if (currentFunction.equals("main")) {
-//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+//        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, symbolNode.getAddress(ident))));
 //      }
 //      else {
 //        machine.add(new StoreInstruction(srcReg, new Operand2Reg(Registers.sp, functionList.get(currentFunction).getAddress(ident))));
 //      }
-      Type type = symbolTable.lookupAll(ident);
+      Type type = symbolNode.lookupAll(ident);
       if (type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ident))));
       } else {
         machine.add(new StoreInstruction(srcReg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ident))));
       }
     } else if (ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
-      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(),
+          symbolNode);
       machine.removeLastInstruciton();
       if (type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
@@ -305,15 +305,15 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       return visit(ctx.expr());
     } else if (ctx.function_call() != null) {
       String function_name = ctx.function_call().ident().getText();
-      SymbolTable main = symbolTable;
-      symbolTable = functionList.get(function_name).getSymbolTable();
+      SymbolNode main = symbolNode;
+      symbolNode = functionList.get(function_name).getSymbolNode();
       if (ctx.function_call().arg_list() != null) {
         visit(ctx.function_call().arg_list());
       }
       machine.add(new BranchLinkInstruction("f_" + function_name));
       Register register = registers.getRegister();
       machine.add(new MovInstruction(register, registers.getReturnRegister()));
-      symbolTable = main;
+      symbolNode = main;
       return register;
     } else if (ctx.array_liter() != null) {
       return visit(ctx.array_liter());
@@ -336,7 +336,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitSide_effect(Side_effectContext ctx) {
     String identName = ctx.ident().getText();
-    int offset = symbolTable.getAddress(identName);
+    int offset = symbolNode.getAddress(identName);
     Register register = registers.getRegister();
     Register register1 = registers.getRegister();
     machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
@@ -377,7 +377,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitArg_list(WaccParser.Arg_listContext ctx) {
-    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    Map<String, SymbolInfo> dict = symbolNode.getDictionary();
     for (int i = 0; i <= (ctx.getChildCount()); i = i + 2) {
 //      functionList.get(currentFunction).setAddress(ctx.getChild(i).getChild(1).getText(),address);
       System.out.println(ctx.getChild(i).getChild(0).getText());
@@ -509,15 +509,15 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitBeginStat(BeginStatContext ctx) {
     int address = 0;
-    System.out.println("Printing SymbolTable before entering scope");
-    symbolTable.printTable();
-    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
-    System.out.println("Printing SymbolTable after entering scope");
-    symbolTable.printTable();
-    System.out.println("Printing finished");
+//    System.out.println("Printing SymbolTable before entering scope");
+//    symbolNode.printTable();
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
+//    System.out.println("Printing SymbolTable after entering scope");
+//    symbolNode.printTable();
+//    System.out.println("Printing finished");
 
     //get the symbol table with it's address and type
-    Map<String, SymbolInfo> dict = symbolTable.getDictionary();
+    Map<String, SymbolInfo> dict = symbolNode.getDictionary();
     //iterate all variables and assign a address to it
     for (String name : dict.keySet()) {
       dict.get(name).setAddress(address);
@@ -525,7 +525,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     }
 
     //get the size of the variable store
-    int reserveByte = symbolTable.getSize();
+    int reserveByte = symbolNode.getSize();
 
     //if size exceed max stack size reserve, Push max_size first
     while (reserveByte > MAX_STACK_SIZE) {
@@ -534,7 +534,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       reserveByte -= MAX_STACK_SIZE;
     }
     machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
-    reserveByte = symbolTable.getSize();
+    reserveByte = symbolNode.getSize();
 
     visit(ctx.stat());
 
@@ -547,14 +547,14 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     //Pop the variables
     machine.add(new AddInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
 
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return null;
   }
 
   @Override
   public Register visitArray_elem(Array_elemContext ctx) {
     Register reg1 = registers.getRegister();
-    Type type = symbolTable.lookupAll(ctx.ident().getText());
+    Type type = symbolNode.lookupAll(ctx.ident().getText());
     Type elementType = null;
     if (type instanceof BaseType) {
       if (type.equals(stringType)) {
@@ -564,7 +564,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       ArrayType arrayType = (ArrayType) type;
       elementType = arrayType.getElementType();
     }
-    int offset = symbolTable.lookupAllSymbol(ctx.ident().getText()).getAddress();
+    int offset = symbolNode.lookupAllSymbol(ctx.ident().getText()).getAddress();
     machine.add(new AddInstruction(reg1, Registers.sp, new Operand2Int('#', offset)));
     Register reg2 = visit(ctx.getChild(2));
     machine.add(new LoadInstruction(reg1, new Operand2Reg(reg1, true)));
@@ -745,8 +745,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       Register reg = registers.getRegister();
       int offset;
       Type type;
-      offset = symbolTable.getAddress(ctx.ident().getText());
-      type = symbolTable.lookupAll(ctx.ident().getText());
+      offset = symbolNode.getAddress(ctx.ident().getText());
+      type = symbolNode.lookupAll(ctx.ident().getText());
       if (type.getSize() == 1) {
         machine.add(new LoadByteInstruction(reg, new Operand2Reg(Registers.sp, offset)));
       } else {
@@ -869,25 +869,27 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitIfStat(IfStatContext ctx) {
-    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
     Register lastRegister = visit(ctx.expr());
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
     Label elseLabel = new Label(labelnumber++); //else label
     Label thenLabel = new Label(labelnumber++); //then label
     machine.add(new BranchEqualInstruction(elseLabel.toString()));
     visit(ctx.stat(0));
+    symbolNode = symbolNode.exitScope();
     machine.add(new BranchInstruction(thenLabel.toString()));
     machine.add(elseLabel);
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
     visit(ctx.stat(1));
     machine.add(thenLabel);
     registers.free(lastRegister);
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return null;
   }
 
   @Override
   public Register visitWhileStat(WhileStatContext ctx) {
-    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
     machine.add(new BranchInstruction(startLabel.toString()));
@@ -898,7 +900,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     registers.free(lastRegister);
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return null;
   }
 
@@ -910,7 +912,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
-    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolNode);
     System.out.println("Expression type = " + exprType);
     System.out.println(exprType.equals(new ArrayType(charType)));
     machine.add(new MovInstruction(Registers.r0, exprRegister));
@@ -941,7 +943,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
 //    System.out.println("hi");
-    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolTable);
+    Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolNode);
 //    System.out.println(exprType);
     machine.add(new MovInstruction(Registers.r0, exprRegister));
     if (exprType.equals(intType)) {
@@ -975,7 +977,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if (ctx.assign_lhs().ident() != null) {
       Register readRegister = registers.getRegister();
       machine.add(new AddInstruction(readRegister, Registers.sp,
-          new Operand2Int('#', symbolTable.getAddress(ident))));
+          new Operand2Int('#', symbolNode.getAddress(ident))));
       machine.add(new MovInstruction(Registers.r0, readRegister));
       registers.free(readRegister);
     } else if (ctx.assign_lhs().array_elem() != null) {
@@ -987,10 +989,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new MovInstruction(Registers.r0, destReg));
       registers.free(destReg);
     }
-    if (symbolTable.lookupAll(ident).equals(intType)) {
+    if (symbolNode.lookupAll(ident).equals(intType)) {
       machine.add(new BranchLinkInstruction("p_read_int"));
       machine.addReadIntFunction();
-    } else if (symbolTable.lookupAll(ident).equals(charType)) {
+    } else if (symbolNode.lookupAll(ident).equals(charType)) {
       machine.add(new BranchLinkInstruction("p_read_char"));
       machine.addReadCharFunction();
     }
@@ -1003,11 +1005,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   }
 
   private int getSizeFromExpr(ExprContext ctx) {
-    return exprTypeGetter.visitExpr(ctx, symbolTable).getSize();
+    return exprTypeGetter.visitExpr(ctx, symbolNode).getSize();
   }
 
   private boolean exprTypeIsCharOrBool(ExprContext ctx) {
-    Type type = exprTypeGetter.visitExpr(ctx, symbolTable);
+    Type type = exprTypeGetter.visitExpr(ctx, symbolNode);
     return type.equals(boolType) || type.equals(charType);
   }
 }

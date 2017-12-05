@@ -8,7 +8,7 @@ public class Function {
   private String ident;
   private ArrayList<String> identList;
   private List<SymbolInfo> symbolInfoList = new LinkedList<>();
-  private SymbolTable symbolTable;
+  private SymbolNode symbolNode;
 
   public Function(Type returnType, ArrayList<String> identList,
       List<Type> typeList) {
@@ -23,12 +23,12 @@ public class Function {
     return identList;
   }
   
-  public void setSymbolTable(SymbolTable symbolTable) {
-    this.symbolTable = symbolTable;
+  public void setSymbolNode(SymbolNode symbolNode) {
+    this.symbolNode = symbolNode;
   }
 
-  public SymbolTable getSymbolTable() {
-    return symbolTable;
+  public SymbolNode getSymbolNode() {
+    return symbolNode;
   }
 
   public Type getReturnType() {
