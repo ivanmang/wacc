@@ -924,6 +924,14 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     if (exprType instanceof PairType) {
       machine.add(new BranchLinkInstruction("p_print_reference"));
       machine.addPrintReferenceFunction();
+    } else if (exprType instanceof ArrayType) {
+      if (exprType.equals(new ArrayType(charType))) {
+        machine.add(new BranchLinkInstruction("p_print_string"));
+        machine.addPrintStringFunction();
+      } else {
+        machine.add(new BranchLinkInstruction("p_print_reference"));
+        machine.addPrintReferenceFunction();
+      }
     } else if (exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
       machine.addPrintIntFunction();
@@ -936,9 +944,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (exprType.equals(boolType)) {
       machine.add(new BranchLinkInstruction("p_print_bool"));
       machine.addPrintBoolFunction();
-    } else if (exprType.equals(new ArrayType(charType))) {
-      machine.add(new BranchLinkInstruction("p_print_string"));
-      machine.addPrintStringFunction();
     }
     System.out.println("hi?");
     registers.free(exprRegister);
@@ -956,6 +961,16 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new BranchLinkInstruction("p_print_reference"));
       machine.add(new BranchLinkInstruction("p_print_ln"));
       machine.addPrintReferenceFunction();
+    } else if (exprType instanceof ArrayType) {
+      if (exprType.equals(new ArrayType(charType))) {
+        machine.add(new BranchLinkInstruction("p_print_string"));
+        machine.add(new BranchLinkInstruction("p_print_ln"));
+        machine.addPrintStringFunction();
+      } else {
+        machine.add(new BranchLinkInstruction("p_print_reference"));
+        machine.add(new BranchLinkInstruction("p_print_ln"));
+        machine.addPrintReferenceFunction();
+      }
     } else if (exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
       machine.add(new BranchLinkInstruction("p_print_ln"));
