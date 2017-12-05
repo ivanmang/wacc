@@ -12,6 +12,7 @@ import antlr.WaccParser.Binary_oper_plusContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.IdentContext;
 import antlr.WaccParser.Pair_elemContext;
+import antlr.WaccParser.Side_effectContext;
 import antlr.WaccParser.Unary_operContext;
 import antlr.WaccParserBaseVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -34,8 +35,16 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
       return intType;
     } else if (ctx.bool_liter() != null) {
       return boolType;
+    } else if (ctx.CHAR_LIT() != null) {
+      return charType;
+    } else if (ctx.CHARACTER_LIT() != null) {
+      return stringType;
+    } else if (ctx.pair_liter() != null) {
+      return new PairType();
+    } else if (ctx.OPEN_PARENTHESES() != null) {
+      return visit(ctx.expr(0));
     } else if (ctx.array_elem() != null) {
-      return visitArray_elem(ctx.array_elem(), symbolTable);
+      return visit(ctx.array_elem());
     } else if (ctx.binary_oper_and_or() != null) {
       return visit(ctx.binary_oper_and_or());
     } else if (ctx.binary_oper_eql() != null) {
@@ -44,22 +53,15 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
       return visit(ctx.binary_oper_mul());
     } else if (ctx.binary_oper_plus() != null) {
       return visit(ctx.binary_oper_plus());
-    } else if (ctx.pair_liter() != null) {
-      return new PairType();
     } else if (ctx.unary_oper() != null) {
       return visit(ctx.unary_oper());
     } else if (ctx.ident() != null) {
       return visit(ctx.ident());
-    } else if (ctx.CHAR_LIT() != null) {
-      return charType;
-    } else if (ctx.CHARACTER_LIT() != null) {
-      return stringType;
-    } else if (ctx.OPEN_PARENTHESES() != null) {
-      return visit(ctx.expr(0));
+    } else if (ctx.side_effect() != null) {
+      return visit(ctx.side_effect());
     }
     return null;
   }
-
 
   public Type visitArray_elem(Array_elemContext ctx, SymbolTable symbolTable) {
 //    System.out.println("visiting array elem");
@@ -167,6 +169,12 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
   @Override
   public Type visitIdent(IdentContext ctx) {
     String ident = ctx.getText();
+    return symbolTable.lookupAll(ident);
+  }
+
+  @Override
+  public Type visitSide_effect(Side_effectContext ctx) {
+    String ident = ctx.ident().getText();
     return symbolTable.lookupAll(ident);
   }
 }

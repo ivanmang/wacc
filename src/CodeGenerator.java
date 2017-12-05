@@ -337,41 +337,83 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitSide_effect(Side_effectContext ctx) {
     String identName = ctx.ident().getText();
     int offset = symbolTable.getAddress(identName);
-    Register register = registers.getRegister();
-    Register register1 = registers.getRegister();
-    machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
 
-    if (ctx.INC() != null) {
-      if (ctx.getChild(0).getChild(0) != null) { //ident++
-        machine.add(new AddInstruction(register1, register, new Operand2Int('#', 1)));
+    if (ctx.INC() != null || ctx.DEC() != null) {
+      Register register = registers.getRegister();
+
+      machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      if (ctx.getChild(0).getChild(0) != null) {
+        Register register1 = registers.getRegister();
+        if (ctx.INC() != null) {
+          machine.add(new AddInstruction(register1, register, new Operand2Int('#', 1)));
+        } else {
+          machine.add(new SubInstruction(register1, register, new Operand2Int('#', 1)));
+        }
         machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
-        return register;
-      } else { //++ident
-        machine.add(new AddInstruction(register, register, new Operand2Int('#', 1)));
+        registers.free(register1);
+      } else {
+        if (ctx.INC() != null) {
+          machine.add(new AddInstruction(register, register, new Operand2Int('#', 1)));
+        } else {
+          machine.add(new SubInstruction(register, register, new Operand2Int('#', 1)));
+        }
         machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-        return register;
       }
-    } else if (ctx.DEC() != null) {
-      if (ctx.getChild(0).getChild(0) != null) { //ident--
-        machine.add(new SubInstruction(register1, register, new Operand2Int('#', 1)));
-        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
-        return register;
-      } else { //--ident
-        machine.add(new SubInstruction(register, register, new Operand2Int('#', 1)));
-        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-        return register;
+
+      return register;
+    } else if (ctx.INCNUM() != null || ctx.DECNUM() != null) {
+      Register register = registers.getRegister();
+      machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      Register exprReg = visit(ctx.expr());
+      if (ctx.INCNUM() != null) {
+        machine.add(new AddInstruction(register, register, new Operand2Reg(exprReg, false)));
+      } else {
+        machine.add(new SubInstruction(register, register, new Operand2Reg(exprReg, false)));
       }
-    } else if (ctx.INCNUM() != null) { //ident += expr
-      Register exprReg = visit(ctx.expr());
-      machine.add(new AddInstruction(register, register, new Operand2Reg(exprReg, false)));
       machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      registers.free(exprReg);
       return register;
-    } else if (ctx.DECNUM() != null) { //ident -= expr
+    } else if (ctx.EQUAL() != null) {
       Register exprReg = visit(ctx.expr());
-      machine.add(new SubInstruction(register, register, new Operand2Reg(exprReg, false)));
-      machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-      return register;
+      machine.add(new StoreInstruction(exprReg, new Operand2Reg(Registers.sp, offset)));
+      return exprReg;
     }
+
+//    if (ctx.INC() != null) {
+//      if (ctx.getChild(0).getChild(0) != null) { //ident++
+//        machine.add(new AddInstruction(register1, register, new Operand2Int('#', 1)));
+//        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
+//        return register;
+//      } else { //++ident
+//        machine.add(new AddInstruction(register, register, new Operand2Int('#', 1)));
+//        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+//        return register;
+//      }
+//    } else if (ctx.DEC() != null) {
+//      if (ctx.getChild(0).getChild(0) != null) { //ident--
+//        machine.add(new SubInstruction(register1, register, new Operand2Int('#', 1)));
+//        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
+//        return register;
+//      } else { //--ident
+//        machine.add(new SubInstruction(register, register, new Operand2Int('#', 1)));
+//        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+//        return register;
+//      }
+//    } else if (ctx.INCNUM() != null) { //ident += expr
+//      Register exprReg = visit(ctx.expr());
+//      machine.add(new AddInstruction(register, register, new Operand2Reg(exprReg, false)));
+//      machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+//      return register;
+//    } else if (ctx.DECNUM() != null) { //ident -= expr
+//      Register exprReg = visit(ctx.expr());
+//      machine.add(new SubInstruction(register, register, new Operand2Reg(exprReg, false)));
+//      machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+//      return register;
+//    } else if (ctx.EQUAL() != null) {
+//      Register exprReg = visit(ctx.expr());
+//      machine.add(new StoreInstruction(exprReg, new Operand2Reg(Registers.sp, offset)));
+//      return exprReg;
+//    }
     return null;
   }
 
@@ -999,7 +1041,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitSideEffectStat(SideEffectStatContext ctx) {
-    return visit(ctx.side_effect());
+    Register returnReg = visit(ctx.side_effect());
+    registers.free(returnReg);
+    return null;
   }
 
   private int getSizeFromExpr(ExprContext ctx) {
