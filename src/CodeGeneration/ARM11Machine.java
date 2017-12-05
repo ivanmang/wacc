@@ -105,12 +105,12 @@ public class ARM11Machine {
       freePair.add(new BranchEqualInstruction("p_throw_runtime_error"));
       freePair.add(new PushInstruction(Registers.r0));
       freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.r0, true)));
-      freePair.add(new BranchInstruction("free"));
+      freePair.add(new BranchLinkInstruction("free"));
       freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.sp, true)));
       freePair.add(new LoadInstruction(Registers.r0, new Operand2Reg(Registers.r0, 4)));
-      freePair.add(new BranchInstruction("free"));
+      freePair.add(new BranchLinkInstruction("free"));
       freePair.add(new PopInstruction(Registers.r0));
-      freePair.add(new BranchInstruction("free"));
+      freePair.add(new BranchLinkInstruction("free"));
       freePair.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_free_pair", freePair);
       addRuntimeErrorInstruction();
