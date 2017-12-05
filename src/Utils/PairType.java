@@ -26,7 +26,7 @@ public class PairType implements Type {
       return true;
     }
     if (isNull) {
-      return true;
+      return false;
     }
     if (other.getID() == ID.Pair) {
       PairType pair = (PairType) other;

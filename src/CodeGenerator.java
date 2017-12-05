@@ -98,13 +98,17 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     int reserveByte = symbolNode.getSize();
 
     //if size exceed max stack size reserve, Push max_size first
-    while (reserveByte > MAX_STACK_SIZE) {
-      machine.add(
-          new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', MAX_STACK_SIZE)));
-      reserveByte -= MAX_STACK_SIZE;
+    if(reserveByte != 0) {
+      while (reserveByte > MAX_STACK_SIZE) {
+        machine.add(
+            new SubInstruction(Registers.sp, Registers.sp,
+                new Operand2Int('#', MAX_STACK_SIZE)));
+        reserveByte -= MAX_STACK_SIZE;
+      }
+      machine.add(new SubInstruction(Registers.sp, Registers.sp,
+          new Operand2Int('#', reserveByte)));
+      reserveByte = symbolNode.getSize();
     }
-    machine.add(new SubInstruction(Registers.sp, Registers.sp, new Operand2Int('#', reserveByte)));
-    reserveByte = symbolNode.getSize();
 
     visitChildren(ctx);
 
@@ -942,10 +946,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitPrintlnStat(PrintlnStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
-//    System.out.println("hi");
     Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolNode);
 //    System.out.println(exprType);
     machine.add(new MovInstruction(Registers.r0, exprRegister));
+//    System.out.println(exprType.equals(intType));
     if (exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
       machine.add(new BranchLinkInstruction("p_print_ln"));
