@@ -26,10 +26,13 @@ import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
+import antlr.WaccParser.DoWhileStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
+import antlr.WaccParser.ForStatContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.IfStatContext;
+import antlr.WaccParser.InitAssignStatContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.New_pairContext;
@@ -43,6 +46,7 @@ import antlr.WaccParser.WhileStatContext;
 import antlr.WaccParserBaseVisitor;
 import Utils.*;
 
+import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -341,40 +345,46 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   public Register visitSide_effect(Side_effectContext ctx) {
     String identName = ctx.ident().getText();
     int offset = symbolNode.getAddress(identName);
-    Register register = registers.getRegister();
-    Register register1 = registers.getRegister();
-    machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
 
-    if (ctx.INC() != null) {
-      if (ctx.getChild(0).getChild(0) != null) { //ident++
-        machine.add(new AddInstruction(register1, register, new Operand2Int('#', 1)));
+    if (ctx.INC() != null || ctx.DEC() != null) {
+      Register register = registers.getRegister();
+
+      machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      if (ctx.getChild(0).getChild(0) != null) {
+        Register register1 = registers.getRegister();
+        if (ctx.INC() != null) {
+          machine.add(new AddInstruction(register1, register, new Operand2Int('#', 1)));
+        } else {
+          machine.add(new SubInstruction(register1, register, new Operand2Int('#', 1)));
+        }
         machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
-        return register;
-      } else { //++ident
-        machine.add(new AddInstruction(register, register, new Operand2Int('#', 1)));
+        registers.free(register1);
+      } else {
+        if (ctx.INC() != null) {
+          machine.add(new AddInstruction(register, register, new Operand2Int('#', 1)));
+        } else {
+          machine.add(new SubInstruction(register, register, new Operand2Int('#', 1)));
+        }
         machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-        return register;
       }
-    } else if (ctx.DEC() != null) {
-      if (ctx.getChild(0).getChild(0) != null) { //ident--
-        machine.add(new SubInstruction(register1, register, new Operand2Int('#', 1)));
-        machine.add(new StoreInstruction(register1, new Operand2Reg(Registers.sp, offset)));
-        return register;
-      } else { //--ident
-        machine.add(new SubInstruction(register, register, new Operand2Int('#', 1)));
-        machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-        return register;
+
+      return register;
+    } else if (ctx.INCNUM() != null || ctx.DECNUM() != null) {
+      Register register = registers.getRegister();
+      machine.add(new LoadInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      Register exprReg = visit(ctx.expr());
+      if (ctx.INCNUM() != null) {
+        machine.add(new AddInstruction(register, register, new Operand2Reg(exprReg, false)));
+      } else {
+        machine.add(new SubInstruction(register, register, new Operand2Reg(exprReg, false)));
       }
-    } else if (ctx.INCNUM() != null) { //ident += expr
-      Register exprReg = visit(ctx.expr());
-      machine.add(new AddInstruction(register, register, new Operand2Reg(exprReg, false)));
       machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
+      registers.free(exprReg);
       return register;
-    } else if (ctx.DECNUM() != null) { //ident -= expr
+    } else if (ctx.EQUAL() != null) {
       Register exprReg = visit(ctx.expr());
-      machine.add(new SubInstruction(register, register, new Operand2Reg(exprReg, false)));
-      machine.add(new StoreInstruction(register, new Operand2Reg(Registers.sp, offset)));
-      return register;
+      machine.add(new StoreInstruction(exprReg, new Operand2Reg(Registers.sp, offset)));
+      return exprReg;
     }
     return null;
   }
@@ -917,6 +927,80 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   }
 
   @Override
+  public Register visitDoWhileStat(DoWhileStatContext ctx) {
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    Label startLabel = new Label(labelnumber++);
+    Label loopLabel = new Label(labelnumber++);
+    visit(ctx.stat());
+    machine.add(new BranchInstruction(startLabel.toString()));
+    machine.add(loopLabel);
+    visit(ctx.stat());
+    machine.add(startLabel);
+    Register lastRegister = visitExpr(ctx.expr());
+    machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
+    machine.add(new BranchEqualInstruction(loopLabel.toString()));
+    registers.free(lastRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return null;
+  }
+
+  @Override
+  public Register visitForStat(ForStatContext ctx) {
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    Label startLabel = new Label(labelnumber++);
+    Label loopLabel = new Label(labelnumber++);
+    visit(ctx.init_stat());
+    machine.add(new BranchInstruction(startLabel.toString()));
+    machine.add(loopLabel);
+    visit(ctx.stat(1));
+    visit(ctx.stat(0));
+    machine.add(startLabel);
+    Register condRegister = visitExpr(ctx.expr());
+    machine.add(new CmpInstruction(condRegister, new Operand2Int('#', 1)));
+    machine.add(new BranchEqualInstruction(loopLabel.toString()));
+    registers.free(condRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return null;
+  }
+
+  @Override
+  public Register visitInitAssignStat(InitAssignStatContext ctx) {
+    Register srcReg = visit(ctx.assign_rhs());
+    if (ctx.assign_lhs().ident() != null) {
+      String ident = ctx.assign_lhs().ident().getText();
+      Type type = symbolTable.lookupAll(ident);
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg,
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      } else {
+        machine.add(new StoreInstruction(srcReg,
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      }
+    } else if (ctx.assign_lhs().array_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().array_elem());
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      machine.removeLastInstruciton();
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
+    } else if (ctx.assign_lhs().pair_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().pair_elem());
+      Type type = exprTypeGetter.visitPair_elem(ctx.assign_lhs().pair_elem());
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
+    }
+    registers.free(srcReg);
+    return null;
+  }
+
+  @Override
   public Register visitSkipStat(SkipStatContext ctx) {
     return null;
   }
@@ -953,7 +1037,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new BranchLinkInstruction("p_print_bool"));
       machine.addPrintBoolFunction();
     }
-    System.out.println("hi?");
     registers.free(exprRegister);
     return null;
   }
@@ -1032,7 +1115,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitSideEffectStat(SideEffectStatContext ctx) {
-    return visit(ctx.side_effect());
+    Register returnReg = visit(ctx.side_effect());
+    registers.free(returnReg);
+    return null;
   }
 
   private int getSizeFromExpr(ExprContext ctx) {

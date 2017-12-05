@@ -29,6 +29,8 @@ stat           : SKIP_                              #skipStat
                | PRINTLN expr                       #printlnStat
                | IF expr THEN stat ELSE stat FI     #ifStat
                | WHILE expr DO stat DONE            #whileStat
+               | DO stat WHILE expr                 #doWhileStat
+               | FOR init_stat COL expr COL stat  DO stat DONE                  #forStat
                | BEGIN stat END                     #beginStat
                | RETURN expr                        #returnStat
                | <assoc=right> stat COL stat        #statToStat
@@ -47,6 +49,11 @@ stat           : SKIP_                              #skipStat
 //               | WHILE expr DO stat DONE            #whileStat
 //               | BEGIN stat END                     #beginStat
 //               ;
+
+init_stat       : assign_lhs EQUAL assign_rhs        #initAssignStat
+                ;
+
+
 
 
 assign_lhs     : ident
@@ -109,7 +116,7 @@ expr           : pair_liter | int_liter | bool_liter | CHAR_LIT | CHARACTER_LIT
                | side_effect
                ;
 
-side_effect    : ident INC | INC ident | ident DEC | DEC ident | ident INCNUM expr | ident DECNUM expr;
+side_effect    : ident INC | INC ident | ident DEC | DEC ident | ident INCNUM expr | ident DECNUM expr | ident EQUAL expr;
 
 unary_oper     : NOT | MINUS | LEN | ORD | CHR ;
 

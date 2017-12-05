@@ -224,11 +224,52 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     symbolNode = symbolNode.enterScope(symbolNode);
     Type conditon = visit(ctx.expr());
     if (!typeChecker(boolType, conditon)) {
-      visitorErrorHandler.incompatibleTypeError(ctx, conditon);
+      visitorErrorHandler.incompatibleTypeError(ctx, ctx.expr().getText(), boolType, conditon);
     }
     Type stat = visit(ctx.stat());
     symbolNode = symbolNode.exitScope();
     return stat;
+  }
+
+  @Override
+  public Type visitDoWhileStat(DoWhileStatContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
+    Type conditon = visit(ctx.expr());
+    if (!typeChecker(boolType, conditon)) {
+      visitorErrorHandler.incompatibleTypeError(ctx, ctx.expr().getText(), boolType, conditon);
+    }
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return visit(ctx.stat());
+  }
+
+  @Override
+  public Type visitForStat(ForStatContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
+    visit(ctx.init_stat());
+
+    Type cond = visit(ctx.expr());
+    if (!typeChecker(cond, boolType)) {
+      visitorErrorHandler.incompatibleTypeError(ctx, ctx.expr().getText(), boolType, cond);
+    }
+    visit(ctx.stat(0));
+
+    return null;
+  }
+
+  @Override
+  public Type visitInitAssignStat(InitAssignStatContext ctx) {
+    Type expected = visit(ctx.assign_lhs());
+    Type actual = visit(ctx.assign_rhs());
+    System.out.println(expected + " " + actual);
+    if (functionList.containsKey(ctx.assign_lhs().getText())) {
+      visitorErrorHandler.variableNotDefinedInScopeError(ctx, ctx.assign_lhs().getText());
+    }
+    if (!typeChecker(expected, actual)) {
+      visitorErrorHandler
+          .incompatibleTypeError(ctx, ctx.assign_rhs().getTokens(0).toString(),
+              expected, actual);
+    }
+    return null;
   }
 
   @Override
