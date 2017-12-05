@@ -405,13 +405,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
     if (exprTypeIsCharOrBool(ctx.expr())) {
       if (ctx.FST() != null) {
-        machine.add(new LoadByteInstruction(exprRegister, new Operand2Reg(exprRegister)));
+        machine.add(new LoadByteInstruction(exprRegister, new Operand2Reg(exprRegister, true)));
       } else if (ctx.SND() != null) {
         machine.add(new LoadByteInstruction(exprRegister, new Operand2Reg(exprRegister, 4)));
       }
     } else {
       if (ctx.FST() != null) {
-        machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister)));
+        machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister, true)));
       } else if (ctx.SND() != null) {
         machine.add(new LoadInstruction(exprRegister, new Operand2Reg(exprRegister, 4)));
       }
