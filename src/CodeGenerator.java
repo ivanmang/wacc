@@ -26,6 +26,7 @@ import antlr.WaccParser.AssignStatContext;
 import antlr.WaccParser.Assign_rhsContext;
 import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
+import antlr.WaccParser.DoWhileStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
 import antlr.WaccParser.ForStatContext;
@@ -934,6 +935,24 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
+    machine.add(new BranchInstruction(startLabel.toString()));
+    machine.add(loopLabel);
+    visit(ctx.stat());
+    machine.add(startLabel);
+    Register lastRegister = visitExpr(ctx.expr());
+    machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
+    machine.add(new BranchEqualInstruction(loopLabel.toString()));
+    registers.free(lastRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return null;
+  }
+
+  @Override
+  public Register visitDoWhileStat(DoWhileStatContext ctx) {
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    Label startLabel = new Label(labelnumber++);
+    Label loopLabel = new Label(labelnumber++);
+    visit(ctx.stat());
     machine.add(new BranchInstruction(startLabel.toString()));
     machine.add(loopLabel);
     visit(ctx.stat());

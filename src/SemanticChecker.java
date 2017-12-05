@@ -225,7 +225,18 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     symbolTable = symbolTable.enterScope(symbolTable);
     Type conditon = visit(ctx.expr());
     if (!typeChecker(boolType, conditon)) {
-      visitorErrorHandler.incompatibleTypeError(ctx, conditon);
+      visitorErrorHandler.incompatibleTypeError(ctx, ctx.expr().getText(), boolType, conditon);
+    }
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return visit(ctx.stat());
+  }
+
+  @Override
+  public Type visitDoWhileStat(DoWhileStatContext ctx) {
+    symbolTable = symbolTable.enterScope(symbolTable);
+    Type conditon = visit(ctx.expr());
+    if (!typeChecker(boolType, conditon)) {
+      visitorErrorHandler.incompatibleTypeError(ctx, ctx.expr().getText(), boolType, conditon);
     }
     symbolTable = symbolTable.exitScope(symbolTable);
     return visit(ctx.stat());
