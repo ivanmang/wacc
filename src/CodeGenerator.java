@@ -920,7 +920,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     System.out.println("Expression type = " + exprType);
     System.out.println(exprType.equals(new ArrayType(charType)));
     machine.add(new MovInstruction(Registers.r0, exprRegister));
-    if (exprType.equals(intType)) {
+    if (exprType instanceof PairType) {
+      machine.add(new BranchLinkInstruction("p_print_reference"));
+      machine.addPrintReferenceFunction();
+    } else if (exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
       machine.addPrintIntFunction();
     } else if (exprType.equals(charType)) {
@@ -935,9 +938,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (exprType.equals(new ArrayType(charType))) {
       machine.add(new BranchLinkInstruction("p_print_string"));
       machine.addPrintStringFunction();
-    } else {
-      machine.add(new BranchLinkInstruction("p_print_reference"));
-      machine.addPrintReferenceFunction();
     }
     registers.free(exprRegister);
     return null;
@@ -950,7 +950,11 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 //    System.out.println(exprType);
     machine.add(new MovInstruction(Registers.r0, exprRegister));
 //    System.out.println(exprType.equals(intType));
-    if (exprType.equals(intType)) {
+    if (exprType instanceof PairType) {
+      machine.add(new BranchLinkInstruction("p_print_reference"));
+      machine.add(new BranchLinkInstruction("p_print_ln"));
+      machine.addPrintReferenceFunction();
+    } else if (exprType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_print_int"));
       machine.add(new BranchLinkInstruction("p_print_ln"));
       machine.addPrintIntFunction();
@@ -965,10 +969,6 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new BranchLinkInstruction("p_print_bool"));
       machine.add(new BranchLinkInstruction("p_print_ln"));
       machine.addPrintBoolFunction();
-    } else {
-      machine.add(new BranchLinkInstruction("p_print_reference"));
-      machine.add(new BranchLinkInstruction("p_print_ln"));
-      machine.addPrintReferenceFunction();
     }
     machine.addPrintlnFunction();
     registers.free(exprRegister);
