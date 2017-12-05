@@ -28,8 +28,10 @@ import antlr.WaccParser.BeginStatContext;
 import antlr.WaccParser.DeclareAndAssignStatContext;
 import antlr.WaccParser.ExitStatContext;
 import antlr.WaccParser.ExprContext;
+import antlr.WaccParser.ForStatContext;
 import antlr.WaccParser.FreeStatContext;
 import antlr.WaccParser.IfStatContext;
+import antlr.WaccParser.InitAssignStatContext;
 import antlr.WaccParser.PrintStatContext;
 import antlr.WaccParser.PrintlnStatContext;
 import antlr.WaccParser.New_pairContext;
@@ -941,6 +943,62 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     registers.free(lastRegister);
     symbolTable = symbolTable.exitScope(symbolTable);
+    return null;
+  }
+
+  @Override
+  public Register visitForStat(ForStatContext ctx) {
+    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    Label startLabel = new Label(labelnumber++);
+    Label loopLabel = new Label(labelnumber++);
+    visit(ctx.init_stat());
+    machine.add(new BranchInstruction(startLabel.toString()));
+    machine.add(loopLabel);
+    visit(ctx.stat(1));
+    visit(ctx.stat(0));
+    machine.add(startLabel);
+    Register condRegister = visitExpr(ctx.expr());
+    machine.add(new CmpInstruction(condRegister, new Operand2Int('#', 1)));
+    machine.add(new BranchEqualInstruction(loopLabel.toString()));
+    registers.free(condRegister);
+    symbolTable = symbolTable.exitScope(symbolTable);
+    return null;
+  }
+
+  @Override
+  public Register visitInitAssignStat(InitAssignStatContext ctx) {
+    Register srcReg = visit(ctx.assign_rhs());
+    if (ctx.assign_lhs().ident() != null) {
+      String ident = ctx.assign_lhs().ident().getText();
+      Type type = symbolTable.lookupAll(ident);
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg,
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      } else {
+        machine.add(new StoreInstruction(srcReg,
+            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+      }
+    } else if (ctx.assign_lhs().array_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().array_elem());
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      machine.removeLastInstruciton();
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
+    } else if (ctx.assign_lhs().pair_elem() != null) {
+      Register destReg = visit(ctx.assign_lhs().pair_elem());
+      Type type = exprTypeGetter.visitPair_elem(ctx.assign_lhs().pair_elem());
+      if (type.equals(boolType) || type.equals(charType)) {
+        machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
+      } else {
+        machine.add(new StoreInstruction(srcReg, new Operand2Reg(destReg, true)));
+      }
+      registers.free(destReg);
+    }
+    registers.free(srcReg);
     return null;
   }
 
