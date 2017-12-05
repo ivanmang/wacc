@@ -387,7 +387,7 @@ public class ARM11Machine {
       nullPointer.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
       nullPointer.add(new LoadEqualInstruction(Registers.r0,
           new Operand2String('=', "msg_" + nullReferenceMsg)));
-      nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error:"));
+      nullPointer.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
       nullPointer.add(new PopInstruction(Registers.pc));
       printFunctions.put("p_check_null_pointer", nullPointer);
       addRuntimeErrorInstruction();
