@@ -444,7 +444,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       //Get the first available register to store the address of the array (address of the first elemnt)
       machine.add(new MovInstruction(addressRegister, Registers.r0));
 
-      int pos = 1;
+      int pos = 0;
       boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
 
       //For each element in the array literal, load the expression to the register and store it to the corresponding address in the heap
@@ -453,10 +453,10 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         if (isCharOrBool) {
           machine.add(
               new StoreByteInstruction(exprRegister,
-                  new Operand2Reg(addressRegister, pos * typeSize)));
+                  new Operand2Reg(addressRegister, pos * typeSize + 4)));
         } else {
           machine.add(
-              new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize)));
+              new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize + 4)));
         }
         pos++;
         registers.free(exprRegister);
