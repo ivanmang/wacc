@@ -226,8 +226,9 @@ public class SemanticChecker extends WaccParserBaseVisitor<Type> {
     if (!typeChecker(boolType, conditon)) {
       visitorErrorHandler.incompatibleTypeError(ctx, conditon);
     }
+    Type stat = visit(ctx.stat());
     symbolNode = symbolNode.exitScope();
-    return visit(ctx.stat());
+    return stat;
   }
 
   @Override

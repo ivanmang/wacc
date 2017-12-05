@@ -125,6 +125,9 @@ public class SymbolNode{
 
   public void printTable(int indentation) {
     if(this.getDictionary().isEmpty()) {
+      for (int i = 0; i < indentation; i++) {
+        System.out.print("\t");
+      }
       System.out.println("EMPTY");
     } else {
       for (String key : this.getDictionary().keySet()) {

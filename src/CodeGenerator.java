@@ -916,6 +916,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
+    System.out.println("died after this");
     Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolNode);
     System.out.println("Expression type = " + exprType);
     System.out.println(exprType.equals(new ArrayType(charType)));
@@ -939,6 +940,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       machine.add(new BranchLinkInstruction("p_print_string"));
       machine.addPrintStringFunction();
     }
+    System.out.println("hi?");
     registers.free(exprRegister);
     return null;
   }
