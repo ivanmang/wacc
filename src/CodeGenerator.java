@@ -320,7 +320,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
       }
       machine.add(new BranchLinkInstruction("f_" + function_name));
       Register register = registers.getRegister();
-      machine.add(new MovInstruction(register, registers.getReturnRegister()));
+      machine.add(new MovInstruction(register, Registers.r0));
       symbolNode = main;
       return register;
     } else if (ctx.array_liter() != null) {
@@ -928,7 +928,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitDoWhileStat(DoWhileStatContext ctx) {
-    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
     visit(ctx.stat());
@@ -940,13 +940,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     registers.free(lastRegister);
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return null;
   }
 
   @Override
   public Register visitForStat(ForStatContext ctx) {
-    symbolTable = symbolTable.enterScopeCodeGen(symbolTable);
+    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
     Label startLabel = new Label(labelnumber++);
     Label loopLabel = new Label(labelnumber++);
     visit(ctx.init_stat());
@@ -959,7 +959,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     machine.add(new CmpInstruction(condRegister, new Operand2Int('#', 1)));
     machine.add(new BranchEqualInstruction(loopLabel.toString()));
     registers.free(condRegister);
-    symbolTable = symbolTable.exitScope(symbolTable);
+    symbolNode = symbolNode.exitScope();
     return null;
   }
 
@@ -968,17 +968,17 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     Register srcReg = visit(ctx.assign_rhs());
     if (ctx.assign_lhs().ident() != null) {
       String ident = ctx.assign_lhs().ident().getText();
-      Type type = symbolTable.lookupAll(ident);
+      Type type = symbolNode.lookupAll(ident);
       if (type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ident))));
       } else {
         machine.add(new StoreInstruction(srcReg,
-            new Operand2Reg(Registers.sp, symbolTable.getAddress(ident))));
+            new Operand2Reg(Registers.sp, symbolNode.getAddress(ident))));
       }
     } else if (ctx.assign_lhs().array_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().array_elem());
-      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolTable);
+      Type type = exprTypeGetter.visitArray_elem(ctx.assign_lhs().array_elem(), symbolNode);
       machine.removeLastInstruciton();
       if (type.equals(boolType) || type.equals(charType)) {
         machine.add(new StoreByteInstruction(srcReg, new Operand2Reg(destReg, true)));
@@ -1008,9 +1008,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitPrintStat(PrintStatContext ctx) {
     Register exprRegister = visit(ctx.expr());
-    System.out.println("died after this");
+//    System.out.println("died after this");
     Type exprType = exprTypeGetter.visitExpr(ctx.expr(), symbolNode);
-    System.out.println("Expression type = " + exprType);
+//    System.out.println("Expression type = " + exprType);
     System.out.println(exprType.equals(new ArrayType(charType)));
     machine.add(new MovInstruction(Registers.r0, exprRegister));
     if (exprType instanceof PairType) {
