@@ -446,6 +446,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
       int pos = 1;
       boolean isCharOrBool = exprTypeIsCharOrBool(ctx.expr(0));
+
       //For each element in the array literal, load the expression to the register and store it to the corresponding address in the heap
       for (ExprContext exprContext : ctx.expr()) {
         Register exprRegister = visit(exprContext);
@@ -460,6 +461,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
         pos++;
         registers.free(exprRegister);
       }
+    } else if (size == 0) {
+      //Load the size of the array to r0 and call malloc to allocate memory on the heap for the array
+      machine.add(new LoadInstruction(Registers.r0, new Operand2Int('=', 4)));
+      machine.add(new BranchLinkInstruction("malloc"));
+
+      //Get the first available register to store the address of the array (address of the first elemnt)
+      machine.add(new MovInstruction(addressRegister, Registers.r0));
     }
     //Put the size of the array literal to the first element (first address) of the array
     Register sizeRegister = registers.getRegister();
