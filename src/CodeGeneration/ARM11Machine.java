@@ -346,12 +346,12 @@ public class ARM11Machine {
   
   
   public void addOverflowErrorFunction(boolean isMul) {
+    if(isMul){
+      add(new BranchLinkNEInstruction("p_throw_overflow_error"));
+    }else{
+      add(new BranchLinkVSInstruction("p_throw_overflow_error"));
+    }
     if (!printFunctions.containsKey("p_throw_overflow_error")) {
-      if(isMul){
-        add(new BranchLinkNEInstruction("p_throw_overflow_error"));
-      }else{
-        add(new BranchLinkVSInstruction("p_throw_overflow_error"));
-      }
       int overflowMsg = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> overflowError = new LinkedList<>();
       overflowError.add(new Label("p_throw_overflow_error"));
