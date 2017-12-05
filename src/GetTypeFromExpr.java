@@ -6,6 +6,7 @@ import Utils.SymbolTable;
 import Utils.Type;
 import antlr.WaccParser;
 import antlr.WaccParser.Array_elemContext;
+import antlr.WaccParser.Assign_lhsContext;
 import antlr.WaccParser.Binary_oper_and_orContext;
 import antlr.WaccParser.Binary_oper_eqlContext;
 import antlr.WaccParser.Binary_oper_mulContext;
@@ -59,6 +60,12 @@ public class GetTypeFromExpr extends WaccParserBaseVisitor<Type> {
       return visit(ctx.expr(0));
     }
     return null;
+  }
+
+  public Type visitAssign_lhs(Assign_lhsContext ctx, SymbolNode symbolNode) {
+//    System.out.println("visiting assign lhs");
+    setSymbolNode(symbolNode);
+    return visitChildren(ctx);
   }
 
 

@@ -994,8 +994,9 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   @Override
   public Register visitReadStat(ReadStatContext ctx) {
-    String ident = ctx.assign_lhs().ident().getText();
+    Type readType = exprTypeGetter.visitAssign_lhs(ctx.assign_lhs(), symbolNode);
     if (ctx.assign_lhs().ident() != null) {
+      String ident = ctx.assign_lhs().ident().getText();
       Register readRegister = registers.getRegister();
       machine.add(new AddInstruction(readRegister, Registers.sp,
           new Operand2Int('#', symbolNode.getAddress(ident))));
@@ -1008,12 +1009,13 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     } else if (ctx.assign_lhs().pair_elem() != null) {
       Register destReg = visit(ctx.assign_lhs().pair_elem());
       machine.add(new MovInstruction(Registers.r0, destReg));
+      machine.addcheckNullPointerInstruction();
       registers.free(destReg);
     }
-    if (symbolNode.lookupAll(ident).equals(intType)) {
+    if (readType.equals(intType)) {
       machine.add(new BranchLinkInstruction("p_read_int"));
       machine.addReadIntFunction();
-    } else if (symbolNode.lookupAll(ident).equals(charType)) {
+    } else if (readType.equals(charType)) {
       machine.add(new BranchLinkInstruction("p_read_char"));
       machine.addReadCharFunction();
     }
