@@ -898,10 +898,12 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitIfStat(IfStatContext ctx) {
     symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    if (ctx.expr().bool_liter().TRUE() != null) {   //if true
-      visit(ctx.stat(0));
-    } else if (ctx.expr().bool_liter().FALSE() != null) {
-      visit(ctx.stat(1));
+    if (ctx.expr().bool_liter() != null) {
+      if (ctx.expr().bool_liter().TRUE() != null) {   //if true
+        visit(ctx.stat(0));
+      } else if (ctx.expr().bool_liter().FALSE() != null) {
+        visit(ctx.stat(1));
+      }
     } else {
       Register lastRegister = visit(ctx.expr());
       machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
