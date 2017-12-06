@@ -9,11 +9,23 @@ public class AddInstruction extends Instruction{
   private Operand2 operand2;
   private Boolean carry;
 
+  public Operand2 getOperand2() {
+    return operand2;
+  }
+
   public AddInstruction(Register dest,Register src, Operand2 operand2) {
     this.dest = dest;
     this.operand2 = operand2;
     this.src = src;
     this.carry = false;
+  }
+
+  public Register getDest() {
+    return dest;
+  }
+
+  public Register getSrc() {
+    return src;
   }
 
   public AddInstruction(Register dest,Register src,Operand2 operand2,Boolean carry) {
