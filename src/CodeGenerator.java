@@ -981,18 +981,31 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitForStat(ForStatContext ctx) {
     symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    Label startLabel = new Label(labelnumber++);
-    Label loopLabel = new Label(labelnumber++);
-    visit(ctx.init_stat());
-    machine.add(new BranchInstruction(startLabel.toString()));
-    machine.add(loopLabel);
-    visit(ctx.stat(1));
-    visit(ctx.stat(0));
-    machine.add(startLabel);
-    Register condRegister = visitExpr(ctx.expr());
-    machine.add(new CmpInstruction(condRegister, new Operand2Int('#', 1)));
-    machine.add(new BranchEqualInstruction(loopLabel.toString()));
-    registers.free(condRegister);
+    if (ctx.expr().bool_liter() != null) {
+      if (ctx.expr().bool_liter().TRUE() != null) {
+        visit(ctx.init_stat());
+        Label loopLabel = new Label(labelnumber++);
+        machine.add(loopLabel);
+        visit(ctx.stat(1));
+        visit(ctx.stat(0));
+        machine.add(new BranchInstruction(loopLabel.toString()));
+      } else {
+        visit(ctx.init_stat());
+      }
+    } else {
+      Label startLabel = new Label(labelnumber++);
+      Label loopLabel = new Label(labelnumber++);
+      visit(ctx.init_stat());
+      machine.add(new BranchInstruction(startLabel.toString()));
+      machine.add(loopLabel);
+      visit(ctx.stat(1));
+      visit(ctx.stat(0));
+      machine.add(startLabel);
+      Register condRegister = visitExpr(ctx.expr());
+      machine.add(new CmpInstruction(condRegister, new Operand2Int('#', 1)));
+      machine.add(new BranchEqualInstruction(loopLabel.toString()));
+      registers.free(condRegister);
+    }
     symbolNode = symbolNode.exitScope();
     return null;
   }
