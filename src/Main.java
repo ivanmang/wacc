@@ -83,7 +83,10 @@ public class Main {
     System.out.println("---Finished---");
 
     CodeGenerator gen = new CodeGenerator(checker.getGlobalSymbolNode(), checker.getFunctionList());
+
     gen.visit(tree);
+    Optimiser optimiser = new Optimiser(gen.getMachine());
+    optimiser.optimise();
     System.out.println(gen.generateCode());
 
 

@@ -15,6 +15,14 @@ public class LoadInstruction extends Instruction {
     this.type = type;
   }
 
+  public Operand2 getOperand2() {
+    return operand2;
+  }
+
+  public Register getReg() {
+    return reg;
+  }
+
   public LoadInstruction(Register reg, Operand2 operand2) {
     this(reg, operand2, "LDR");
   }

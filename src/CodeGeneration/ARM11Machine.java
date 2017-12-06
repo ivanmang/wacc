@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ARM11Machine {
 
@@ -49,6 +50,10 @@ public class ARM11Machine {
     printFunctions = new LinkedHashMap<>();
   }
 
+  public Map<String, List<Instruction>> getFunctions() {
+    return functions;
+  }
+
   //add the label for the start of the function and add it to the map
   public void addFunctionStart(String name) {
     if (currentFunction != null) {
@@ -61,6 +66,14 @@ public class ARM11Machine {
 
   public void addFunctionEnd() {
     currentFunction = previousFunction;
+  }
+
+  public void removeInstruction(List<Instruction> instructions, int i) {
+    instructions.remove(i);
+  }
+
+  public void addInstruction(List<Instruction> instructions, int i, Instruction instruction) {
+    instructions.add(i, instruction);
   }
 
   public void removeLastInstruciton() {
@@ -84,8 +97,10 @@ public class ARM11Machine {
     int msgIndex = (msg.size() - 1) / 3;
     msg.add(new Label("msg_" + msgIndex));
     String messageCopy = message;
-    messageCopy = messageCopy.replace("\\0", "\0").replace("\\b", "\b").replace("\\t", "\t").replace("\\n", "\n").replace("\\t", "\t")
-        .replace("\\f", "\f").replace("\\r", "\r").replace("\\'", "\'").replace("\\", "\"").replace("\\\\", "\\");
+    messageCopy = messageCopy.replace("\\0", "\0").replace("\\b", "\b").replace("\\t", "\t")
+        .replace("\\n", "\n").replace("\\t", "\t")
+        .replace("\\f", "\f").replace("\\r", "\r").replace("\\'", "\'").replace("\\", "\"")
+        .replace("\\\\", "\\");
     msg.add(new WordInstruction(messageCopy.length()));
     msg.add(new StringInstruction(message));
     return msgIndex;
@@ -294,8 +309,7 @@ public class ARM11Machine {
   }
 
 
-
-  public void addCheckArrayBoundFunction(){
+  public void addCheckArrayBoundFunction() {
     if (!printFunctions.containsKey("p_check_array_bounds")) {
       add(new BranchLinkInstruction("p_check_array_bounds"));
       int negMsg = addMsg("\"ArrayIndexOutOfBoundsError: negative index\\n\\0\"");
@@ -303,38 +317,37 @@ public class ARM11Machine {
       List<Instruction> arrayBoundError = new LinkedList<>();
       arrayBoundError.add(new Label("p_check_array_bounds"));
       arrayBoundError.add(new PushInstruction(Registers.lr));
-      arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#',0)));
+      arrayBoundError.add(new CmpInstruction(Registers.r0, new Operand2Int('#', 0)));
 
-      arrayBoundError.add(new LoadLargerThanInstruction(Registers.r0,new Operand2String('=', "msg_" + negMsg)));
+      arrayBoundError.add(
+          new LoadLargerThanInstruction(Registers.r0, new Operand2String('=', "msg_" + negMsg)));
       arrayBoundError.add(new BranchLinkLargerThanInstruction("p_throw_runtime_error"));
 
-      arrayBoundError.add(new LoadInstruction(Registers.r1,new Operand2Reg(Registers.r1, true)));
-      arrayBoundError.add(new CmpInstruction(Registers.r0,Registers.r1));
+      arrayBoundError.add(new LoadInstruction(Registers.r1, new Operand2Reg(Registers.r1, true)));
+      arrayBoundError.add(new CmpInstruction(Registers.r0, Registers.r1));
       arrayBoundError
           .add(new LoadCSInstruction(Registers.r0, new Operand2String('=', "msg_" + largeMsg)));
       arrayBoundError.add(new BrachLinkCSInstrcution("p_throw_runtime_error"));
       arrayBoundError.add(new PopInstruction(Registers.pc));
-
-
-
 
       printFunctions.put("p_check_array_bounds", arrayBoundError);
       addRuntimeErrorInstruction();
     }
   }
 
-  public void CheckDividedByZeroFunction(){
+  public void CheckDividedByZeroFunction() {
     add(new BranchLinkInstruction("p_check_divide_by_zero"));
     addDivByZeroFunction();
   }
 
   private void addDivByZeroFunction() {
     if (!printFunctions.containsKey("p_check_divide_by_zero")) {
-      int checkZero = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
+      int checkZero = addMsg(
+          "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> checkZeroError = new LinkedList<>();
       checkZeroError.add(new Label("p_check_divide_by_zero"));
       checkZeroError.add(new PushInstruction(Registers.lr));
-      checkZeroError.add(new CmpInstruction(Registers.r1,new Operand2Int('#',0)));
+      checkZeroError.add(new CmpInstruction(Registers.r1, new Operand2Int('#', 0)));
       checkZeroError
           .add(new LoadEqualInstruction(Registers.r0, new Operand2String('=', "msg_" + checkZero)));
       checkZeroError.add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
@@ -343,16 +356,17 @@ public class ARM11Machine {
       addRuntimeErrorInstruction();
     }
   }
-  
-  
+
+
   public void addOverflowErrorFunction(boolean isMul) {
-    if(isMul){
+    if (isMul) {
       add(new BranchLinkNEInstruction("p_throw_overflow_error"));
-    }else{
+    } else {
       add(new BranchLinkVSInstruction("p_throw_overflow_error"));
     }
     if (!printFunctions.containsKey("p_throw_overflow_error")) {
-      int overflowMsg = addMsg("\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
+      int overflowMsg = addMsg(
+          "\"OverflowError: the result is too small/large to store in a 4-byte signed-integer.\\n\"");
       List<Instruction> overflowError = new LinkedList<>();
       overflowError.add(new Label("p_throw_overflow_error"));
       overflowError
@@ -367,7 +381,7 @@ public class ARM11Machine {
   public void addRuntimeErrorInstruction() {
     if (!printFunctions.containsKey("p_throw_runtime_error")) {
       List<Instruction> runTimeError = new LinkedList<>();
-     // add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
+      // add(new BranchLinkEqualInstruction("p_throw_runtime_error"));
       runTimeError.add(new Label("p_throw_runtime_error"));
       runTimeError.add(new BranchLinkInstruction("p_print_string"));
       runTimeError.add(new MovInstruction(Registers.r0, new Operand2Int('#', -1)));

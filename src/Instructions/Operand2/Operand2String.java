@@ -14,5 +14,15 @@ public class Operand2String implements Operand2 {
   public String toString() {
     return type + "" + string;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Operand2String)) {
+      return false;
+    } else {
+      Operand2String operand2String = (Operand2String) o;
+      return this.toString().equals(operand2String.toString());
+    }
+  }
 }
 

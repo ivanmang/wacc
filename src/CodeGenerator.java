@@ -53,6 +53,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 public class CodeGenerator extends WaccParserBaseVisitor<Register> {
 
   private CodeStringBuilder builder = new CodeStringBuilder("");
+
+  public ARM11Machine getMachine() {
+    return machine;
+  }
+
   private ARM11Machine machine = new ARM11Machine();
   private Registers registers = new Registers();
   private int labelnumber = 0;

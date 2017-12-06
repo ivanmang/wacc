@@ -34,11 +34,7 @@ public class Register {
       return false;
     } else {
       Register reg = (Register) o;
-      if(name.equals(reg.toString())) {
-        return true;
-      } else {
-        return false;
-      }
+      return name.equals(reg.toString());
     }
   }
 

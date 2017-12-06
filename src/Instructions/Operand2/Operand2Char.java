@@ -14,4 +14,14 @@ public class Operand2Char implements Operand2 {
   public String toString() {
     return type + "\'" + character + '\'';
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Operand2Char)) {
+      return false;
+    } else {
+      Operand2Char operand2Char = (Operand2Char) o;
+      return this.toString().equals(operand2Char.toString());
+    }
+  }
 }

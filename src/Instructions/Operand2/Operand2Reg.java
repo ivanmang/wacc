@@ -33,4 +33,14 @@ public class Operand2Reg implements Operand2{
     }
     return reg.toString();
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Operand2Reg)) {
+      return false;
+    } else {
+      Operand2Reg operand2Reg = (Operand2Reg) o;
+      return this.toString().equals(operand2Reg.toString());
+    }
+  }
 }

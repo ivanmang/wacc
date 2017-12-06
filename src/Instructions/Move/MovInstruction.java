@@ -16,6 +16,18 @@ public class MovInstruction extends Instruction {
     this.type = type;
   }
 
+  public Register getDest() {
+    return dest;
+  }
+
+  public Operand2 getOperand2() {
+    return operand2;
+  }
+
+  public Register getRet() {
+    return ret;
+  }
+
   public MovInstruction(Register dest, Operand2 operand2) {
     this(dest, operand2, "MOV");
   }
