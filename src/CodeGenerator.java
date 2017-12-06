@@ -927,16 +927,25 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitWhileStat(WhileStatContext ctx) {
     symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    Label startLabel = new Label(labelnumber++);
-    Label loopLabel = new Label(labelnumber++);
-    machine.add(new BranchInstruction(startLabel.toString()));
-    machine.add(loopLabel);
-    visit(ctx.stat());
-    machine.add(startLabel);
-    Register lastRegister = visitExpr(ctx.expr());
-    machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
-    machine.add(new BranchEqualInstruction(loopLabel.toString()));
-    registers.free(lastRegister);
+    if (ctx.expr().bool_liter() != null) {
+      if (ctx.expr().bool_liter().TRUE() != null) {
+        Label loopLabel = new Label(labelnumber++);
+        machine.add(loopLabel);
+        visit(ctx.stat());
+        machine.add(new BranchInstruction(loopLabel.toString()));
+      }
+    } else {
+      Label startLabel = new Label(labelnumber++);
+      Label loopLabel = new Label(labelnumber++);
+      machine.add(new BranchInstruction(startLabel.toString()));
+      machine.add(loopLabel);
+      visit(ctx.stat());
+      machine.add(startLabel);
+      Register lastRegister = visitExpr(ctx.expr());
+      machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
+      machine.add(new BranchEqualInstruction(loopLabel.toString()));
+      registers.free(lastRegister);
+    }
     symbolNode = symbolNode.exitScope();
     return null;
   }
@@ -944,17 +953,27 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitDoWhileStat(DoWhileStatContext ctx) {
     symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    Label startLabel = new Label(labelnumber++);
-    Label loopLabel = new Label(labelnumber++);
-    visit(ctx.stat());
-    machine.add(new BranchInstruction(startLabel.toString()));
-    machine.add(loopLabel);
-    visit(ctx.stat());
-    machine.add(startLabel);
-    Register lastRegister = visitExpr(ctx.expr());
-    machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
-    machine.add(new BranchEqualInstruction(loopLabel.toString()));
-    registers.free(lastRegister);
+    if (ctx.expr().bool_liter() != null) {
+      visit(ctx.stat());
+      if (ctx.expr().bool_liter().TRUE() != null) {
+        Label loopLabel = new Label(labelnumber++);
+        machine.add(loopLabel);
+        visit(ctx.stat());
+        machine.add(new BranchInstruction(loopLabel.toString()));
+      }
+    } else {
+      Label startLabel = new Label(labelnumber++);
+      Label loopLabel = new Label(labelnumber++);
+      visit(ctx.stat());
+      machine.add(new BranchInstruction(startLabel.toString()));
+      machine.add(loopLabel);
+      visit(ctx.stat());
+      machine.add(startLabel);
+      Register lastRegister = visitExpr(ctx.expr());
+      machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 1)));
+      machine.add(new BranchEqualInstruction(loopLabel.toString()));
+      registers.free(lastRegister);
+    }
     symbolNode = symbolNode.exitScope();
     return null;
   }
