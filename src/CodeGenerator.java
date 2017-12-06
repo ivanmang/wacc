@@ -107,7 +107,7 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
     int reserveByte = symbolNode.getSize();
 
     //if size exceed max stack size reserve, Push max_size first
-    if(reserveByte != 0) {
+    if (reserveByte != 0) {
       while (reserveByte > MAX_STACK_SIZE) {
         machine.add(
             new SubInstruction(Registers.sp, Registers.sp,
@@ -471,7 +471,8 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
                   new Operand2Reg(addressRegister, pos * typeSize + 4)));
         } else {
           machine.add(
-              new StoreInstruction(exprRegister, new Operand2Reg(addressRegister, pos * typeSize + 4)));
+              new StoreInstruction(exprRegister,
+                  new Operand2Reg(addressRegister, pos * typeSize + 4)));
         }
         pos++;
         registers.free(exprRegister);
@@ -897,19 +898,26 @@ public class CodeGenerator extends WaccParserBaseVisitor<Register> {
   @Override
   public Register visitIfStat(IfStatContext ctx) {
     symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    Register lastRegister = visit(ctx.expr());
-    machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
-    Label elseLabel = new Label(labelnumber++); //else label
-    Label thenLabel = new Label(labelnumber++); //then label
-    machine.add(new BranchEqualInstruction(elseLabel.toString()));
-    visit(ctx.stat(0));
-    symbolNode = symbolNode.exitScope();
-    machine.add(new BranchInstruction(thenLabel.toString()));
-    machine.add(elseLabel);
-    symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
-    visit(ctx.stat(1));
-    machine.add(thenLabel);
-    registers.free(lastRegister);
+    if (ctx.expr().bool_liter().TRUE() != null) {   //if true
+      visit(ctx.stat(0));
+    } else if (ctx.expr().bool_liter().FALSE() != null) {
+      visit(ctx.stat(1));
+    } else {
+      Register lastRegister = visit(ctx.expr());
+      machine.add(new CmpInstruction(lastRegister, new Operand2Int('#', 0)));
+      Label elseLabel = new Label(labelnumber++); //else label
+      Label thenLabel = new Label(labelnumber++); //then label
+      machine.add(new BranchEqualInstruction(elseLabel.toString()));
+      visit(ctx.stat(0));
+      symbolNode = symbolNode.exitScope();
+      machine.add(new BranchInstruction(thenLabel.toString()));
+      machine.add(elseLabel);
+      symbolNode = symbolNode.enterScopeCodeGen(symbolNode);
+      visit(ctx.stat(1));
+      machine.add(thenLabel);
+      registers.free(lastRegister);
+    }
+
     symbolNode = symbolNode.exitScope();
     return null;
   }
